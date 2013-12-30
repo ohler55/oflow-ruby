@@ -1,0 +1,103 @@
+;; -*- mode: outline; outline-regexp: " *[-\+]"; indent-tabs-mode: nil -*-
+
+^c^d hide subtree
+^c^s show subtree
+
+- todo
+ - set up bin with oflow
+  - point to ruby config files that defines registration and definitions
+  - creates inspector
+
+
+- classes
+ - Task/Node
+  - wrapper around TaskHandler/TaskImpl
+  - accepts requests and places on queue
+  - request is op and data
+  - can send to other tasks on request of handler
+  - 
+ - TaskHandler (Actor?)
+  - self.inputs
+   - Hash {op: description}
+  - self.outputs
+  - Hash{name: description}
+  - self.new
+  - set_out(name, link)
+  - perform(task, op, data)
+   - calls link.out() 0 or more times
+
+  - base class for doing the processing, has specialized behavior
+  - responds to
+   - allowed inputs
+   - possible_outputs
+    - tagged name for UI
+    - op for target
+    - give back hook to target identified
+  - * have to match up output with input
+   - ops must match
+   - handler ops defined at run time
+
+ - Data/Job
+  - just a data tree
+  - use methods to access and set
+  - get as native or something to get ruby 
+ - Workflow
+  - contains Tasks
+ - WorkflowManager
+ 
+- idea
+ - define env
+  - require, link, whatever
+  - register TaskHandlers with TaskType name
+ - should be able to write a program to build a workflow
+  - create task
+  - hook outputs to other tasks
+   - task id
+   - op (optional)
+   - path to data
+  - configure task
+   - options that are static
+ - should be able to build from the inspector
+  - better ability to set local variables that are there next time
+   - or maybe implement limited env instead
+
+- language (Ruby)
+ - Workflow(name)
+  - all commands are in the context of a wf so set the current wf
+ - NewTask(name, type)
+ - Task.SetOption(opt_id, value)
+ - Task.SetOut(target, op, data_path)
+
+ - Workflow is a Task
+  - how to connect Workflow inputs and output to inner tasks
+
+- steps
+ - registration
+  - register task types
+   - define TaskHandler
+   - register each and verify respond_to
+ - define
+ - run
+
+
+Task("foo", Workflow) {
+  In(target, op, data_path)
+  Task(name, type) {
+    Option(bar, value)
+    Out(target, op, data_path)
+    Out(target, op, data_path)
+  }
+  name = Task(type) {
+  }
+  # create a Kernel method for each registered task type
+  name = type(bar: value) { |task|
+    # how to set the context to new object just created?
+    task.Out(target, op, data_path)
+  }
+  Send(op, data_value)
+  name.Send(op, data_value)
+  name.Out(target, op, data_path)
+}
+
+ - ct (change task)
+  - in inspector, show task path
