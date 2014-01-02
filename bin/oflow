@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+# encoding: UTF-8
+
+# Ubuntu does not accept arguments to ruby when called using env. To get warnings to show up the -w options is
+# required. That can be set in the RUBYOPT environment variable.
+# export RUBYOPT=-w
+
+$VERBOSE = true
+
+while (index = ARGV.index('-I'))
+  _,path = ARGV.slice!(index, 2)
+  $: << path
+end
+
+# TBD tmp for testing
+$: << ::File.join(::File.dirname(__FILE__), "../../oterm/lib")
+$: << ::File.join(::File.dirname(__FILE__), "../lib")
+
+require 'optparse'
+begin
+  v = $VERBOSE
+  $VERBOSE = false
+  require 'net/ssh'
+  require 'net/sftp'
+  $VERBOSE = v
+end
+
+require 'oterm'
+require 'oflow'
+
+$verbose = Logger::WARN
+$inspector_port = 0
+
+opts = OptionParser.new(%{Usage: oflow [options]
+
+Provides an operations workflow environment.
+})
+opts.on('-s', 'decrease verbosity')                 { $verbose += 1 unless 5 == $verbose }
+opts.on('-v', 'increase verbosity')                 { $verbose -= 1 unless 0 == $verbose }
+opts.on('-n', 'dry run / no modifications')         { $dry_run = true }
+opts.on('-i', '--inspector-port Integer', Integer, 'inspector port')             { |port| $inspector_port = port }
+opts.on('-h', '--help', 'Show this display')                                     { puts opts.help; Process.exit!(0) }
+dirs = opts.parse(ARGV)
+
+inspector = nil
+if 0 < $inspector_port
+  inspector = OFlow::Inspector.new($inspector_port)
+end
+
+inspector.join() if nil != inspector
