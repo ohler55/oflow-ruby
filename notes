@@ -10,21 +10,30 @@
 
 
 - classes
- - Task/Node
+ - Box types
+  - describe expected contents
+   - required
+   - optional
+   - extra allowed?
+ - Task
   - wrapper around TaskHandler/TaskImpl
   - accepts requests and places on queue
   - request is op and data
   - can send to other tasks on request of handler
   - 
- - TaskHandler (Actor?)
+ - Actor
   - self.inputs
    - Hash {op: description}
   - self.outputs
   - Hash{name: description}
   - self.new
-  - set_out(name, link)
-  - perform(task, op, data)
-   - calls link.out() 0 or more times
+  - receive(task, op, box)
+   - calls task.ship() 0 or more times
+ 
+ - scheme, pattern, kind, type, fingerprint, format, template
+  - scheme, pattern, template
+  - pattern
+
 
   - base class for doing the processing, has specialized behavior
   - responds to
