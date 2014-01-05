@@ -3,7 +3,11 @@ module OFlow
 
   class Actor
 
-    def initialize()
+    attr_reader :task
+
+    def initialize(task)
+      @task = task
+
     end
 
     def perform(task, op, box)

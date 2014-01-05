@@ -30,9 +30,24 @@
   - receive(task, op, box)
    - calls task.ship() 0 or more times
  
- - scheme, pattern, kind, type, fingerprint, format, template
-  - scheme, pattern, template
-  - pattern
+ - Workflow < Task
+  - has link to log
+ - Env - 1
+  - like opee
+  - Log < Actor
+   - one out for chaining
+   - tasks have info, debug, etc 
+    - use a cached ship approach (hang on to log task)
+
+- todo
+ - actor test driver
+  - call receive, wait for out, kill task after timeout or when getting reply
+  - driver is task with log and receive ovder-ridden, ship is not needed so can be left along
+ - Env
+ - Task
+ - Log
+ 
+
 
 
   - base class for doing the processing, has specialized behavior
