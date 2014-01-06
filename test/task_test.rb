@@ -37,13 +37,13 @@ class TaskTest < ::Test::Unit::TestCase
     assert_equal(1, task.queue_count())
     task.receive(:dance, ::OFlow::Box.new('twist'))
     assert_equal(2, task.queue_count())
-    task.close()
+    task.shutdown()
   end
 
   def test_task_perform
     task = ::OFlow::Task.new(nil, 'test', Gather)
     task.receive(:dance, ::OFlow::Box.new('two step'))
-    sleep(0.5) # minimize dependencies for simplest possible test
+    task.flush()
 
     requests = task.actor.requests
     assert_equal(1, task.actor.requests.size)
@@ -52,36 +52,47 @@ class TaskTest < ::Test::Unit::TestCase
     box = boxes[0]
     assert_equal(false, box.nil?)
     assert_equal('two step', box.contents)
-    task.close()
+    task.shutdown()
+  end
+
+  def test_task_perform_shutdown
+    task = ::OFlow::Task.new(nil, 'test', Gather)
+    task.receive(:dance, ::OFlow::Box.new('two step'))
+    task.shutdown(true)
+
+    requests = task.actor.requests
+    assert_equal(1, task.actor.requests.size)
+    boxes = task.actor.requests[:dance]
+    assert_equal(1, boxes.size)
+    box = boxes[0]
+    assert_equal(false, box.nil?)
+    assert_equal('two step', box.contents)
   end
 
   def test_task_raise_after_close
     task = ::OFlow::Task.new(nil, 'test', Gather)
-    task.close()
+    task.shutdown()
     assert_raise(ThreadError) { task.start() }
   end
 
-=begin
-  def test_opee_actor_order
-    a = ::Relay.new()
-    a.stop()
-    a.on_idle(:relay, 17)
-    a.priority_ask(:relay, 3)
-    a.ask(:relay, 7)
-    a.step()
-    assert_equal(3, a.last_data)
-    a.step()
-    assert_equal(7, a.last_data)
-    a.step()
-    assert_equal(17, a.last_data)
-    a.close()
+  def test_task_max_queue_count
+    task = ::OFlow::Task.new(nil, 'test', Gather, :max_queue_count => 4, :req_timeout => 0.1)
+    task.stop()
+    6.times do |i|
+      begin
+        task.receive(:dance, ::OFlow::Box.new(i))
+      rescue ::OFlow::BusyError => e
+        # expected for all over first 4
+      end
+    end
+    task.start()
+    task.shutdown(true)
+
+    requests = task.actor.requests
+    boxes = task.actor.requests[:dance]
+    assert_equal(4, boxes.size)
+    nums = boxes.map { |box| box.contents }
+    assert_equal([0, 1, 2, 3], nums)
   end
 
-  def test_opee_actor_max_queue_count
-    a = ::Relay.new(:max_queue_count => 4, :ask_timeout => 1.0)
-    10.times { |i| a.ask(:slow, 0.1) }
-    ::Opee::Env.wait_close()
-    assert(4 > a.last_data.max)
-  end
-=end
 end # TaskTest

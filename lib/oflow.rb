@@ -2,6 +2,7 @@
 module OFlow
 end
 
+require 'oflow/errors'
 require 'oflow/stamp'
 require 'oflow/pattern'
 require 'oflow/tracker'

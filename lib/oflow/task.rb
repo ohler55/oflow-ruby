@@ -12,9 +12,11 @@ module OFlow
     RUNNING = 1
     # value of @state that indicates the Task is shutting down
     CLOSING = 2
+    # value of @state that indicates the Task is not receiving new requests.
+    BLOCKED = 3
     # value of @state that indicates the Task is processing one request and will
     # stop after that processing is complete
-    STEP    = 3
+    STEP    = 4
 
     # The current processing state of the Task
     attr_reader :state
@@ -33,10 +35,11 @@ module OFlow
       @links = {}
       @queue = []
       @req_mutex = Mutex.new()
+      @req_thread = nil
       @step_thread = nil
-      @ask_timeout = 0.0
+      @waiting_thread = nil
+      @req_timeout = 0.0
       @max_queue_count = nil
-      @ask_thread = nil
       @state = RUNNING
       @busy = false
       @proc_cnt = 0
@@ -45,16 +48,17 @@ module OFlow
         Thread.current[:name] = me.full_name()
         while CLOSING != @state
           begin
-            if RUNNING == @state || STEP == @state
+            if RUNNING == @state || STEP == @state || BLOCKED == @state
               req = nil
-              if !@queue.empty?
+              if @queue.empty?
+                @waiting_thread.wakeup() unless @waiting_thread.nil?
+                # TBD Env.wake_finish()
+                sleep(1.0)
+              else
                 @req_mutex.synchronize {
                   req = @queue.pop()
                 }
                 @req_thread.wakeup() unless @req_thread.nil?
-              else
-                # TBD Env.wake_finish()
-                sleep(1.0)
               end
               @busy = true
               @actor.perform(self, req.op, req.box) unless req.nil?
@@ -171,9 +175,13 @@ module OFlow
       @loop.wakeup()
     end
 
-    # Closes the Task by exiting the processing thread and removing the Actor
-    # from the Env.
-    def close()
+    # Closes the Task by exiting the processing thread. If flush is true then
+    # all requests in the queue are processed first.
+    def shutdown(flush_first=false)
+      if flush_first
+        @state = BLOCKED
+        flush()
+      end
       @state = CLOSING
       begin
         # if the loop has already exited this will raise an Exception that can be ignored
@@ -181,8 +189,22 @@ module OFlow
       rescue
         # ignore
       end
-      # TBD Env.remove_actor(self)
       @loop.join()
+    end
+
+    # Closes the Task by exiting the processing thread. If flush is true then
+    # all requests in the queue are processed first.
+    def flush()
+      @waiting_thread = Thread.current
+      begin
+        @loop.wakeup()
+      rescue
+        # ignore
+      end
+      while busy?
+        sleep(2.0)
+      end
+      @waiting_thread = nil
     end
 
 
@@ -205,6 +227,8 @@ module OFlow
     end
 
     def receive(op, box)
+      raise BlockedError.new() if CLOSING == @state || BLOCKED == @state
+
       unless @max_queue_count.nil? || 0 == @max_queue_count || @queue.size() < @max_queue_count
         @req_thread = Thread.current
         sleep(timeout) unless @req_timeout.nil? || 0 == @req_timeout

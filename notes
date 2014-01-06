@@ -40,10 +40,12 @@
     - use a cached ship approach (hang on to log task)
 
 - todo
- - actor test driver
-  - call receive, wait for out, kill task after timeout or when getting reply
-  - driver is task with log and receive ovder-ridden, ship is not needed so can be left along
  - Env
+  - same interface as workflow
+  - can put task directly under env, like wf (useful for testing)
+
+ - actor test driver
+  - all sync
  - Task
  - Log
  
