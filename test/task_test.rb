@@ -11,7 +11,7 @@ require 'oflow'
 class Gather < ::OFlow::Actor
   attr_accessor :requests
 
-  def initialize(task)
+  def initialize(task, options)
     super
     @requests = {}
   end

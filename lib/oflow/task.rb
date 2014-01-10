@@ -29,8 +29,10 @@ module OFlow
     def initialize(flow, name, actor_class, options={})
       @flow = flow
       @name = name
-      @actor = actor_class.new(self)
+      @actor = actor_class.new(self, options)
       raise Exception.new("#{actor} does not respond to the perform() method.") unless @actor.respond_to?(:perform)
+
+      flow.add_task(self) unless flow.nil?
 
       @links = {}
       @queue = []
@@ -207,6 +209,10 @@ module OFlow
       @waiting_thread = nil
     end
 
+    def state=(s)
+      # TBD anything that needs to be done when changing state?
+      @state = s
+    end
 
     def link(out_name, task, op)
       pat = nil

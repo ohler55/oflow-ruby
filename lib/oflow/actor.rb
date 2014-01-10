@@ -5,7 +5,7 @@ module OFlow
 
     attr_reader :task
 
-    def initialize(task)
+    def initialize(task, options)
       @task = task
 
     end

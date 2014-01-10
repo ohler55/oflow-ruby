@@ -12,7 +12,7 @@ module OFlow
     end
 
     class FlowActor < Actor
-      def initialize(task)
+      def initialize(task, options)
         super
       end
 
