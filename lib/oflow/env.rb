@@ -2,7 +2,11 @@
 module OFlow
 
   class Env
-    attr_accessor :log
+
+    extend HasTasks
+    extend HasLog
+
+
     attr_accessor :parent
 
     attr_reader :tasks

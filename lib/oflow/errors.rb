@@ -15,4 +15,11 @@ module OFlow
     end
   end # BusyError
 
+  # An Exception indicating an error in setup or configuration.
+  class ConfigError < Exception
+    def initialize(msg)
+      super(msg)
+    end
+  end # ConfigError
+
 end # OFlow

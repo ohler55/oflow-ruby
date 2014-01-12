@@ -34,4 +34,23 @@ INFO: something
     log.shutdown()
   end
 
+  def test_log_filename
+    filename = 'filename_test.log'
+    %x{rm -f #{filename}}
+
+    log = ::OFlow::Task.new(nil, 'log', ::OFlow::Log,
+                            :filename => filename,
+                            :severity => Logger::INFO,
+                            :formatter => proc { |sev, time, prog, msg| "#{sev}: #{msg}\n" })
+
+    log.receive(:info, ::OFlow::Box.new(['One', 'first entry']))
+    log.flush()
+
+    output = File.read(filename).split("\n")[1..-1]
+    assert_equal(['INFO: first entry'], output)
+    %x{rm #{filename}}
+
+    log.shutdown()
+  end
+
 end # LogTest

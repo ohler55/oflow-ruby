@@ -4,6 +4,16 @@
 ^c^s show subtree
 
 - todo
+ - FlowMixin - better name
+ - Flow < Task
+ - Env
+
+  - can put task directly under env, like wf (useful for testing)
+
+ - actor test driver
+  - all sync
+
+
  - set up bin with oflow
   - point to ruby config files that defines registration and definitions
   - creates inspector
@@ -39,21 +49,7 @@
    - tasks have info, debug, etc 
     - use a cached ship approach (hang on to log task)
 
-- todo
- - Env
-  - identify common method for tasks and flow
-
-  - same interface as workflow
-  - can put task directly under env, like wf (useful for testing)
-
- - actor test driver
-  - all sync
- - Task
- - Log
  
-
-
-
   - base class for doing the processing, has specialized behavior
   - responds to
    - allowed inputs
