@@ -1,10 +1,16 @@
 
 module OFlow
 
-  class Flow < Task
+  class Flow
+    include HasTasks
+    include HasLinks
+    include HasName
 
-    def initialize()
-      super(FlowActor)
+    def initialize(flow, name, options)
+      #super(flow, name, FlowActor, options)
+      init_name(flow, name)
+      init_tasks()
+      init_links()
     end
 
     def receive(op, box)

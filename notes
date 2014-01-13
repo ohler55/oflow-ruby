@@ -4,9 +4,12 @@
 ^c^s show subtree
 
 - todo
- - FlowMixin - better name
- - Flow < Task
- - Env
+ - describe()
+  - add to basic test
+ - make sure links get set up
+  - make sure all symbols
+ - implement ship
+ - run it and look at output
 
   - can put task directly under env, like wf (useful for testing)
 
@@ -18,57 +21,26 @@
   - point to ruby config files that defines registration and definitions
   - creates inspector
 
+- example
+ - data store
+  - handles CRUD and simple list
+  - tasks
+   - receive request and identify action
+    - send to correct task (path)
+   - insert
+    - json encoded object
+    - decode header
+    - save
+    - reply
+ - simple (covers all features)
+  - receive json request from simple command line input generator
+  - send to 2 tasks, get time and get count
+  - join back
+  - queue to 2+ sleepers (random sleep)
+  - reply
 
-- classes
- - Box types
-  - describe expected contents
-   - required
-   - optional
-   - extra allowed?
- - Task
-  - wrapper around TaskHandler/TaskImpl
-  - accepts requests and places on queue
-  - request is op and data
-  - can send to other tasks on request of handler
-  - 
- - Actor
-  - self.inputs
-   - Hash {op: description}
-  - self.outputs
-  - Hash{name: description}
-  - self.new
-  - receive(task, op, box)
-   - calls task.ship() 0 or more times
- 
- - Workflow < Task
-  - has link to log
- - Env - 1
-  - like opee
-  - Log < Actor
-   - one out for chaining
-   - tasks have info, debug, etc 
-    - use a cached ship approach (hang on to log task)
 
- 
-  - base class for doing the processing, has specialized behavior
-  - responds to
-   - allowed inputs
-   - possible_outputs
-    - tagged name for UI
-    - op for target
-    - give back hook to target identified
-  - * have to match up output with input
-   - ops must match
-   - handler ops defined at run time
 
- - Data/Job
-  - just a data tree
-  - use methods to access and set
-  - get as native or something to get ruby 
- - Workflow
-  - contains Tasks
- - WorkflowManager
- 
 - idea
  - define env
   - require, link, whatever

@@ -6,6 +6,9 @@ module OFlow
   # data by the receive() method. The request is put on a queue and popped off
   # one at a time and handed to an Actor associatesd with the Task.
   class Task
+    include HasName
+    include HasLinks
+
     # value of @state that indicates the Task is not currently processing requests
     STOPPED = 0
     # value of @state that indicates the Task is currently ready to process requests
@@ -20,21 +23,16 @@ module OFlow
 
     # The current processing state of the Task
     attr_reader :state
-    # name of the Task
-    attr_reader :name
     # the Actor
     attr_reader :actor
 
     # A Task is initialized by specifying a class to create an instance of.
     def initialize(flow, name, actor_class, options={})
-      @flow = flow
-      @name = name
+      init_name(flow, name)
+      init_links()
       @actor = actor_class.new(self, options)
       raise Exception.new("#{actor} does not respond to the perform() method.") unless @actor.respond_to?(:perform)
 
-      flow.add_task(self) unless flow.nil?
-
-      @links = {}
       @queue = []
       @req_mutex = Mutex.new()
       @req_thread = nil
@@ -81,14 +79,6 @@ module OFlow
       end
     end
 
-    def full_name()
-      if @flow.nil?
-        @name
-      else
-        @flow.full_name() + ':' + @name
-      end
-    end
-
     def state_string()
       ss = 'UNKNOWN'
       case @state
@@ -103,6 +93,17 @@ module OFlow
       end
       ss
     end
+
+    def describe(indent=0)
+      i = ' ' * indent
+      lines = ["#{i}#{name} (#{actor.class}) {"]
+      @links.each { |local,link|
+        lines << "  #{i}#{local} => #{link.target_name}:#{link.op}"
+      }
+      lines << i + "}\n"
+      lines.join("\n")
+    end
+
 
     # Returns the number of requests on the queue.
     # @return [Fixnum] number of queued requests
@@ -194,8 +195,6 @@ module OFlow
       @loop.join()
     end
 
-    # Closes the Task by exiting the processing thread. If flush is true then
-    # all requests in the queue are processed first.
     def flush()
       @waiting_thread = Thread.current
       begin
@@ -214,6 +213,7 @@ module OFlow
       @state = s
     end
 
+=begin
     def link(out_name, task, op)
       pat = nil
       if @actor.class.respond_to?(:outputs)
@@ -223,6 +223,7 @@ module OFlow
       # TBD compare inputs to op and to pattern
       @link[out_name] = Link.new(out_name, task, op)
     end
+=end
 
     def inputs()
       @actor.inputs()
@@ -248,7 +249,15 @@ module OFlow
     end
 
     def ship(dest, box)
-      # TBD lookup dest to get a task and op, then call receive on that task
+      # TBD raise if link or link target is nil, or just log?
+      begin
+        link = resolve_link(dest)
+        link.target.receive(link.op, box)
+      rescue Exception => e
+        # TBD log
+        puts "*** #{e.class}: #{e.message}"
+      end
+      link
     end
 
     # Processes the initialize() options. Subclasses should call super.
