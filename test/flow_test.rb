@@ -39,10 +39,21 @@ class Stutter < ::OFlow::Actor
 
 end # Stutter
 
+class Crash < ::OFlow::Actor
+  def initialize(task, options)
+    super
+  end
+
+  def perform(task, op, box)
+    puts "*** crash"
+    nil.crash()
+  end
+
+end # Stutter
+
 class FlowTest < ::Test::Unit::TestCase
 
   def test_flow_basic
-    kept = []
     trigger = nil
     collector = nil
     ::OFlow::Env.flow('basic', :opt1 => 1) { |f|
@@ -59,7 +70,9 @@ class FlowTest < ::Test::Unit::TestCase
       f.task('dub', Stutter, :opt1 => 7) { |t|
         t.link(:collector, 'collector', 'dub')
         t.link(:twice, 'dub', :once)
+        # TBD t.link(:once, 'ignore', nil)
       }
+      # TBD set error task to collector (support aliases)
     }
     # see if the flow was constructed correctly
     assert_equal(%|OFlow::Env {
@@ -86,6 +99,18 @@ class FlowTest < ::Test::Unit::TestCase
                   [':basic:dub', :once, 7],
                  ], collector.collection)
 
+    ::OFlow::Env.clear()
+  end
+
+  def test_flow_rescue
+    trigger = nil
+    ::OFlow::Env.flow('rescue') { |f|
+      trigger = f.task('crash', Crash)
+    }
+    trigger.receive(:knock, ::OFlow::Box.new(7))
+    ::OFlow::Env.flush()
+
+    ::OFlow::Env.clear()
   end
 
 end # FlowTest

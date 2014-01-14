@@ -22,4 +22,11 @@ module OFlow
     end
   end # ConfigError
 
+  # An Exception raised when no destination is found.
+  class LinkError < Exception
+    def initialize(dest)
+      super("No destination found for '#{dest}'.")
+    end
+  end # LinkError
+
 end # OFlow

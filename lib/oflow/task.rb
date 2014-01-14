@@ -61,7 +61,11 @@ module OFlow
                 @req_thread.wakeup() unless @req_thread.nil?
               end
               @busy = true
-              @actor.perform(self, req.op, req.box) unless req.nil?
+              begin
+                @actor.perform(self, req.op, req.box) unless req.nil?
+              rescue Exception => e
+                handleError("Error in task #{full_name} - ", e)
+              end
               @proc_cnt += 1
               @busy = false
               if STEP == @state
@@ -252,12 +256,21 @@ module OFlow
       # TBD raise if link or link target is nil, or just log?
       begin
         link = resolve_link(dest)
+        raise LinkError.new(dest) if link.nil? || link.target.nil?
         link.target.receive(link.op, box)
       rescue Exception => e
-        # TBD log
-        puts "*** #{e.class}: #{e.message}"
+        handleError("ship to #{dest} failed - ", e)
       end
       link
+    end
+
+    def handleError(msg, e)
+      # TBD if error task then send to it with error class as op
+      lines = [msg + "#{e.class}: #{e.message}"]
+      e.backtrace.each { |line| lines << "    #{line}" }
+      
+      # TBD else if log task then write to it
+      puts lines.join("\n")
     end
 
     # Processes the initialize() options. Subclasses should call super.

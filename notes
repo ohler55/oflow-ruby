@@ -4,17 +4,31 @@
 ^c^s show subtree
 
 - todo
- - describe()
-  - add to basic test
+ - support aliases
+
+ - make log, error, and ignore reserved names for tasks
+  - allow replacement with user supplied
+
+ - catch exceptions in task and log or print
+ - what to do about links not set up?
+  - raise exception
+  - provide a /dev/nul equivalent
+   - ignore task
+
+ - add checks and do resolve at end of creation
+ - add options
+  - log severity
+   - overrides general severity
+
  - make sure links get set up
   - make sure all symbols
- - implement ship
- - run it and look at output
 
-  - can put task directly under env, like wf (useful for testing)
 
  - actor test driver
-  - all sync
+  - links to driver
+  - start with perform()
+  - gather link calls
+  - user test unit asserts to compare results
 
 
  - set up bin with oflow

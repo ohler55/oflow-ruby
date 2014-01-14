@@ -99,12 +99,17 @@ module OFlow
     end
 
 
+    def state=(s)
+      @tasks.each_value do |task|
+        task.state = s
+      end
+    end
 
     # Shuts down all Tasks.
     def shutdown(flush_first=false)
       # block all tasks first so threads can empty queues
       @tasks.each_value do |task|
-        task.state = BLOCKED
+        task.state = Task::BLOCKED
       end
       # shutdown and wait for queues to empty if necessary
       @tasks.each_value do |task|
@@ -113,7 +118,10 @@ module OFlow
       @tasks = {}
     end
 
-
+    def clear()
+      shutdown()
+      @tasks = {}
+    end
 
   end # HasTasks
 end # OFlow
