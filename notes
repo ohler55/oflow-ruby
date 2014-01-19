@@ -4,16 +4,14 @@
 ^c^s show subtree
 
 - todo
+
+ - set up log, error, and ignore at start of flow
+  - ask actor
  - support aliases
 
  - make log, error, and ignore reserved names for tasks
   - allow replacement with user supplied
 
- - catch exceptions in task and log or print
- - what to do about links not set up?
-  - raise exception
-  - provide a /dev/nul equivalent
-   - ignore task
 
  - add checks and do resolve at end of creation
  - add options

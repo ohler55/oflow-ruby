@@ -5,6 +5,8 @@ module OFlow
     include HasTasks
     include HasLinks
     include HasName
+    include HasErrorHandler
+    include HasLog
 
     def initialize(flow, name, options)
       #super(flow, name, FlowActor, options)

@@ -8,6 +8,8 @@ module OFlow
   class Task
     include HasName
     include HasLinks
+    include HasErrorHandler
+    include HasLog
 
     # value of @state that indicates the Task is not currently processing requests
     STOPPED = 0
@@ -44,6 +46,9 @@ module OFlow
       @busy = false
       @proc_cnt = 0
       set_options(options)
+
+      return unless @actor.with_own_thread()
+
       @loop = Thread.start(self) do |me|
         Thread.current[:name] = me.full_name()
         while CLOSING != @state
@@ -64,7 +69,7 @@ module OFlow
               begin
                 @actor.perform(self, req.op, req.box) unless req.nil?
               rescue Exception => e
-                handleError("Error in task #{full_name} - ", e)
+                handle_error(e)
               end
               @proc_cnt += 1
               @busy = false
@@ -164,6 +169,7 @@ module OFlow
     # used to avoid getting stuck if the processing takes too long.
     # @param [Float|Fixnum] max_wait maximum time to wait for the step to complete
     def step(max_wait=5)
+      return if @loop.nil?
       @state = STEP
       @step_thread = Thread.current
       @loop.wakeup()
@@ -173,18 +179,19 @@ module OFlow
 
     # Wakes up the Task if it has been stopped or if Env.shutdown() has been called.
     def wakeup()
-      @loop.wakeup()
+      @loop.wakeup() unless @loop.nil?
     end
 
     # Restarts the Task's processing thread.
     def start()
       @state = RUNNING
-      @loop.wakeup()
+      @loop.wakeup() unless @loop.nil?
     end
 
     # Closes the Task by exiting the processing thread. If flush is true then
     # all requests in the queue are processed first.
     def shutdown(flush_first=false)
+      return if @loop.nil?
       if flush_first
         @state = BLOCKED
         flush()
@@ -200,6 +207,7 @@ module OFlow
     end
 
     def flush()
+      return if @loop.nil?
       @waiting_thread = Thread.current
       begin
         @loop.wakeup()
@@ -217,18 +225,6 @@ module OFlow
       @state = s
     end
 
-=begin
-    def link(out_name, task, op)
-      pat = nil
-      if @actor.class.respond_to?(:outputs)
-        # TBD compare outputs to out name, also get pattern
-      end
-      ins = task.inputs()
-      # TBD compare inputs to op and to pattern
-      @link[out_name] = Link.new(out_name, task, op)
-    end
-=end
-
     def inputs()
       @actor.inputs()
     end
@@ -239,7 +235,14 @@ module OFlow
 
     def receive(op, box)
       raise BlockedError.new() if CLOSING == @state || BLOCKED == @state
-
+      if @loop.nil? # no thread task
+        begin
+          @actor.perform(self, op, box)
+        rescue Exception => e
+          handle_error(e)
+        end
+        return
+      end
       unless @max_queue_count.nil? || 0 == @max_queue_count || @queue.size() < @max_queue_count
         @req_thread = Thread.current
         sleep(timeout) unless @req_timeout.nil? || 0 == @req_timeout

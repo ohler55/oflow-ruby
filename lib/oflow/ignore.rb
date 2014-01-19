@@ -1,23 +1,20 @@
 
 module OFlow
 
-  class Actor
-
-    attr_reader :task
+  class Ignore < Actor
 
     def initialize(task, options)
-      @task = task
-
+      super
     end
 
     def perform(task, op, box)
+      # ignore
     end
 
     def with_own_thread()
-      true
+      false
     end
 
-  end
+  end # Ignore
 
 end # OFlow
-

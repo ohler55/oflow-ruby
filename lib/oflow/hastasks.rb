@@ -40,7 +40,6 @@ module OFlow
       lines
     end
 
-
     # Iterates over each Task and yields to the provided block with each Task.
     # @param [Proc] blk Proc to call on each iteration
     def each_task(&blk)
@@ -94,7 +93,7 @@ module OFlow
       wakeup()
       @tasks.each_value { |t| t.flush() }
       while busy?
-        sleep(1.0)
+        sleep(0.2)
       end
     end
 

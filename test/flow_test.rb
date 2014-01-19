@@ -26,15 +26,23 @@ class Stutter < ::OFlow::Actor
   
   def initialize(task, options)
     super
-    @collector_link = nil
-    @once_link = nil
-    @twice_link = nil
   end
 
   def perform(task, op, box)
-    # TBD later use links
     task.ship(:collector, ::OFlow::Box.new([task.full_name, op, box.contents]))
     task.ship(op, box)
+  end
+
+end # Stutter
+
+class Noise < ::OFlow::Actor
+  
+  def initialize(task, options)
+    super
+  end
+
+  def perform(task, op, box)
+    task.info("op: #{op}, box: #{box.contents}")
   end
 
 end # Stutter
@@ -45,7 +53,6 @@ class Crash < ::OFlow::Actor
   end
 
   def perform(task, op, box)
-    puts "*** crash"
     nil.crash()
   end
 
@@ -70,9 +77,9 @@ class FlowTest < ::Test::Unit::TestCase
       f.task('dub', Stutter, :opt1 => 7) { |t|
         t.link(:collector, 'collector', 'dub')
         t.link(:twice, 'dub', :once)
-        # TBD t.link(:once, 'ignore', nil)
+        t.link(:once, 'ignore', nil)
       }
-      # TBD set error task to collector (support aliases)
+      f.task(:ignore, ::OFlow::Ignore)
     }
     # see if the flow was constructed correctly
     assert_equal(%|OFlow::Env {
@@ -86,6 +93,9 @@ class FlowTest < ::Test::Unit::TestCase
     dub (Stutter) {
       collector => collector:dub
       twice => dub:once
+      once => ignore:
+    }
+    ignore (OFlow::Ignore) {
     }
   }
 }
@@ -102,13 +112,49 @@ class FlowTest < ::Test::Unit::TestCase
     ::OFlow::Env.clear()
   end
 
+  # Make sure the error handler works and forwards to the 'error' task if it
+  # exists.
   def test_flow_rescue
     trigger = nil
+    collector = nil
     ::OFlow::Env.flow('rescue') { |f|
       trigger = f.task('crash', Crash)
+      f.task(:collector, Collector) { |t|
+        collector = t.actor
+      }
+      f.task(:error, ::OFlow::Relay) { |t|
+        t.link(nil, 'collector', 'error')
+      }
+      f.task(:log, ::OFlow::Relay) { |t|
+        t.link(nil, 'collector', 'log')
+      }
     }
     trigger.receive(:knock, ::OFlow::Box.new(7))
     ::OFlow::Env.flush()
+
+    assert_equal(collector.collection.size, 1)
+    assert_equal(collector.collection[0][0].class, NoMethodError)
+    assert_equal(collector.collection[0][1], ':rescue:crash')
+
+    ::OFlow::Env.clear()
+  end
+
+  # Make sure the log works and relays to a log task if it exists.
+  def test_flow_log_relay
+    trigger = nil
+    collector = nil
+    ::OFlow::Env.flow('log_relay') { |f|
+      trigger = f.task('noise', Noise)
+      f.task(:log, Collector) { |t|
+        collector = t.actor
+      }
+    }
+    trigger.receive(:speak, ::OFlow::Box.new(7))
+    ::OFlow::Env.flush()
+
+    assert_equal(collector.collection.size, 1)
+    assert_equal(collector.collection[0][0], 'op: speak, box: 7')
+    assert_equal(collector.collection[0][1], ':log_relay:noise')
 
     ::OFlow::Env.clear()
   end

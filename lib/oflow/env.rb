@@ -6,6 +6,7 @@ module OFlow
     extend HasTasks
     extend HasLog
     extend HasName
+    extend HasErrorHandler
 
     init_name(nil, '')
     init_tasks()
