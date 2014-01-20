@@ -18,6 +18,10 @@ module OFlow
       nil
     end
 
+    def error_handler=(t)
+      @error_handler = t
+    end
+
     def handle_error(e)
       handler = error_handler()
       unless handler.nil?

@@ -256,24 +256,10 @@ module OFlow
     end
 
     def ship(dest, box)
-      # TBD raise if link or link target is nil, or just log?
-      begin
-        link = resolve_link(dest)
-        raise LinkError.new(dest) if link.nil? || link.target.nil?
-        link.target.receive(link.op, box)
-      rescue Exception => e
-        handleError("ship to #{dest} failed - ", e)
-      end
+      link = resolve_link(dest)
+      raise LinkError.new(dest) if link.nil? || link.target.nil?
+      link.target.receive(link.op, box)
       link
-    end
-
-    def handleError(msg, e)
-      # TBD if error task then send to it with error class as op
-      lines = [msg + "#{e.class}: #{e.message}"]
-      e.backtrace.each { |line| lines << "    #{line}" }
-      
-      # TBD else if log task then write to it
-      puts lines.join("\n")
     end
 
     # Processes the initialize() options. Subclasses should call super.
@@ -287,6 +273,27 @@ module OFlow
       @req_timeout = options.fetch(:request_timeout, @req_timeout).to_f
     end
     
+    def _validation_errors()
+      errors = []
+      # TBD handle input spec not defined
+      if !@nil_link.nil? && @nil_link.target.nil?
+        errors << ValidateError::Problem.new(full_name, ValidateError::Problem::LINK_ERROR, "Failed to find task '#{@nil_link.target_name}'.")
+      end
+      @links.each_value do |lnk|
+        if lnk.target.nil?
+          errors << ValidateError::Problem.new(full_name, ValidateError::Problem::LINK_ERROR, "Failed to find task '#{lnk.target_name}'.")
+        end
+      end
+      errors
+    end
+
+    def resolve_all_links()
+      @nil_link.instance_variable_set(:@target, @flow.find_task(@nil_link.target_name)) unless @nil_link.nil?
+      @links.each_value { |link|
+        link.instance_variable_set(:@target, @flow.find_task(link.target_name))
+      }
+    end
+
     private
 
     # Internal class used to store information about asynchronous method

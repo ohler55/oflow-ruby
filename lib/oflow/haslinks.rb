@@ -31,12 +31,6 @@ module OFlow
       lnk
     end
     
-    def resolve_all_links()
-      @links.each_value { |link|
-        link.instance_variable_set(:@target, @flow.find_task(link.target_name)) unless @flow.nil?
-      }
-    end
-
     def _find_link(local)
       return @nil_link if local.nil?
       @links[local.to_sym]

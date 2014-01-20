@@ -14,6 +14,11 @@ module OFlow
       nil
     end
 
+    def log=(t)
+      @log = t
+    end
+
+
     def log_msg(level, msg)
       lt = log()
       unless lt.nil?

@@ -12,5 +12,9 @@ module OFlow
       @target = nil
     end
 
+    def ship(box)
+      @target.receive(@op, box)
+    end
+
   end # Link
 end # OFlow

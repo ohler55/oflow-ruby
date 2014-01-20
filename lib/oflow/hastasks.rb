@@ -11,9 +11,9 @@ module OFlow
       f = Flow.new(self, name, options)
       @tasks[name] = f
       yield(f) if block_given?
-      @tasks.each_value { |t|
-        t.resolve_all_links
-      }
+      resolve_all_links()
+      validate()
+      prepare() if respond_to?(:prepare)
       f
     end
 
@@ -39,6 +39,27 @@ module OFlow
       lines += i + "}\n"
       lines
     end
+
+    # Validates the container by verifying all links on a task have been set to
+    # a valid destination and that destination has been resolved.
+    def validate()
+      # collects errors and raises all errors at once if there are any
+      errors = _validation_errors()
+      raise ValidateError.new(errors) unless errors.empty?
+    end
+
+    def _validation_errors()
+      errors = []
+      @tasks.each_value { |t| errors += t._validation_errors() }
+      errors
+    end
+
+    def resolve_all_links()
+      @tasks.each_value { |t|
+        t.resolve_all_links()
+      }
+    end
+
 
     # Iterates over each Task and yields to the provided block with each Task.
     # @param [Proc] blk Proc to call on each iteration

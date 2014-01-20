@@ -5,15 +5,21 @@
 
 - todo
 
+ - tests
+  - verify config errors are caught
+  - verify log and error handler set on start
+   - setup and then check env and flow
+  - set logger stream?
+
+
  - set up log, error, and ignore at start of flow
   - ask actor
  - support aliases
 
- - make log, error, and ignore reserved names for tasks
-  - allow replacement with user supplied
+ - option to set debug leve in task
+  - options in task and flow
+  - log takes additional arg that is over-ride on current debug level (at each parent)
 
-
- - add checks and do resolve at end of creation
  - add options
   - log severity
    - overrides general severity

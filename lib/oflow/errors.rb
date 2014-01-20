@@ -29,4 +29,36 @@ module OFlow
     end
   end # LinkError
 
+  # An Exception raised when there are validation errors.
+  class ValidateError < Exception
+    attr_accessor :errors
+    def initialize(errors)
+      @errors = errors
+      ma = ["#{errors.size} validation errors."]
+      errors.each { |e| ma << e.to_s }
+      super(ma.join("\n  "))
+    end
+
+    class Problem
+      LINK_ERROR = 'link_error'
+
+      attr_reader :task_name
+      attr_reader :kind
+      attr_reader :message
+
+      def initialize(task_name, kind, msg)
+        @task_name = task_name
+        @kind = kind
+        @message = msg
+      end
+      
+      def to_s()
+        "#{@task_name}: #{@message}"
+      end
+      alias inpsect to_s
+
+    end # Problem
+
+  end # ValidateError
+
 end # OFlow
