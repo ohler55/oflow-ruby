@@ -5,27 +5,34 @@
 
 - todo
 
+ - features
+  - option to set debug level in task
+  - actor test driver
+  - nested flows
+  - inspector
+  - workqueue task/actor that distributes to 1 or n others based on how busy
+  - collector waits for n number of boxes to be recieved before continuing
+  - other actors
+   - http server
+   - cache or persister (write to disk and ready on start)
+   - call out using pipe and fork
+
+
  - tests
-  - verify config errors are caught
-  - verify log and error handler set on start
+
+  - verify log and error handler set on start (prepare())
    - setup and then check env and flow
   - set logger stream?
 
 
- - set up log, error, and ignore at start of flow
-  - ask actor
- - support aliases
 
- - option to set debug leve in task
+ - allow flow to pass through links to internal
+
+
+ - option to set debug level in task
   - options in task and flow
   - log takes additional arg that is over-ride on current debug level (at each parent)
 
- - add options
-  - log severity
-   - overrides general severity
-
- - make sure links get set up
-  - make sure all symbols
 
 
  - actor test driver
@@ -57,6 +64,7 @@
   - queue to 2+ sleepers (random sleep)
   - reply
 
+ - store front?
 
 
 - idea

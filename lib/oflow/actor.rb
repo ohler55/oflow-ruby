@@ -17,6 +17,38 @@ module OFlow
       true
     end
 
+    # Return array of Specs.
+    def inputs()
+      nil
+    end
+
+    # Return array of Specs.
+    def outputs()
+      nil
+    end
+
+    class Spec
+      attr_reader :op
+      attr_reader :type
+
+      def initialize(op, type)
+        if op.nil? || op.is_a?(Symbol)
+          @op = op
+        else
+          @op = op.to_sym
+        end
+        @type = type
+      end
+
+      alias dest op
+
+      def to_s()
+        "Spec{op: #{@op}, type: #{@type}}"
+      end
+      alias inspect to_s
+
+    end # Spec
+
   end
 
 end # OFlow

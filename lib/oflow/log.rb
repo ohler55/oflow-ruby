@@ -16,6 +16,7 @@ module OFlow
     def initialize(task, options={})
       @logger = nil
       @formatter = nil
+      @name = nil
       super
       set_options(options)
     end

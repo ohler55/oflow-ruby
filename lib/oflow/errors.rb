@@ -31,9 +31,10 @@ module OFlow
 
   # An Exception raised when there are validation errors.
   class ValidateError < Exception
-    attr_accessor :errors
+    attr_accessor :problems
+
     def initialize(errors)
-      @errors = errors
+      @problems = errors
       ma = ["#{errors.size} validation errors."]
       errors.each { |e| ma << e.to_s }
       super(ma.join("\n  "))
@@ -41,6 +42,8 @@ module OFlow
 
     class Problem
       LINK_ERROR = 'link_error'
+      MISSING_ERROR = 'missing_link_error'
+      INPUT_ERROR = 'input_link_error'
 
       attr_reader :task_name
       attr_reader :kind

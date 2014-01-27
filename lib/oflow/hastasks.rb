@@ -11,9 +11,9 @@ module OFlow
       f = Flow.new(self, name, options)
       @tasks[name] = f
       yield(f) if block_given?
-      resolve_all_links()
-      validate()
-      prepare() if respond_to?(:prepare)
+      f.resolve_all_links()
+      f.validate()
+      f.prepare() if f.respond_to?(:prepare)
       f
     end
 

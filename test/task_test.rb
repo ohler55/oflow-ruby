@@ -46,8 +46,8 @@ class TaskTest < ::Test::Unit::TestCase
     task.flush()
 
     requests = task.actor.requests
-    assert_equal(1, task.actor.requests.size)
-    boxes = task.actor.requests[:dance]
+    assert_equal(1, requests.size)
+    boxes = requests[:dance]
     assert_equal(1, boxes.size)
     box = boxes[0]
     assert_equal(false, box.nil?)
@@ -61,8 +61,8 @@ class TaskTest < ::Test::Unit::TestCase
     task.shutdown(true)
 
     requests = task.actor.requests
-    assert_equal(1, task.actor.requests.size)
-    boxes = task.actor.requests[:dance]
+    assert_equal(1, requests.size)
+    boxes = requests[:dance]
     assert_equal(1, boxes.size)
     box = boxes[0]
     assert_equal(false, box.nil?)
@@ -81,7 +81,7 @@ class TaskTest < ::Test::Unit::TestCase
     6.times do |i|
       begin
         task.receive(:dance, ::OFlow::Box.new(i))
-      rescue ::OFlow::BusyError => e
+      rescue ::OFlow::BusyError
         # expected for all over first 4
       end
     end
@@ -89,7 +89,7 @@ class TaskTest < ::Test::Unit::TestCase
     task.shutdown(true)
 
     requests = task.actor.requests
-    boxes = task.actor.requests[:dance]
+    boxes = requests[:dance]
     assert_equal(4, boxes.size)
     nums = boxes.map { |box| box.contents }
     assert_equal([0, 1, 2, 3], nums)

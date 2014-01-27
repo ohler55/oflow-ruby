@@ -45,6 +45,7 @@ module OFlow
       @state = RUNNING
       @busy = false
       @proc_cnt = 0
+      @loop = nil
       set_options(options)
 
       return unless @actor.with_own_thread()
@@ -57,7 +58,6 @@ module OFlow
               req = nil
               if @queue.empty?
                 @waiting_thread.wakeup() unless @waiting_thread.nil?
-                # TBD Env.wake_finish()
                 sleep(1.0)
               else
                 @req_mutex.synchronize {
@@ -275,20 +275,42 @@ module OFlow
     
     def _validation_errors()
       errors = []
-      # TBD handle input spec not defined
-      if !@nil_link.nil? && @nil_link.target.nil?
-        errors << ValidateError::Problem.new(full_name, ValidateError::Problem::LINK_ERROR, "Failed to find task '#{@nil_link.target_name}'.")
-      end
-      @links.each_value do |lnk|
-        if lnk.target.nil?
-          errors << ValidateError::Problem.new(full_name, ValidateError::Problem::LINK_ERROR, "Failed to find task '#{lnk.target_name}'.")
+      @links.each_value { |lnk| _check_link(lnk, errors) }
+
+      unless (outs = @actor.outputs()).nil?
+        outs.each do |spec|
+          if find_link(spec.dest).nil?
+            errors << ValidateError::Problem.new(full_name, ValidateError::Problem::MISSING_ERROR, "Missing link for '#{spec.dest}'.")
+          end
         end
       end
       errors
     end
 
+    def has_input(op)
+      ins = @actor.inputs()
+      return true if ins.nil?
+      op = op.to_sym unless op.nil?
+      ins.each { |spec| return true if spec.op.nil? || spec.op == op }
+      false
+    end
+
+    def _check_link(lnk, errors)
+      if lnk.target.nil?
+        errors << ValidateError::Problem.new(full_name, ValidateError::Problem::LINK_ERROR, "Failed to find task '#{lnk.target_name}'.")
+        return
+      end
+      unless lnk.target.has_input(lnk.op)
+        errors << ValidateError::Problem.new(full_name, ValidateError::Problem::INPUT_ERROR, "'#{lnk.op}' not allowed on '#{lnk.target.full_name}'.")
+        return
+      end
+
+      # TBD
+      # Verify target has link.op as input if input is specified.
+
+    end
+
     def resolve_all_links()
-      @nil_link.instance_variable_set(:@target, @flow.find_task(@nil_link.target_name)) unless @nil_link.nil?
       @links.each_value { |link|
         link.instance_variable_set(:@target, @flow.find_task(link.target_name))
       }

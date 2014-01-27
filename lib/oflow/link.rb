@@ -16,5 +16,10 @@ module OFlow
       @target.receive(@op, box)
     end
 
+    def to_s()
+      "Link{target_name: #{@target_name}, op: #{op}, target: #{@target}}"
+    end
+    alias inspect to_s
+
   end # Link
 end # OFlow
