@@ -19,9 +19,6 @@
 
 
  - tests
-
-  - verify log and error handler set on start (prepare())
-   - setup and then check env and flow
   - set logger stream?
 
 

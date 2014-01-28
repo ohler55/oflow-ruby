@@ -10,12 +10,9 @@ module OFlow
 
     init_name(nil, '')
     init_tasks()
-    
-    # Perform additional preparations.
-    def self.prepare()
-      # TBD make sure log and error_handler are set it env
-    end
 
+    @error_handler = Task.new(self, :error, ErrorHandler)
+    @log = Task.new(self, :log, Log)
 
   end # Env
 end # OFlow

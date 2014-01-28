@@ -19,43 +19,43 @@ module OFlow
     end
 
 
-    def log_msg(level, msg)
+    def log_msg(level, msg, fn)
       lt = log()
       unless lt.nil?
-        lt.receive(level, Box.new([msg, full_name()]))
+        lt.receive(level, Box.new([msg, fn]))
       else
-        puts "[#{full_name()}] #{msg}"
+        puts "[#{fn}] #{msg}"
       end
     end
 
     # Logs the message if logging level is at least debug.
     # @param msg [String] message to log
     def debug(msg)
-      log_msg(:debug, msg)
+      log_msg(:debug, msg, full_name())
     end
 
     # Logs the message if logging level is at least info.
     # @param msg [String] message to display or log
     def info(msg)
-      log_msg(:info, msg)
+      log_msg(:info, msg, full_name())
     end
 
     # Logs the message if logging level is at least error.
     # @param msg [String] message to display or log
     def error(msg)
-      log_msg(:error, msg)
+      log_msg(:error, msg, full_name())
     end
 
     # Logs the message if logging level is at least warn.
     # @param msg [String] message to display or log
     def warn(msg)
-      log_msg(:warn, msg)
+      log_msg(:warn, msg, full_name())
     end
 
     # Logs the message if logging level is at least fatal.
     # @param msg [String] message to display or log
     def fatal(msg)
-      log_msg(:fatal, msg)
+      log_msg(:fatal, msg, full_name())
     end
 
   end # HasLog
