@@ -6,8 +6,6 @@
 - todo
 
  - features
-  - option to set debug level in task
-  - actor test driver
   - nested flows
   - inspector
   - workqueue task/actor that distributes to 1 or n others based on how busy
@@ -16,34 +14,35 @@
    - http server
    - cache or persister (write to disk and ready on start)
    - call out using pipe and fork
+   - timer
+  - file input for configuration
+   - .graffle OmniGraffle
+   - .svg vector graphics
+   - .vdx Visio
 
 
- - tests
-  - set logger stream?
+ - nested: allow flow to pass through links to internal
+  - link()
+   - use link approach but link to flow and resolve down
+   - can link to output of flow which resolves
+   - Flow.link()
+    - link internal and external
+   - inputs() and outputs() for Flow
+   - args
+    - use :parent or :flow for link from task to containing flow
 
-
-
- - allow flow to pass through links to internal
-
-
- - option to set debug level in task
-  - options in task and flow
-  - log takes additional arg that is over-ride on current debug level (at each parent)
-
-
-
- - actor test driver
-  - links to driver
-  - start with perform()
-  - gather link calls
-  - user test unit asserts to compare results
-
-
- - set up bin with oflow
-  - point to ruby config files that defines registration and definitions
-  - creates inspector
-
+  
 - example
+ - rubygems graphs
+  - timer
+  - fetch
+  - persist
+  - http
+   - fetch data
+   - fetch page template
+   - form page
+   - respond
+
  - data store
   - handles CRUD and simple list
   - tasks

@@ -34,11 +34,10 @@ module OFlow
       @formatter
     end
 
+    # Writes a log entry. op is the severity. The box contents is expected to be
+    # an Array with the first element as the full task name of the logging task
+    # and the second argument being the message to log
     def perform(task, op, box)
-      # op is the severity
-      # box contents is expected to be an Array with the first element as the
-      # full task name of the logging task and the second argument being the
-      # message to log.
       a = box.contents
       level = SEVERITY_MAP[op]
       if a.is_a?(Array)
@@ -46,7 +45,8 @@ module OFlow
       else
         log(level, a.to_s, '')
       end
-      # TBD forward using task.ship()
+      # Forward to the next if there is a generic (nil) link.
+      task.ship(nil, box) if find_link(nil)
     end
 
     private
