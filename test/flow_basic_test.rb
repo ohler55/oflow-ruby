@@ -68,8 +68,7 @@ class FlowBasicTest < ::Test::Unit::TestCase
     ignore (OFlow::Ignore) {
     }
   }
-}
-|, ::OFlow::Env.describe())
+}|, ::OFlow::Env.describe())
 
     # run it and check the output
     trigger.receive(:once, ::OFlow::Box.new(7))

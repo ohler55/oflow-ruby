@@ -11,8 +11,22 @@ module OFlow
     init_name(nil, '')
     init_tasks()
 
-    @error_handler = Task.new(self, :error, ErrorHandler)
-    @log = Task.new(self, :log, Log)
+    def self._clear()
+      @error_handler = Task.new(self, :error, ErrorHandler)
+      @log = Task.new(self, :log, Log)
+    end
+
+    _clear()
+
+    def self.describe(indent=0)
+      i = ' ' * indent
+      lines = ["#{i}#{self} {"]
+      @tasks.each_value { |t|
+        lines << t.describe(indent + 2)
+      }
+      lines << i + "}"
+      lines.join("\n")
+    end
 
   end # Env
 end # OFlow

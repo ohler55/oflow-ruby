@@ -24,22 +24,6 @@ module OFlow
       t
     end
 
-    def describe(indent=0)
-      i = ' ' * indent
-      if is_a?(Class) # Env
-        lines = "#{i}#{self} {\n"
-      elsif respond_to?(:name)
-        lines = "#{i}#{name} (#{self.class}) {\n"
-      else
-        lines = "#{i}#{self.class} {\n"
-      end
-      @tasks.each_value { |t|
-        lines += t.describe(indent + 2)
-      }
-      lines += i + "}\n"
-      lines
-    end
-
     # Validates the container by verifying all links on a task have been set to
     # a valid destination and that destination has been resolved.
     def validate()
@@ -70,8 +54,15 @@ module OFlow
     # Locates and return a Task with the specified name.
     # @param [String] name name of the Task
     # @return [Actor|NilClass] the Task with the name specified or nil
-    def find_task(name)
-      @tasks[name.to_sym]
+    def find_task(name, op=nil)
+      return self if :flow == name
+      t = @tasks[name.to_sym]
+      if t.kind_of?(Flow)
+        unless (r = t.get_route(op)).nil?
+          t = t.find_task(r.task, r.op)
+        end
+      end
+      t
     end
 
     # Returns the number of active Tasks.
@@ -118,7 +109,6 @@ module OFlow
       end
     end
 
-
     def state=(s)
       @tasks.each_value do |task|
         task.state = s
@@ -141,6 +131,7 @@ module OFlow
     def clear()
       shutdown()
       @tasks = {}
+      _clear()
     end
 
   end # HasTasks

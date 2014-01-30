@@ -109,7 +109,7 @@ module OFlow
       @links.each { |local,link|
         lines << "  #{i}#{local} => #{link.target_name}:#{link.op}"
       }
-      lines << i + "}\n"
+      lines << i + "}"
       lines.join("\n")
     end
 
@@ -312,7 +312,7 @@ module OFlow
 
     def resolve_all_links()
       @links.each_value { |link|
-        link.instance_variable_set(:@target, @flow.find_task(link.target_name))
+        link.instance_variable_set(:@target, @flow.find_task(link.target_name, link.op)) if link.target.nil?
       }
     end
 

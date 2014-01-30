@@ -8,6 +8,8 @@
 require 'test/unit'
 require 'oflow'
 
+require 'collector'
+
 class Crash < ::OFlow::Actor
   def initialize(task, options)
     super
@@ -103,20 +105,29 @@ class FlowRescueTest < ::Test::Unit::TestCase
       ::OFlow::Env.log = f.task(:collector, Collector) { |t|
         collector = t.actor
       }
-      f.task(:log, ::OFlow::Relay) { |t|
-        t.link(nil, 'collector', 'log')
-      }
     }
     trigger.receive(:knock, ::OFlow::Box.new(7))
     ::OFlow::Env.flush()
 
     assert_equal(1, collector.collection.size)
-    assert_equal([%|NoMethodError: undefined method `crash' for nil:NilClass
-    /Users/ohler/git/oflow-ruby/test/flow_rescue_test.rb:17:in `perform'
-    /Users/ohler/git/oflow-ruby/lib/oflow/task.rb:70:in `block in initialize'|,
-                  ':rescue:crash'], collector.collection[0])
+    assert_equal(["NoMethodError: undefined method `crash' for nil:NilClass",
+                  "/flow_rescue_test.rb:0:in `perform'",
+                  "/task.rb:0:in `block in initialize'"],
+                 simplify(collector.collection[0][0]))
+
+    assert_equal(':rescue:crash', collector.collection[0][1])
 
     ::OFlow::Env.clear()
+  end
+
+  def simplify(bt)
+    bt.split("\n").map do |line|
+      i = line.index(/\/\w+\.rb\:\d+/)
+      unless i.nil?
+        line = line[i..-1]
+      end
+      line.gsub(/\d+/, '0')
+    end
   end
 
 end # FlowRescueTest

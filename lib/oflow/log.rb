@@ -46,7 +46,7 @@ module OFlow
         log(level, a.to_s, '')
       end
       # Forward to the next if there is a generic (nil) link.
-      task.ship(nil, box) if find_link(nil)
+      task.ship(nil, box) if task.find_link(nil)
     end
 
     private

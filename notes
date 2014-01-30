@@ -6,7 +6,6 @@
 - todo
 
  - features
-  - nested flows
   - inspector
   - workqueue task/actor that distributes to 1 or n others based on how busy
   - collector waits for n number of boxes to be recieved before continuing
@@ -20,16 +19,6 @@
    - .svg vector graphics
    - .vdx Visio
 
-
- - nested: allow flow to pass through links to internal
-  - link()
-   - use link approach but link to flow and resolve down
-   - can link to output of flow which resolves
-   - Flow.link()
-    - link internal and external
-   - inputs() and outputs() for Flow
-   - args
-    - use :parent or :flow for link from task to containing flow
 
   
 - example
