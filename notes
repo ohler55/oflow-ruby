@@ -6,6 +6,7 @@
 - todo
 
  - features
+  - timer Actor
   - inspector
   - workqueue task/actor that distributes to 1 or n others based on how busy
   - collector waits for n number of boxes to be recieved before continuing
@@ -23,6 +24,7 @@
 - inspector
  - show op & box being worked as well as those in queue
  - show trace if available
+ - create timer actor
  
 
 - example

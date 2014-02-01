@@ -24,7 +24,7 @@ class TrackerTest < ::Test::Unit::TestCase
 
   def test_tracker_track
     t = ::OFlow::Tracker.new('here')
-    t2 = t.receive('there')
+    t2 = t.receive('there', 'op1')
 
     assert_equal('here', t.track[0].location)
     assert_equal('here', t2.track[0].location)
@@ -34,8 +34,8 @@ class TrackerTest < ::Test::Unit::TestCase
   def test_tracker_merge
     t = ::OFlow::Tracker.new('here')
     # 2 different paths
-    t2 = t.receive('there')
-    t3 = t.receive('everywhere')
+    t2 = t.receive('there', 'op1')
+    t3 = t.receive('everywhere', 'op2')
     # should not happen but should handle merging when not back to a common place
     t4 = t2.merge(t3)
     assert_equal('here', t4.track[0].location)
@@ -45,8 +45,8 @@ class TrackerTest < ::Test::Unit::TestCase
     assert_equal('everywhere', t4.track[1][1][0].location)
 
     # back to a common location
-    t2 = t2.receive('home')
-    t3 = t3.receive('home')
+    t2 = t2.receive('home', 'op1')
+    t3 = t3.receive('home', 'op1')
     t4 = t2.merge(t3)
     assert_equal('here', t4.track[0].location)
     assert_equal(true, t4.track[1].is_a?(Array))

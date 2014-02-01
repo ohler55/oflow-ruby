@@ -52,7 +52,7 @@ class FlowNestTest < ::Test::Unit::TestCase
       f.task(:out, Hop) { |t|
           t.link(nil, :done, nil)
       }
-      f.task(:done, ::OFlow::Ignore)
+      f.task(:done, ::OFlow::Actors::Ignore)
     }
 
     # see if the flow was constructed correctly
@@ -76,7 +76,7 @@ class FlowNestTest < ::Test::Unit::TestCase
     out (Hop) {
        => done:
     }
-    done (OFlow::Ignore) {
+    done (OFlow::Actors::Ignore) {
     }
   }
 }|, ::OFlow::Env.describe())
@@ -124,7 +124,7 @@ class FlowNestTest < ::Test::Unit::TestCase
       f.task(:out, Hop) { |t|
         t.link(nil, :done, nil)
       }
-      f.task(:done, ::OFlow::Ignore)
+      f.task(:done, ::OFlow::Actors::Ignore)
     }
 
     # see if the flow was constructed correctly
@@ -152,7 +152,7 @@ class FlowNestTest < ::Test::Unit::TestCase
     out (Hop) {
        => done:
     }
-    done (OFlow::Ignore) {
+    done (OFlow::Actors::Ignore) {
     }
   }
 }|, ::OFlow::Env.describe())
@@ -196,7 +196,7 @@ class FlowNestTest < ::Test::Unit::TestCase
       f.task(:out, Hop) { |t|
           t.link(:finish, :done, nil)
       }
-      f.task(:done, ::OFlow::Ignore)
+      f.task(:done, ::OFlow::Actors::Ignore)
     }
 
     # run it and check the output

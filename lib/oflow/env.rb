@@ -12,8 +12,8 @@ module OFlow
     init_tasks()
 
     def self._clear()
-      @error_handler = Task.new(self, :error, ErrorHandler)
-      @log = Task.new(self, :log, Log)
+      @error_handler = Task.new(self, :error, Actors::ErrorHandler)
+      @log = Task.new(self, :log, Actors::Log)
     end
 
     _clear()

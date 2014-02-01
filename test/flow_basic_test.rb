@@ -49,7 +49,7 @@ class FlowBasicTest < ::Test::Unit::TestCase
         t.link(:twice, 'dub', :once)
         t.link(:once, 'ignore', nil)
       }
-      f.task(:ignore, ::OFlow::Ignore)
+      f.task(:ignore, ::OFlow::Actors::Ignore)
     }
     # see if the flow was constructed correctly
     assert_equal(%|OFlow::Env {
@@ -65,7 +65,7 @@ class FlowBasicTest < ::Test::Unit::TestCase
       twice => dub:once
       once => ignore:
     }
-    ignore (OFlow::Ignore) {
+    ignore (OFlow::Actors::Ignore) {
     }
   }
 }|, ::OFlow::Env.describe())

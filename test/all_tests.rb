@@ -20,4 +20,5 @@ require 'flow_log_test'
 require 'flow_cfg_error_test'
 require 'flow_rescue_test'
 require 'flow_nest_test'
+require 'flow_tracker_test'
 

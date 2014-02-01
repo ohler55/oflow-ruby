@@ -33,10 +33,10 @@ class FlowRescueTest < ::Test::Unit::TestCase
       f.task(:collector, Collector) { |t|
         collector = t.actor
       }
-      f.task(:error, ::OFlow::Relay) { |t|
+      f.task(:error, ::OFlow::Actors::Relay) { |t|
         t.link(nil, 'collector', 'error')
       }
-      f.task(:log, ::OFlow::Relay) { |t|
+      f.task(:log, ::OFlow::Actors::Relay) { |t|
         t.link(nil, 'collector', 'log')
       }
     }
@@ -59,7 +59,7 @@ class FlowRescueTest < ::Test::Unit::TestCase
       f.error_handler = f.task(:collector, Collector) { |t|
         collector = t.actor
       }
-      f.task(:log, ::OFlow::Relay) { |t|
+      f.task(:log, ::OFlow::Actors::Relay) { |t|
         t.link(nil, 'collector', 'log')
       }
     }
@@ -82,7 +82,7 @@ class FlowRescueTest < ::Test::Unit::TestCase
       ::OFlow::Env.error_handler = f.task(:collector, Collector) { |t|
         collector = t.actor
       }
-      f.task(:log, ::OFlow::Relay) { |t|
+      f.task(:log, ::OFlow::Actors::Relay) { |t|
         t.link(nil, 'collector', 'log')
       }
     }

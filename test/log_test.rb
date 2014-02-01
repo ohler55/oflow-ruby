@@ -13,7 +13,7 @@ class LogTest < ::Test::Unit::TestCase
 
   def test_log
     stream = StringIO.new()
-    log = ::OFlow::Task.new(nil, 'log', ::OFlow::Log,
+    log = ::OFlow::Task.new(nil, 'log', ::OFlow::Actors::Log,
                             :stream => stream,
                             :severity => Logger::INFO,
                             :formatter => proc { |sev, time, prog, msg| "#{sev}: #{msg}\n" })
@@ -38,7 +38,7 @@ INFO: something msg
     filename = 'filename_test.log'
     %x{rm -f #{filename}}
 
-    log = ::OFlow::Task.new(nil, 'log', ::OFlow::Log,
+    log = ::OFlow::Task.new(nil, 'log', ::OFlow::Actors::Log,
                             :filename => filename,
                             :severity => Logger::INFO,
                             :formatter => proc { |sev, time, prog, msg| "#{sev}: #{msg}\n" })
