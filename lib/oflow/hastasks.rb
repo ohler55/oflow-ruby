@@ -12,8 +12,8 @@ module OFlow
       @tasks[name] = f
       yield(f) if block_given?
       f.resolve_all_links()
-      f.validate()
-      f.prepare() if f.respond_to?(:prepare)
+      # Wait to validate until at the top so up-links don't fail validation.
+      f.validate() if Env == self
       f
     end
 
@@ -39,6 +39,9 @@ module OFlow
     end
 
     def resolve_all_links()
+      @links.each_value { |lnk|
+        set_link_target(lnk) if lnk.target.nil?
+      }
       @tasks.each_value { |t|
         t.resolve_all_links()
       }
@@ -53,16 +56,11 @@ module OFlow
 
     # Locates and return a Task with the specified name.
     # @param [String] name name of the Task
-    # @return [Actor|NilClass] the Task with the name specified or nil
-    def find_task(name, op=nil)
+    # @return [Task|nil] the Task with the name specified or nil
+    def find_task(name)
+      name = name.to_sym unless name.nil?
       return self if :flow == name
-      t = @tasks[name.to_sym]
-      if t.kind_of?(Flow)
-        unless (r = t.get_route(op)).nil?
-          t = t.find_task(r.task, r.op)
-        end
-      end
-      t
+      @tasks[name]
     end
 
     # Returns the number of active Tasks.

@@ -41,7 +41,7 @@ module OFlow
       a = box.contents
       level = SEVERITY_MAP[op]
       if a.is_a?(Array)
-        log(level, a[1], a[0])
+        log(level, a[0], a[1])
       else
         log(level, a.to_s, '')
       end
@@ -85,7 +85,7 @@ module OFlow
       ss = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'][level]
       ss = '' if ss.nil?
       if @formatter.nil?
-        msg = "#{ss[0]}, [#{now.strftime('%Y-%m-%dT%H:%M:%S.%6N')} ##{tid}] #{ss} -- : #{message}\n"
+        msg = "#{ss[0]}, [#{now.strftime('%Y-%m-%dT%H:%M:%S.%6N')} #{tid}] #{ss} -- #{message}\n"
       else
         msg = @formatter.call(ss, now, tid, message)
       end

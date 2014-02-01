@@ -5,11 +5,13 @@ module OFlow
     attr_reader :target_name
     attr_reader :op
     attr_reader :target
+    attr_reader :ingress
 
-    def initialize(target_name, op)
+    def initialize(target_name, op, ingress=false)
       @target_name = target_name
       @op = op
       @target = nil
+      @ingress = ingress
     end
 
     def ship(box)
@@ -17,7 +19,7 @@ module OFlow
     end
 
     def to_s()
-      "Link{target_name: #{@target_name}, op: #{op}, target: #{@target}}"
+      "Link{ingress: #{@ingress}, target_name: #{@target_name}, op: #{op}, target: #{@target}}"
     end
     alias inspect to_s
 

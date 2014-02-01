@@ -5,8 +5,7 @@ module OFlow
 
   class Tracker
     def self.get_machine()
-      machine = nil
-      machine = "what"
+      machine = "unknown"
       Socket.ip_address_list.each do |addr|
         next unless addr.ip?
         next if addr.ipv6_linklocal?
@@ -42,12 +41,17 @@ module OFlow
       @track.freeze
     end
 
-    def receive(location)
+    def receive(location, op)
       t = Tracker.new(nil)
       t.id = @id
-      t.track = Array.new(@track) << Stamp.new(location)
+      t.track = Array.new(@track) << Stamp.new(location, op)
       t
     end
+
+    def to_s()
+      "Tracker{#{@id}, track: #{@track}}"
+    end
+    alias inspect to_s
 
     def merge(t2)
       raise Exception.new("Can not merge #{t2.id} into #{@id}. Different IDs.") if t2.id != @id

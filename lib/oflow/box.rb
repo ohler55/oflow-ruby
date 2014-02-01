@@ -22,9 +22,10 @@ module OFlow
     attr_reader :contents
     
     # id and data will be frozen and not copied.
-    def initialize(value, tracker=nil)
+    def initialize(value, tracker=nil, frozen=false)
       @tracker = tracker
-      @contents = deep_freeze(value)
+      value = deep_freeze(value) unless frozen
+      @contents = value
     end
 
     def spawn(value)
@@ -37,6 +38,11 @@ module OFlow
       spawn(@contents)
     end
 
+    def receive(location, op)
+      return self if @tracker.nil?
+      Box.new(@contents, @tracker.receive(location, op), true)
+    end
+
     def set(path, value)
       # TBD need to duplicate all elements on the path that are frozen
 
@@ -47,6 +53,11 @@ module OFlow
       # TBD 
       nil
     end
+
+    def to_s()
+      "Box{#{@contents}, tracker: #{@tracker}}"
+    end
+    alias inspect to_s
 
     # Call when passing to another Task.
     def freeze()

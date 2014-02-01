@@ -18,17 +18,17 @@ class LogTest < ::Test::Unit::TestCase
                             :severity => Logger::INFO,
                             :formatter => proc { |sev, time, prog, msg| "#{sev}: #{msg}\n" })
 
-    log.receive(:fatal, ::OFlow::Box.new(['Dead', 'dead']))
-    log.receive(:error, ::OFlow::Box.new(['Oops', 'oops']))
-    log.receive(:warn, ::OFlow::Box.new(['Duck', 'duck']))
-    log.receive(:info, ::OFlow::Box.new(['Something', 'something']))
-    log.receive(:debug, ::OFlow::Box.new(['Bugs', 'bugs']))
+    log.receive(:fatal, ::OFlow::Box.new(['dead msg', 'Dead']))
+    log.receive(:error, ::OFlow::Box.new(['oops msg', 'Oops']))
+    log.receive(:warn, ::OFlow::Box.new(['duck msg', 'Duck']))
+    log.receive(:info, ::OFlow::Box.new(['something msg', 'Something']))
+    log.receive(:debug, ::OFlow::Box.new(['bugs msg', 'Bugs']))
 
     log.flush()
-    assert_equal(%{FATAL: dead
-ERROR: oops
-WARN: duck
-INFO: something
+    assert_equal(%{FATAL: dead msg
+ERROR: oops msg
+WARN: duck msg
+INFO: something msg
 }, stream.string)
 
     log.shutdown()
@@ -43,7 +43,7 @@ INFO: something
                             :severity => Logger::INFO,
                             :formatter => proc { |sev, time, prog, msg| "#{sev}: #{msg}\n" })
 
-    log.receive(:info, ::OFlow::Box.new(['One', 'first entry']))
+    log.receive(:info, ::OFlow::Box.new(['first entry', 'One']))
     log.flush()
 
     output = File.read(filename).split("\n")[1..-1]

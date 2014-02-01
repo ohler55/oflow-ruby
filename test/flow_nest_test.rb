@@ -41,14 +41,13 @@ class FlowNestTest < ::Test::Unit::TestCase
       # a nested flow
       f.flow(:deep) { |f2|
         f2.route(nil, :one, nil)
-        f2.out(nil) # optional
         f2.task(:one, Hop) { |t|
           t.link(nil, :two, nil)
         }
         f2.task(:two, Hop) { |t|
-          t.link(nil, :flow, nil)
+          t.link(nil, :flow, :bye)
         }
-        f2.link(nil, :out, nil)
+        f2.link(:bye, :out, nil)
       }
       f.task(:out, Hop) { |t|
           t.link(nil, :done, nil)
@@ -65,14 +64,14 @@ class FlowNestTest < ::Test::Unit::TestCase
        => deep:
     }
     deep (OFlow::Flow) {
-      route  => one:
       one (Hop) {
          => two:
       }
       two (Hop) {
-         => flow:
+         => flow:bye
       }
-       => out:
+       * one:
+      bye => out:
     }
     out (Hop) {
        => done:
@@ -116,11 +115,11 @@ class FlowNestTest < ::Test::Unit::TestCase
             t.link(nil, :two, nil)
           }
           f3.task(:two, Hop) { |t|
-            t.link(nil, :flow, nil)
+            t.link(nil, :flow, :bye)
           }
-          f3.link(nil, :flow, nil)
+          f3.link(:bye, :flow, :bye)
         }
-        f2.link(nil, :out, nil)
+        f2.link(:bye, :out, nil)
       }
       f.task(:out, Hop) { |t|
         t.link(nil, :done, nil)
@@ -137,18 +136,18 @@ class FlowNestTest < ::Test::Unit::TestCase
        => deep:
     }
     deep (OFlow::Flow) {
-      route  => deeper:
       deeper (OFlow::Flow) {
-        route  => one:
         one (Hop) {
            => two:
         }
         two (Hop) {
-           => flow:
+           => flow:bye
         }
-         => flow:
+         * one:
+        bye => flow:bye
       }
-       => out:
+       * deeper:
+      bye => out:
     }
     out (Hop) {
        => done:
@@ -169,5 +168,48 @@ class FlowNestTest < ::Test::Unit::TestCase
 
     ::OFlow::Env.clear()
   end
+
+  def test_flow_nest_label
+    trigger = nil
+    collector = nil
+    ::OFlow::Env.flow(:nest) { |f|
+      # use collector as the log
+      f.task(:log, Collector) { |t|
+        collector = t.actor
+      }
+
+      # starts off the process
+      trigger = f.task(:trigger, Hop) { |t|
+        t.link(:go, :deep, :first)
+      }
+      # a nested flow
+      f.flow(:deep) { |f2|
+        f2.route(:first, :one, :hip)
+        f2.task(:one, Hop) { |t|
+          t.link(:hip, :two, :hop)
+        }
+        f2.task(:two, Hop) { |t|
+          t.link(:hop, :flow, :get_out)
+        }
+        f2.link(:get_out, :out, :finish)
+      }
+      f.task(:out, Hop) { |t|
+          t.link(:finish, :done, nil)
+      }
+      f.task(:done, ::OFlow::Ignore)
+    }
+
+    # run it and check the output
+    trigger.receive(:go, ::OFlow::Box.new(7))
+    ::OFlow::Env.flush()
+    assert_equal([['go 7', ':nest:trigger'],
+                  ['hip 7', ':nest:deep:one'],
+                  ['hop 7', ':nest:deep:two'],
+                  ['finish 7', ':nest:out']
+                 ], collector.collection)
+
+    ::OFlow::Env.clear()
+  end
+
 
 end # FlowNestTest

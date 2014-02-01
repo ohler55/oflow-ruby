@@ -20,7 +20,11 @@
    - .vdx Visio
 
 
-  
+- inspector
+ - show op & box being worked as well as those in queue
+ - show trace if available
+ 
+
 - example
  - rubygems graphs
   - timer

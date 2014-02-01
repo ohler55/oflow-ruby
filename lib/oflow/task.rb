@@ -235,6 +235,7 @@ module OFlow
 
     def receive(op, box)
       raise BlockedError.new() if CLOSING == @state || BLOCKED == @state
+      box = box.receive(full_name, op)
       if @loop.nil? # no thread task
         begin
           @actor.perform(self, op, box)
@@ -311,8 +312,8 @@ module OFlow
     end
 
     def resolve_all_links()
-      @links.each_value { |link|
-        link.instance_variable_set(:@target, @flow.find_task(link.target_name, link.op)) if link.target.nil?
+      @links.each_value { |lnk|
+        set_link_target(lnk) if lnk.target.nil?
       }
     end
 

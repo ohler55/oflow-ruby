@@ -17,39 +17,35 @@ module OFlow
     end
 
     def route(label, task_name, op)
-      @routes[label] = Route.new(label, task_name, op)
-    end
-
-    # Optional.
-    def out(label)
-      @outs << Out.new(label)
+      op = op.to_sym unless op.nil?
+      label = label.to_sym unless label.nil?
+      raise ConfigError.new("Link #{label} already exists.") unless find_link(label).nil?
+      @links[label] = Link.new(task_name.to_sym, op, true)
     end
 
     def receive(op, box)
-      link = resolve_link(op)
-      raise LinkError.new(op) if link.nil? || link.target.nil?
-      link.target.receive(link.op, box)
-    end
-
-    def get_route(op)
-      @routes[op]
+      box = box.receive(full_name, op)
+      lnk = find_link(op)
+      raise LinkError.new(op) if lnk.nil? || lnk.target.nil?
+      lnk.target.receive(lnk.op, box)
     end
 
     def has_input(op)
-      !@routes[op].nil?
+      !find_link(op).nil?
     end
 
     def describe(indent=0)
       i = ' ' * indent
       lines = ["#{i}#{name} (#{self.class}) {"]
-      @routes.each_value { |r|
-        lines << "#{i}  route #{r.label} => #{r.task}:#{r.op}"
-      }
       @tasks.each_value { |t|
         lines << t.describe(indent + 2)
       }
       @links.each { |local,link|
-        lines << "  #{i}#{local} => #{link.target_name}:#{link.op}"
+        if link.ingress
+          lines << "  #{i}#{local} * #{link.target_name}:#{link.op}"
+        else
+          lines << "  #{i}#{local} => #{link.target_name}:#{link.op}"
+        end
       }
       lines << i + "}"
       lines.join("\n")
@@ -57,38 +53,6 @@ module OFlow
 
     def _clear()
     end
-
-    class Route
-      attr_reader :label
-      attr_reader :task
-      attr_reader :op
-
-      def initialize(label, task_name, op)
-        @label = label
-        @task = task_name
-        @op = op
-      end
-
-      def to_s()
-        "Route{label: #{@label}, task: #{@task}, op: #{@op}}"
-      end
-      alias inspect to_s
-
-    end # Route
-
-    class Out
-      attr_reader :label
-
-      def initialize(label)
-        @label = label
-      end
-
-      def to_s()
-        "Out{#{@label}}"
-      end
-      alias inspect to_s
-
-    end # Out
 
   end # Flow
 end # OFlow
