@@ -79,7 +79,7 @@ module OFlow
 
       # Writes a message if the severity is high enough. This method is
       # executed asynchronously.
-      # @param [Fixnum] severity one of the Logger levels
+      # @param [Fixnum] level one of the Logger levels
       # @param [String] message string to log
       # @param [Fixnum|String] tid Task id of the Task generating the message
       def log(level, message, tid)
