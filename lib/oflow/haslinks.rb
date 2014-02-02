@@ -36,6 +36,10 @@ module OFlow
       local = local.to_sym unless local.nil?
       @links[local] || @links[nil]
     end
+
+    def links()
+      @links
+    end
     
   end # HasLinks
 end # OFlow

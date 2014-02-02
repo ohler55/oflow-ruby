@@ -11,17 +11,19 @@ module OFlow
     include HasErrorHandler
     include HasLog
 
+    # value of @state that indicates the Task is being created.
+    STARTING = 0
     # value of @state that indicates the Task is not currently processing requests
-    STOPPED = 0
+    STOPPED  = 1
     # value of @state that indicates the Task is currently ready to process requests
-    RUNNING = 1
+    RUNNING  = 2
     # value of @state that indicates the Task is shutting down
-    CLOSING = 2
+    CLOSING  = 3
     # value of @state that indicates the Task is not receiving new requests.
-    BLOCKED = 3
+    BLOCKED  = 4
     # value of @state that indicates the Task is processing one request and will
     # stop after that processing is complete
-    STEP    = 4
+    STEP     = 5
 
     # The current processing state of the Task
     attr_reader :state
@@ -30,11 +32,7 @@ module OFlow
 
     # A Task is initialized by specifying a class to create an instance of.
     def initialize(flow, name, actor_class, options={})
-      init_name(flow, name)
-      init_links()
-      @actor = actor_class.new(self, options)
-      raise Exception.new("#{actor} does not respond to the perform() method.") unless @actor.respond_to?(:perform)
-
+      @state = STARTING
       @queue = []
       @req_mutex = Mutex.new()
       @req_thread = nil
@@ -42,12 +40,18 @@ module OFlow
       @waiting_thread = nil
       @req_timeout = 0.0
       @max_queue_count = nil
-      @state = RUNNING
       @busy = false
       @proc_cnt = 0
       @loop = nil
+
+      init_name(flow, name)
+      init_links()
       set_options(options)
 
+      @actor = actor_class.new(self, options)
+      raise Exception.new("#{actor} does not respond to the perform() method.") unless @actor.respond_to?(:perform)
+
+      @state = RUNNING
       return unless @actor.with_own_thread()
 
       @loop = Thread.start(self) do |me|
@@ -235,8 +239,10 @@ module OFlow
 
     def receive(op, box)
       raise BlockedError.new() if CLOSING == @state || BLOCKED == @state
-      box = box.receive(full_name, op)
-      if @loop.nil? # no thread task
+      box = box.receive(full_name, op) unless box.nil?
+      # Special case for starting state so that an Actor can place an item on
+      # the queue before the loop is started.
+      if @loop.nil? && STARTING != @state # no thread task
         begin
           @actor.perform(self, op, box)
         rescue Exception => e
