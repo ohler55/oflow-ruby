@@ -20,7 +20,7 @@ end # HelloWorld
 
 def hello_flow(period)
     ::OFlow::Env.flow('hello_world') { |f|
-      f.task(:repeater, ::OFlow::Actors::Timer, repeat: 3, period: period) { |t|
+      f.task(:repeater, ::OFlow::Actors::Timer, repeat: 300, period: period) { |t|
         t.link(nil, :hello, nil)
       }
       f.task(:hello, HelloWorld)

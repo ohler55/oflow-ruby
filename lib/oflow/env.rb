@@ -8,8 +8,18 @@ module OFlow
     extend HasName
     extend HasErrorHandler
 
+    @@log_level = Logger::WARN
+
     init_name(nil, '')
     init_tasks()
+
+    def self.log_level()
+      @@log_level
+    end
+
+    def self.log_level=(level)
+      @@log_level = level unless level < Logger::Severity::DEBUG || Logger::Severity::FATAL < level
+    end
 
     def self._clear()
       @error_handler = Task.new(self, :error, Actors::ErrorHandler)

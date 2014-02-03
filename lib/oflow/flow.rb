@@ -34,11 +34,11 @@ module OFlow
       !find_link(op).nil?
     end
 
-    def describe(indent=0)
+    def describe(detail=false, indent=0)
       i = ' ' * indent
       lines = ["#{i}#{name} (#{self.class}) {"]
       @tasks.each_value { |t|
-        lines << t.describe(indent + 2)
+        lines << t.describe(detail, indent + 2)
       }
       @links.each { |local,link|
         if link.ingress

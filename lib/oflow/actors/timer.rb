@@ -68,8 +68,10 @@ module OFlow
           return if !@repeat.nil? && @repeat <= @count
           # If there is nothing pending the timer has completed.
           return if @pending.nil?
+          # If the Task is blocked or shutting down.
+          return if Task::CLOSING == task.state || Task::BLOCKED == task.state
 
-          if @pending <= now
+          if @pending <= now && Task::STOPPED != task.state
             @count += 1
             now = Time.now()
             tracker = @with_tracker ? Tracker.new(@label) : nil
@@ -85,11 +87,15 @@ module OFlow
           # will come back here to allow more timer processing.
           return if 0 < task.queue_count()
 
-          now = Time.now()
-          if now < @pending
-            wait_time = @pending - now
-            wait_time = MAX_SLEEP if MAX_SLEEP < wait_time
-            sleep(wait_time)
+          if Task::STOPPED == task.state
+            sleep(0.1)
+          else
+            now = Time.now()
+            if now < @pending
+              wait_time = @pending - now
+              wait_time = MAX_SLEEP if MAX_SLEEP < wait_time
+              sleep(wait_time)
+            end
           end
         end
       end

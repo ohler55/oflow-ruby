@@ -7,7 +7,6 @@ module OFlow
 
     def initialize(task, options)
       @task = task
-
     end
 
     def perform(task, op, box)
@@ -25,6 +24,11 @@ module OFlow
     # Return array of Specs.
     def outputs()
       nil
+    end
+
+    # Return any options that should be displayed as part of a Task.describe().
+    def options()
+      {}
     end
 
     class Spec

@@ -17,7 +17,6 @@ require 'optparse'
 require 'oterm'
 require 'oflow'
 
-$verbose = Logger::WARN
 $inspector_port = 0
 $exit_not_busy = true
 $exit_after = nil
@@ -31,8 +30,8 @@ Executes flows defined by the files specified. Files can be
  - .svg
 Each file format has a specific expected format.
 |)
-$opts.on('-s', 'decrease verbosity')                                   { $verbose += 1 unless 5 == $verbose }
-$opts.on('-v', 'increase verbosity')                                   { $verbose -= 1 unless 0 == $verbose }
+$opts.on('-s', 'decrease verbosity')                                   { Env.log_level = Env.log_level += 1 }
+$opts.on('-v', 'increase verbosity')                                   { Env.log_level = Env.log_level -= 1 }
 $opts.on('-b', "don't exit when no longer busy")                       { $exit_not_busy = false }
 $opts.on('-e', '--exit-after Integer', Integer, 'exit after <secs>')   { |secs| $exit_after = secs }
 $opts.on('-i', '--inspector-port Integer', Integer, 'inspector port')  { |port| $inspector_port = port }
@@ -76,7 +75,14 @@ end
 # can be used to force the exit. It is also possible to not exit at all if there
 # is an event receiver or generator in a flow.
 if !$exit_after.nil?
-  sleep($exit_after)
+  if inspector.nil?
+    sleep($exit_after)
+  else
+    done = Time.now() + $exit_after
+    while inspector.running && Time.now() < done
+      sleep(1.0)
+    end
+  end  
 elsif $exit_not_busy
   ::OFlow::Env.flush()
 else !inspector.nil?

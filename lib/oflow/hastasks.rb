@@ -9,7 +9,7 @@ module OFlow
 
     def flow(name, options={}, &block)
       f = Flow.new(self, name, options)
-      @tasks[name] = f
+      @tasks[f.name] = f
       yield(f) if block_given?
       f.resolve_all_links()
       # Wait to validate until at the top so up-links don't fail validation.
@@ -54,6 +54,16 @@ module OFlow
       @tasks.each { |name,task| blk.yield(task) }
     end
 
+    def walk_tasks(&blk)
+      @tasks.each_value do |t|
+        if t.is_a?(Task)
+          blk.yield(t)
+        else
+          t.walk_tasks(&blk)
+        end
+      end
+    end
+
     # Locates and return a Task with the specified name.
     # @param [String] name name of the Task
     # @return [Task|nil] the Task with the name specified or nil
@@ -61,6 +71,22 @@ module OFlow
       name = name.to_sym unless name.nil?
       return self if :flow == name
       @tasks[name]
+    end
+
+    # Locates and return a Task with the specified full name.
+    # @param [String] name full name of the Task
+    # @return [Task|nil] the Task with the name specified or nil
+    def locate(name)
+      name = name[1..-1] if name.start_with?(':')
+      name = name[0..-2] if name.end_with?(':')
+      path = name.split(':')
+      _locate(path)
+    end
+
+    def _locate(path)
+      t = @tasks[path[0].to_sym]
+      return t if t.nil? || 1 == path.size
+      t._locate(path[1..-1])
     end
 
     # Returns the number of active Tasks.
@@ -87,6 +113,24 @@ module OFlow
     # Calls the stop() method on all Tasks.
     def stop()
       @tasks.each_value { |task| task.stop() }
+    end
+
+    # Calls the step() method one Task that is stopped and has an item in the
+    # queue. The Tasks with the highest backed_up() value is selected.
+    def step()
+      max = 0.0
+      best = nil
+      walk_tasks() do |t|
+        if Task::STOPPED == t.state
+          bu = t.backed_up()
+          if max < bu
+            best = t
+            max = bu
+          end
+        end
+      end
+      best.step() unless best.nil?
+      best
     end
 
     # Calls the start() method on all Tasks.

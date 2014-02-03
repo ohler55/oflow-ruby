@@ -40,7 +40,7 @@ module OFlow
       @waiting_thread = nil
       @req_timeout = 0.0
       @max_queue_count = nil
-      @busy = false
+      @current_req = nil
       @proc_cnt = 0
       @loop = nil
 
@@ -69,14 +69,14 @@ module OFlow
                 }
                 @req_thread.wakeup() unless @req_thread.nil?
               end
-              @busy = true
+              @current_req = req
               begin
                 @actor.perform(self, req.op, req.box) unless req.nil?
               rescue Exception => e
                 handle_error(e)
               end
               @proc_cnt += 1
-              @busy = false
+              @current_req = nil
               if STEP == @state
                 @step_thread.wakeup() unless @step_thread.nil?
                 @state = STOPPED
@@ -85,7 +85,7 @@ module OFlow
               sleep(1.0)
             end
           rescue Exception => e
-            @busy = false
+            @current_req = nil
             # TBD Env.rescue(e)
           end
         end
@@ -107,12 +107,30 @@ module OFlow
       ss
     end
 
-    def describe(indent=0)
+    def describe(detail=0, indent=0)
       i = ' ' * indent
       lines = ["#{i}#{name} (#{actor.class}) {"]
       @links.each { |local,link|
         lines << "  #{i}#{local} => #{link.target_name}:#{link.op}"
       }
+      if 1 <= detail
+        lines << "  #{i}queued: #{queue_count()} (#{busy? ? 'busy' : 'idle'})"
+        lines << "  #{i}state: #{state_string()}"
+        @actor.options.each do |key,value|
+          lines << "  #{i}#{key} = #{value} (#{value.class})"
+        end
+        if 2 <= detail
+          lines << "  #{i}processing: #{@current_req.describe(detail)}" unless @current_req.nil?
+          # Copy queue so it doesn't change while working with it. It is okay
+          # for the requests to be stale as it is for a display that will be out
+          # of date as soon as it is displayed.
+          reqs = Array.new(@queue)
+          lines << "  #{i}queue:"
+          reqs.each do |req|
+            lines << "    #{i}#{req.describe(detail)}"
+          end
+        end
+      end
       lines << i + "}"
       lines.join("\n")
     end
@@ -140,7 +158,7 @@ module OFlow
     # Returns the true if any requests are queued or a request is being processed.
     # @return [true|false] true if busy, false otherwise
     def busy?()
-      @busy || !@queue.empty?
+      !@current_req.nil? || !@queue.empty?
     end
 
     # Returns the default timeout for the time to wait for the Task to be
@@ -173,12 +191,14 @@ module OFlow
     # used to avoid getting stuck if the processing takes too long.
     # @param [Float|Fixnum] max_wait maximum time to wait for the step to complete
     def step(max_wait=5)
-      return if @loop.nil?
+      return nil if @loop.nil?
+      return nil if STOPPED != @state || @queue.empty?
       @state = STEP
       @step_thread = Thread.current
       @loop.wakeup()
       sleep(max_wait)
       @step_thread = nil
+      self
     end
 
     # Wakes up the Task if it has been stopped or if Env.shutdown() has been called.
@@ -225,7 +245,6 @@ module OFlow
     end
 
     def state=(s)
-      # TBD anything that needs to be done when changing state?
       @state = s
     end
 
@@ -238,7 +257,9 @@ module OFlow
     end
 
     def receive(op, box)
-      raise BlockedError.new() if CLOSING == @state || BLOCKED == @state
+      return if CLOSING == @state || BLOCKED == @state
+      #raise BlockedError.new() if BLOCKED == @state
+
       box = box.receive(full_name, op) unless box.nil?
       # Special case for starting state so that an Actor can place an item on
       # the queue before the loop is started.
@@ -335,6 +356,19 @@ module OFlow
         @op = op
         @box = box
       end
+
+      def describe(detail=3)
+        if @box.nil?
+          "#{@op}()"
+        elsif 2 >= detail
+          @op
+        elsif 3 >= detail || @box.tracker.nil?
+          "#{@op}(#{@box.contents})"
+        else
+          "#{@op}(#{@box.contents}) #{@box.tracker}"
+        end
+      end
+
     end # Request
 
     class Link

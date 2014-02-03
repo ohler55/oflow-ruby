@@ -4,6 +4,9 @@
 ^c^s show subtree
 
 - todo
+ - watch
+ - tab completion
+
  - features
   - inspector
 
@@ -19,13 +22,10 @@
    - .svg vector graphics
    - .vdx Visio
 
-
 - inspector
- - starts up a flow with timer generating events every second
+ - watch
+ - tab completion
 
- - show op & box being worked as well as those in queue
- - show trace if available
- - create timer actor
  
 - TBDs
  - timer

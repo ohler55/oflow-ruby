@@ -2,7 +2,7 @@
 module OFlow
   # An Exception indicating a Task was currently not receiving new requests.
   class BlockedError < Exception
-    def initialize(option, msg)
+    def initialize()
       super("Blocked, try again later")
     end
   end # BlockedError

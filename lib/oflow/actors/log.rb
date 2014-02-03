@@ -40,15 +40,26 @@ module OFlow
       # an Array with the first element as the full task name of the logging task
       # and the second argument being the message to log
       def perform(task, op, box)
+        op = op.to_sym unless op.nil?
         a = box.contents
-        level = SEVERITY_MAP[op]
-        if a.is_a?(Array)
-          log(level, a[0], a[1])
+        case op
+        when :severity
+          self.severity = a
+        when :formatter
+          # TBD
+        when :file, :filename
+          # TBD
+          # self.set_filename(filename, shift_age=7, shift_size=1048576)
         else
-          log(level, a.to_s, '')
+          level = SEVERITY_MAP.fetch(op, Logger::Severity::UNKNOWN)
+          if a.is_a?(Array)
+            log(level, a[0], a[1])
+          else
+            log(level, a.to_s, '')
+          end
+          # Forward to the next if there is a generic (nil) link.
+          task.ship(nil, box) if task.find_link(nil)
         end
-        # Forward to the next if there is a generic (nil) link.
-        task.ship(nil, box) if task.find_link(nil)
       end
 
       private
@@ -71,7 +82,7 @@ module OFlow
         else
           @logger = Logger.new(STDOUT)
         end
-        @logger.level = options[:severity] if options.has_key?(:severity)
+        @logger.level = options.fetch(:severity, Env.log_level)
         @formatter = options.fetch(:formatter, nil)
         @logger.formatter = proc { |s,t,p,m| m }
         @name = 'Logger' if @name.nil?
@@ -128,7 +139,7 @@ module OFlow
       # @param [String|Fixnum] level value to set the severity to
       def severity=(level)
         if level.is_a?(String)
-          severity = {
+          sev = {
             'FATAL' => Logger::Severity::FATAL,
             'ERROR' => Logger::Severity::ERROR,
             'WARN' => Logger::Severity::WARN,
@@ -140,9 +151,13 @@ module OFlow
             '1' => Logger::Severity::INFO,
             '0' => Logger::Severity::DEBUG
           }[level.upcase()]
-          raise "#{level} is not a severity" if severity.nil?
-          level = severity
-        elsif level < Logger::Severity::DEBUG || Logger::Severity::FATAL < level
+          raise "#{level} is not a severity" if sev.nil?
+          level = sev
+        elsif level.is_a?(Symbol)
+          sev = SEVERITY_MAP[level]
+          raise "#{level} is not a severity" if sev.nil?
+          level = sev
+        elsif !level.is_a?(Fixnum) || level < Logger::Severity::DEBUG || Logger::Severity::FATAL < level
           raise "#{level} is not a severity"
         end
         @logger.level = level
