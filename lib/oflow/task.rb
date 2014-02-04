@@ -33,7 +33,7 @@ module OFlow
     # A Task is initialized by specifying a class to create an instance of.
     # @param flow [Flow] Flow containing the Task
     # @param name [name] Task base name
-    # @param actor [Class] _class Class of the Actor to create
+    # @param actor_class [Class] _class Class of the Actor to create
     # @param options [Hash] additional options for the Task or Actor
     def initialize(flow, name, actor_class, options={})
       @state = STARTING
@@ -203,7 +203,7 @@ module OFlow
 
     # Causes the Task to process one request and then stop. The max_wait is
     # used to avoid getting stuck if the processing takes too long.
-    # @param max [Float|Fixnum] _wait maximum time to wait for the step to complete
+    # @param max_wait [Float|Fixnum] _wait maximum time to wait for the step to complete
     def step(max_wait=5)
       return nil if @loop.nil?
       return nil if STOPPED != @state || @queue.empty?

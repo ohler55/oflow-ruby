@@ -20,7 +20,6 @@ module OFlow
     # frozen to inhibit changes to the value after the Box is created.
     # @param value contents of the Box
     # @param tracker [Tracker] used to track the progress of the Box
-    # @param frozen [Boolean] indicates the contents are already frozen. Don't set to true unless the contents are really frozen.
     def initialize(value, tracker=nil)
       @tracker = tracker
       @contents = value
