@@ -21,7 +21,7 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 ## Build Status
 
-[![Build Status](https://secure.travis-ci.org/ohler55/oflow-ruby.png?branch=master)](http://travis-ci.org/ohler55/oflow-ruby)
+[![Build Status](https://travis-ci.org/ohler55/oflow-ruby.png?branch=master)](https://travis-ci.org/ohler55/oflow-ruby)
 
 ### Current Release 0.3
 
