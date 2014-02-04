@@ -5,9 +5,6 @@
 
 - todo
  
- - Box methods
-
-
  - features
   - workqueue task/actor that distributes to 1 or n others based on how busy
   - collector waits for n number of boxes to be recieved before continuing
@@ -20,8 +17,6 @@
    - .graffle OmniGraffle
    - .svg vector graphics
    - .vdx Visio
-
- - separate actor test dir?
 
 - TBDs
  - timer
