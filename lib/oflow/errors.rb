@@ -15,6 +15,13 @@ module OFlow
     end
   end # BusyError
 
+  # An Exception indicating a data value is frozen and can not be modified.
+  class FrozenError < Exception
+    def initialize(name, value)
+      super("#{name}, a #{value.class} Object is frozen")
+    end
+  end # FrozenError
+
   # An Exception indicating an error in setup or configuration.
   class ConfigError < Exception
     def initialize(msg)

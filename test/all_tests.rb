@@ -10,7 +10,6 @@ require 'test/unit'
 
 require 'box_test'
 require 'task_test'
-require 'log_test'
 require 'tracker_test'
 require 'actorwrap_test'
 
@@ -23,5 +22,6 @@ require 'flow_nest_test'
 require 'flow_tracker_test'
 
 # Actor tests
-require 'timer_test'
+require 'actors/log_test'
+require 'actors/timer_test'
 

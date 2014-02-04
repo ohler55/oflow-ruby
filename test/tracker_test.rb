@@ -15,15 +15,15 @@ require 'oflow'
 class TrackerTest < ::Test::Unit::TestCase
 
   def test_tracker_new
-    t = ::OFlow::Tracker.new('here')
-    t2 = ::OFlow::Tracker.new('here')
+    t = ::OFlow::Tracker.create('here')
+    t2 = ::OFlow::Tracker.create('here')
 
     assert_not_equal(t.id, t2.id, 'id must be unique')
     assert_equal('here', t.track[0].location)
   end
 
   def test_tracker_track
-    t = ::OFlow::Tracker.new('here')
+    t = ::OFlow::Tracker.create('here')
     t2 = t.receive('there', 'op1')
 
     assert_equal('here', t.track[0].location)
@@ -32,7 +32,7 @@ class TrackerTest < ::Test::Unit::TestCase
   end
 
   def test_tracker_merge
-    t = ::OFlow::Tracker.new('here')
+    t = ::OFlow::Tracker.create('here')
     # 2 different paths
     t2 = t.receive('there', 'op1')
     t3 = t.receive('everywhere', 'op2')

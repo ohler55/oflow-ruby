@@ -21,6 +21,8 @@
    - .svg vector graphics
    - .vdx Visio
 
+ - separate actor test dir?
+
 - TBDs
  - timer
   - dynamic updates

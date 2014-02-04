@@ -2,7 +2,8 @@
 # encoding: UTF-8
 
 [ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../lib")
+  File.join(File.dirname(__FILE__), "../../lib"),
+  File.join(File.dirname(__FILE__), "..")
 ].each { |path| $: << path unless $:.include?(path) }
 
 require 'test/unit'

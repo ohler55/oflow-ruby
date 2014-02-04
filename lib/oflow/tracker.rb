@@ -31,22 +31,10 @@ module OFlow
     # The Stamps that were placed in the Tracker as it is received.
     attr_reader :track
 
-    # Create a new Tracker at the location specified.
-    # @param location [String] where the Tracker was created
-    def initialize(location)
-      # if an internal new then return leaving fields unset
-      return if location.nil?
-
-      nano = (Time.now.to_f * 1000000000.0).to_i
-      @@nano_mutex.synchronize do
-        while nano <= @@last_nano
-          nano += 1
-        end
-        @@last_nano = nano
-      end
-      @id = "#{@@machine}.#{@@pid}.#{nano}"
-      @track = [Stamp.new(location)]
-      @track.freeze
+    def self.create(location, op=nil)
+      t = Tracker.new(gen_id(), [Stamp.new(location, op).freeze()])
+      t.track.freeze()
+      t.freeze()
     end
 
     # Returns an updated instance with a Stamp for the location, operation, and
@@ -55,10 +43,9 @@ module OFlow
     # @param op [Symbol] operation that caused the Stamp to be created
     # @return [Tracker] updated Tracker
     def receive(location, op)
-      t = Tracker.new(nil)
-      t.id = @id
-      t.track = Array.new(@track) << Stamp.new(location, op)
-      t
+      t = Tracker.new(@id, Array.new(@track) << Stamp.new(location, op).freeze())
+      t.track.freeze()
+      t.freeze()
     end
 
     # Returns a String representation of the Tracker.
@@ -89,13 +76,26 @@ module OFlow
         comb << @track[i]
       end
       comb.freeze
-      t = Tracker.new(nil)
-      t.id = @id
-      t.track = comb
-      t
+      Tracker.new(@id, comb)
     end
 
-    protected
+    private
+
+    def self.gen_id()
+      nano = (Time.now.to_f * 1000000000.0).to_i
+      @@nano_mutex.synchronize do
+        while nano <= @@last_nano
+          nano += 1
+        end
+        @@last_nano = nano
+      end
+      "#{@@machine}.#{@@pid}.#{nano}"
+    end
+
+    def initialize(id, track)
+      @id = id
+      @track = track
+    end
 
     def id=(i)
       @id = i
@@ -103,11 +103,6 @@ module OFlow
 
     def track=(t)
       @track = t
-    end
-
-    def dup()
-      t = Tracker.new()
-      t.id = @id
     end
 
   end # Tracker

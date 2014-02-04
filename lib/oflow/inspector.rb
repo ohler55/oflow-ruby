@@ -186,17 +186,29 @@ available for sorting on name, activity, or queue size.|)
     end
 
     def watch(listener, args)
-      max_len = 10
       tasks = []
-      Env.walk_tasks() do |t|
-        tasks << t
-        len = t.full_name.size
-        max_len = len if max_len < len
+      if args.nil? || 0 == args.size()
+        Env.walk_tasks() { |t| tasks << t }
+      else
+        args.strip!
+        task = Env.locate(args)
+        if task.nil?
+          listener.out.pl("--- Failed to find '#{args}'")
+          return
+        elsif task.kind_of?(HasTasks)
+          task.walk_tasks() { |t| tasks << t }
+        else
+          tasks << task
+        end
       end
-
       if listener.out.is_vt100?
         _dynamic_watch(listener, tasks)
       else
+        max_len = 10
+        tasks.each do |t|
+          len = t.full_name.size
+          max_len = len if max_len < len
+        end
         listener.out.pl("  %#{max_len}s  %-11s  %5s  %9s" % ['Task Name', 'Q-cnt/max', 'busy?', 'processed'])
         tasks.each do |t|
           listener.out.pl("  %#{max_len}s  %5d/%-5d  %5s  %9d" % [t.full_name, t.queue_count(), t.max_queue_count().to_i, t.busy?(), t.proc_count()])
@@ -204,6 +216,7 @@ available for sorting on name, activity, or queue size.|)
       end
     end
 
+    # sort by values
     BY_NAME = 'name'
     BY_ACTIVITY = 'activity'
     BY_QUEUE = 'queued'

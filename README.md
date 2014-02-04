@@ -68,7 +68,7 @@ class HelloWorld < ::OFlow::Actor
     super
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     puts 'Hello World!'
   end
 end
@@ -100,7 +100,6 @@ Running the helloworld.rb results in this output.
 Hello World!
 Hello World!
 Hello World!
-Hello World!
 >
 ```
 
@@ -112,7 +111,7 @@ Hello World!
 
  - HTTP Server Actor
 
- - Persister Actor (write to disk and ready on start)
+ - Persister Actor that writes to disk and reads on start)
 
  - CallOut Actor that uses pipes and fork to use a non-Ruby actor.
 

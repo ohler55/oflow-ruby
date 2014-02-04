@@ -65,7 +65,7 @@ class FlowTrackerTest < ::Test::Unit::TestCase
     }
 
     # run it and check the output
-    trigger.receive(:go, ::OFlow::Box.new(7, ::OFlow::Tracker.new('test')))
+    trigger.receive(:go, ::OFlow::Box.new(7, ::OFlow::Tracker.create('test')))
     ::OFlow::Env.flush()
     assert_equal(["test-",
                   ":nest:trigger-go",
