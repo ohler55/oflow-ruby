@@ -1,0 +1,6 @@
+rvm:
+  - 2.1.0
+
+script:
+  - gem build oflow.gemspec
+  - gem install oflow-*
