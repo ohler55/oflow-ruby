@@ -15,7 +15,7 @@ class Nonsense < ::OFlow::Actor
     @cnt = 0
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     @cnt += 1
     task.ship(:start, ::OFlow::Box.new(@cnt))
     task.ship(op, box)

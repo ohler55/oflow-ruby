@@ -16,7 +16,7 @@ class Throw < ::OFlow::Actor
     super
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     task.ship(op, box)
   end
 
@@ -30,7 +30,7 @@ class Catch < ::OFlow::Actor
     @ball = nil
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     @ball = box
   end
 

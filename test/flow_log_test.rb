@@ -16,7 +16,7 @@ class Noise < ::OFlow::Actor
     super
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     task.info("op: #{op}, box: #{box.contents}")
   end
 

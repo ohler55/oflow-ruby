@@ -22,3 +22,6 @@ require 'flow_rescue_test'
 require 'flow_nest_test'
 require 'flow_tracker_test'
 
+# Actor tests
+require 'timer_test'
+

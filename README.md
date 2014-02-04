@@ -106,15 +106,19 @@ Hello World!
 
 ## Future Features
 
- - WorkQueue Actor that distributes to 1 or n others based on how busy each is.
+ - Balancer Actor that distributes to a set of others Tasks based on how busy each is.
 
- - Collector Actor that waits for a criteria to be met before continuing.
+ - Merger Actor that waits for a criteria to be met before continuing.
 
  - HTTP Server Actor
 
  - Persister Actor (write to disk and ready on start)
 
  - CallOut Actor that uses pipes and fork to use a non-Ruby actor.
+
+ - Cross linking Tasks and Flows.
+
+ - Dynamic links to Tasks and Flows.
 
  - OmniGraffle file input for configuration.
 

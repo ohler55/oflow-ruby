@@ -12,7 +12,7 @@ class HelloWorld < ::OFlow::Actor
     super
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     puts 'Hello World!'
   end
 

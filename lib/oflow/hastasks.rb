@@ -1,12 +1,20 @@
 
 module OFlow
 
+  # Provides the ability to have Tasks and Flows.
   module HasTasks
     
+    # Initializes the tasks attribute.
     def init_tasks()
       @tasks = {}
     end
 
+    # Creates a Flow and yield to a block with the newly create Flow. Used to
+    # contruct Flows.
+    # @param name [Symbol|String] base name for the Flow
+    # @param options [Hash] optional parameters
+    # @param block [Proc] block to yield to with the new Flow instance
+    # @return [Flow] new Flow
     def flow(name, options={}, &block)
       f = Flow.new(self, name, options)
       @tasks[f.name] = f
@@ -17,6 +25,13 @@ module OFlow
       f
     end
 
+    # Creates a Task and yield to a block with the newly create Task. Used to
+    # configure Tasks.
+    # @param name [Symbol|String] base name for the Task
+    # @param actor_class [Class] Class to create an Actor instance of
+    # @param options [Hash] optional parameters
+    # @param block [Proc] block to yield to with the new Task instance
+    # @return [Task] new Task
     def task(name, actor_class, options={}, &block)
       t = Task.new(self, name, actor_class, options)
       @tasks[t.name] = t
@@ -26,18 +41,22 @@ module OFlow
 
     # Validates the container by verifying all links on a task have been set to
     # a valid destination and that destination has been resolved.
+    # @raise [ValidateError] if there is an error in validation
     def validate()
       # collects errors and raises all errors at once if there are any
       errors = _validation_errors()
       raise ValidateError.new(errors) unless errors.empty?
     end
 
+    # Returns an Array of validation errors.
     def _validation_errors()
       errors = []
       @tasks.each_value { |t| errors += t._validation_errors() }
       errors
     end
 
+    # Resolves all the Links on all the Tasks and Flows being managed as well as
+    # any Links in the instance itself.
     def resolve_all_links()
       @links.each_value { |lnk|
         set_link_target(lnk) if lnk.target.nil?
@@ -47,25 +66,29 @@ module OFlow
       }
     end
 
-
     # Iterates over each Task and yields to the provided block with each Task.
-    # @param [Proc] blk Proc to call on each iteration
+    # @param blk [Proc] Proc to call on each iteration
     def each_task(&blk)
       @tasks.each { |name,task| blk.yield(task) }
     end
 
-    def walk_tasks(&blk)
+    # Performs a recursive walk over all Tasks and yields to the provided block
+    # for each. Flows are followed recusively.
+    # @param tasks_only [Boolean] indicates on Tasks and not Flows are yielded to
+    # @param blk [Proc] Proc to call on each iteration
+    def walk_tasks(tasks_only=true, &blk)
       @tasks.each_value do |t|
         if t.is_a?(Task)
           blk.yield(t)
         else
-          t.walk_tasks(&blk)
+          blk.yield(t) unless tasks_only
+          t.walk_tasks(tasks_only, &blk)
         end
       end
     end
 
     # Locates and return a Task with the specified name.
-    # @param [String] name name of the Task
+    # @param name [String] name of the Task
     # @return [Task|nil] the Task with the name specified or nil
     def find_task(name)
       name = name.to_sym unless name.nil?
@@ -74,7 +97,7 @@ module OFlow
     end
 
     # Locates and return a Task with the specified full name.
-    # @param [String] name full name of the Task
+    # @param name [String] full name of the Task
     # @return [Task|nil] the Task with the name specified or nil
     def locate(name)
       name = name[1..-1] if name.start_with?(':')
@@ -135,14 +158,16 @@ module OFlow
 
     # Calls the start() method on all Tasks.
     def start()
-      # TBD @@finish_thread = nil
       @tasks.each_value { |task| task.start() }
     end
 
+    # Wakes up all the Tasks in the Flow.
     def wakeup()
       @tasks.each_value { |t| t.wakeup() }
     end
 
+    # Wakes up all the Tasks in the Flow and waits for the system to become idle
+    # before returning.
     def flush()
       wakeup()
       @tasks.each_value { |t| t.flush() }
@@ -151,6 +176,8 @@ module OFlow
       end
     end
 
+    # Sets the state of all Tasks recursively. This should not be called
+    # directly.
     def state=(s)
       @tasks.each_value do |task|
         task.state = s
@@ -158,6 +185,7 @@ module OFlow
     end
 
     # Shuts down all Tasks.
+    # @param flush_first [Boolean] flag indicating shutdown should occur after the system becomes idle
     def shutdown(flush_first=false)
       # block all tasks first so threads can empty queues
       @tasks.each_value do |task|
@@ -170,6 +198,7 @@ module OFlow
       @tasks = {}
     end
 
+    # Clears out all Tasks and Flows and resets the object back to a empty state.
     def clear()
       shutdown()
       @tasks = {}

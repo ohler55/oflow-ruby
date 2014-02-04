@@ -25,7 +25,7 @@ module OFlow
 
       # Calls perform on the actor instance
       def receive(op, box)
-        @actor.perform(self, op, box)
+        @actor.perform(op, box)
       end
 
       # Task API that adds entry to history.

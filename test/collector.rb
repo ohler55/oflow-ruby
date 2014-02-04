@@ -15,7 +15,7 @@ class Collector < ::OFlow::Actor
     @collection = []
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     @collection << box.contents
   end
 

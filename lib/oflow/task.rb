@@ -31,6 +31,10 @@ module OFlow
     attr_reader :actor
 
     # A Task is initialized by specifying a class to create an instance of.
+    # @param flow [Flow] Flow containing the Task
+    # @param name [name] Task base name
+    # @param actor [Class] _class Class of the Actor to create
+    # @param options [Hash] additional options for the Task or Actor
     def initialize(flow, name, actor_class, options={})
       @state = STARTING
       @queue = []
@@ -63,15 +67,16 @@ module OFlow
               if @queue.empty?
                 @waiting_thread.wakeup() unless @waiting_thread.nil?
                 sleep(1.0)
-              else
-                @req_mutex.synchronize {
-                  req = @queue.pop()
-                }
-                @req_thread.wakeup() unless @req_thread.nil?
+                next
               end
+              @req_mutex.synchronize {
+                req = @queue.pop()
+              }
+              @req_thread.wakeup() unless @req_thread.nil?
+
               @current_req = req
               begin
-                @actor.perform(self, req.op, req.box) unless req.nil?
+                @actor.perform(req.op, req.box) unless req.nil?
               rescue Exception => e
                 handle_error(e)
               end
@@ -85,6 +90,7 @@ module OFlow
               sleep(1.0)
             end
           rescue Exception => e
+                puts "*** #{full_name} #{e.class}: #{e.message}"
             @current_req = nil
             # TBD Env.rescue(e)
           end
@@ -92,6 +98,8 @@ module OFlow
       end
     end
 
+    # Returns the state of the Task as a String.
+    # @return [String] String representation of the state
     def state_string()
       ss = 'UNKNOWN'
       case @state
@@ -107,6 +115,9 @@ module OFlow
       ss
     end
 
+    # Returns a String that describes the Task.
+    # @param detail [Fixnum] higher values result in more detail in the description
+    # @param indent [Fixnum] the number of spaces to indent the description
     def describe(detail=0, indent=0)
       i = ' ' * indent
       lines = ["#{i}#{name} (#{actor.class}) {"]
@@ -121,10 +132,13 @@ module OFlow
         end
         if 2 <= detail
           lines << "  #{i}processing: #{@current_req.describe(detail)}" unless @current_req.nil?
-          # Copy queue so it doesn't change while working with it. It is okay
-          # for the requests to be stale as it is for a display that will be out
-          # of date as soon as it is displayed.
-          reqs = Array.new(@queue)
+          # Copy queue so it doesn't change while working with it and don't
+          # block the queue. It is okay for the requests to be stale as it is
+          # for a display that will be out of date as soon as it is displayed.
+          reqs = []
+          @req_mutex.synchronize {
+            reqs = Array.new(@queue)
+          }
           lines << "  #{i}queue:"
           reqs.each do |req|
             lines << "    #{i}#{req.describe(detail)}"
@@ -135,7 +149,6 @@ module OFlow
       lines.join("\n")
     end
 
-
     # Returns the number of requests on the queue.
     # @return [Fixnum] number of queued requests
     def queue_count()
@@ -144,6 +157,7 @@ module OFlow
 
     # Returns a score indicating how backed up the queue is. This is used for
     # selecting an Actor when stepping from the Inspector.
+    # @return [Fixnum] a measure of how backed up a Task is
     def backed_up()
       cnt = @queue.size()
       return 0 if 0 == cnt
@@ -189,7 +203,7 @@ module OFlow
 
     # Causes the Task to process one request and then stop. The max_wait is
     # used to avoid getting stuck if the processing takes too long.
-    # @param [Float|Fixnum] max_wait maximum time to wait for the step to complete
+    # @param max [Float|Fixnum] _wait maximum time to wait for the step to complete
     def step(max_wait=5)
       return nil if @loop.nil?
       return nil if STOPPED != @state || @queue.empty?
@@ -230,6 +244,7 @@ module OFlow
       @loop.join()
     end
 
+    # Waits for all processing to complete before returning.
     def flush()
       return if @loop.nil?
       @waiting_thread = Thread.current
@@ -244,28 +259,35 @@ module OFlow
       @waiting_thread = nil
     end
 
+    # The current state of the Task.
     def state=(s)
       @state = s
     end
 
+    # The expected inputs the Task supports or nil if not implemented.
     def inputs()
       @actor.inputs()
     end
 
+    # The expected outputs the Task supports or nil if not implemented.
     def outputs()
       @actor.outputs()
     end
 
+    # Creates a Request and adds it to the queue.
+    # @param op [Symbol] operation to perform
+    # @param box [Box] contents or data for the request
     def receive(op, box)
-      return if CLOSING == @state || BLOCKED == @state
-      #raise BlockedError.new() if BLOCKED == @state
+      return if CLOSING == @state
+
+      raise BlockedError.new() if BLOCKED == @state
 
       box = box.receive(full_name, op) unless box.nil?
       # Special case for starting state so that an Actor can place an item on
       # the queue before the loop is started.
       if @loop.nil? && STARTING != @state # no thread task
         begin
-          @actor.perform(self, op, box)
+          @actor.perform(op, box)
         rescue Exception => e
           handle_error(e)
         end
@@ -283,7 +305,11 @@ module OFlow
       @loop.wakeup() if RUNNING == @state
     end
 
+    # Sends a message to another Task or Flow.
+    # @param dest [Symbol] identifies the link that points to the destination Task or Flow
+    # @param box [Box] contents or data for the request
     def ship(dest, box)
+      box.freeze() unless box.nil?
       link = resolve_link(dest)
       raise LinkError.new(dest) if link.nil? || link.target.nil?
       link.target.receive(link.op, box)
@@ -291,10 +317,10 @@ module OFlow
     end
 
     # Processes the initialize() options. Subclasses should call super.
-    # @param [Hash] options options to be used for initialization
+    # @param options [Hash] options to be used for initialization
     # @option options [Fixnum] :max_queue_count maximum number of requests
     #         that can be queued before backpressure is applied to the caller.
-    # @option options [Float] :ask_timeout timeout in seconds to wait
+    # @option options [Float] :request_timeout timeout in seconds to wait
     #         before raising a BusyError if the request queue is too long.
     def set_options(options)
       @max_queue_count = options.fetch(:max_queue_count, @max_queue_count)
@@ -338,6 +364,7 @@ module OFlow
 
     end
 
+    # Resolves all links. Called by the system.
     def resolve_all_links()
       @links.each_value { |lnk|
         set_link_target(lnk) if lnk.target.nil?

@@ -27,10 +27,10 @@ waiting if no Task is identified.|)
       register('stop', self, :stop, '[<task id>] stops a Task.', nil)
       register('verbosity', self, :verbosity, '[<level>] show or set the verbosity or log level.', nil)
       register('watch', self, :watch, '[<task id> displays status of Tasks.',
-               %|Displays the Task name, activity indicator, and queued count. If the terminal
-supports real time updates the displays stays active until the X character is
-pressed. While running options are available for sorting on name, activity,
-or queue size.|)
+               %|Displays the Task name, activity indicator, queued count, and number of
+requests processed. If the terminal supports real time updates the displays
+stays active until the X character is pressed. While running options are
+available for sorting on name, activity, or queue size.|)
 
       # register('debug', self, :debug, 'toggles debug mode.', nil)
 
@@ -76,19 +76,8 @@ or queue size.|)
         end
         return
       end
-      args.strip!
-      recurse = false
-      id = nil
-      args.split(' ').each do |a|
-        if '-r' == a
-          recurse = true
-        elsif !id.nil?
-          listener.out.pl("--- Multiple Ids specified")
-          return
-        else
-          id = a
-        end
-      end
+      recurse, id, ok = _parse_opt_id_args(args, 'r', listener)
+      return unless ok
       if id.nil?
         flow = Env
       else
@@ -99,7 +88,7 @@ or queue size.|)
         return
       end
       _walk(flow, recurse, listener) do |task|
-        listener.out.pl('zzz '+task.full_name) unless Env == task
+        listener.out.pl(task.full_name) unless Env == task
       end
     end
 
@@ -108,7 +97,7 @@ or queue size.|)
         listener.out.pl("--- No Flow or Task specified")
         return
       end
-      detail, id, ok = _parse_opt_id_args(args, 'v')
+      detail, id, ok = _parse_opt_id_args(args, 'v', listener)
       return unless ok
 
       task = Env.locate(id)
@@ -197,17 +186,226 @@ or queue size.|)
     end
 
     def watch(listener, args)
-      # TBD
-      # collect tasks using a walk
-      # 
+      max_len = 10
+      tasks = []
+      Env.walk_tasks() do |t|
+        tasks << t
+        len = t.full_name.size
+        max_len = len if max_len < len
+      end
+
+      if listener.out.is_vt100?
+        _dynamic_watch(listener, tasks)
+      else
+        listener.out.pl("  %#{max_len}s  %-11s  %5s  %9s" % ['Task Name', 'Q-cnt/max', 'busy?', 'processed'])
+        tasks.each do |t|
+          listener.out.pl("  %#{max_len}s  %5d/%-5d  %5s  %9d" % [t.full_name, t.queue_count(), t.max_queue_count().to_i, t.busy?(), t.proc_count()])
+        end
+      end
+    end
+
+    BY_NAME = 'name'
+    BY_ACTIVITY = 'activity'
+    BY_QUEUE = 'queued'
+    BY_COUNT = 'count'
+    BY_STATE = 'state'
+
+    def _dynamic_watch(listener, tasks)
+      o = listener.out
+      sort_by = BY_NAME
+      rev = false
+      delay = 0.4
+      tasks.map! { |t| TaskStat.new(t) }
+      lines = tasks.size + 3
+      h, w = o.screen_size()
+      lines = h - 1 if lines > h - 1
+      o.clear_screen()
+      done = false
+      until done
+        tasks.each { |ts| ts.refresh() }
+        max = 6
+        max_n = 1
+        tasks.each do |ts|
+          max = ts.name.size if max < ts.name.size
+          max_n = ts.count.size if max_n < ts.count.size
+        end
+        # 5 for space between after, 3 for state, max_n for number
+        max_q = w - max - 8 - max_n
+
+        case sort_by
+        when BY_NAME
+          if rev
+            tasks.sort! { |a,b| b.name <=> a.name }
+          else
+            tasks.sort! { |a,b| a.name <=> b.name }
+          end
+        when BY_ACTIVITY
+          if rev
+            tasks.sort! { |a,b| a.activity <=> b.activity }
+          else
+            tasks.sort! { |a,b| b.activity <=> a.activity }
+          end
+        when BY_QUEUE
+          if rev
+            tasks.sort! { |a,b| a.queued <=> b.queued }
+          else
+            tasks.sort! { |a,b| b.queued <=> a.queued }
+          end
+        when BY_COUNT
+          if rev
+            tasks.sort! { |a,b| a.proc_cnt <=> b.proc_cnt }
+          else
+            tasks.sort! { |a,b| b.proc_cnt <=> a.proc_cnt }
+          end
+        when BY_STATE
+          if rev
+            tasks.sort! { |a,b| a.state <=> b.state }
+          else
+            tasks.sort! { |a,b| b.state <=> a.state }
+          end
+        end
+        o.set_cursor(1, 1)
+        o.bold()
+        o.underline()
+        o.p("%1$*2$s ? %3$*4$s @ Queued %5$*6$s" % ['#', -max_n, 'Task', -max, ' ', max_q])
+        o.attrs_off()
+        i = 2
+        tasks[0..lines].each do |ts|
+          o.set_cursor(i, 1)
+          o.p("%1$*2$s %5$c %3$*4$s " % [ts.count, max_n, ts.name, -max, ts.state])
+          o.set_cursor(i, max + max_n + 5)
+          case ts.activity
+          when 0
+            o.p(' ')
+          when 1
+            o.p('.')
+          when 2, 3
+            o.p('o')
+          else
+            o.p('O')
+          end
+          o.p(' ')
+          qlen = ts.queued
+          qlen = max_q if max_q < qlen
+          if 0 < qlen
+            o.reverse()
+            o.p("%1$*2$d" % [ts.queued, -qlen])
+            o.attrs_off()
+          end
+          o.clear_to_end()
+          i += 1
+        end
+        o.bold()
+        o.set_cursor(i, 1)
+        if rev
+          o.p("E) exit  R) ")
+          o.reverse()
+          o.p("reverse")
+          o.attrs_off()
+          o.bold()
+          o.p("  +) faster  -) slower [%0.1f]" % [delay])
+        else
+          o.p("E) exit  R) reverse  +) faster  -) slower [%0.1f]" % [delay])
+        end
+        i += 1
+        o.set_cursor(i, 1)
+        o.p('sort by')
+        { '#' => BY_COUNT, '?' => BY_STATE, 'N' => BY_NAME, 'A' => BY_ACTIVITY, 'Q' => BY_QUEUE }.each do |c,by|
+          if by == sort_by
+            o.p("  #{c}) ")
+            o.reverse()
+            o.p(by)
+            o.attrs_off()
+            o.bold()
+          else
+            o.p("  #{c}) #{by}")
+          end
+        end
+        o.attrs_off()
+
+        c = o.recv_wait(1, delay, /./)
+        unless c.nil?
+          case c[0]
+          when 'e', 'E'
+            done = true
+          when 'n', 'N'
+            sort_by = BY_NAME
+            rev = false
+          when 'a', 'A'
+            sort_by = BY_ACTIVITY
+            rev = false
+          when 'q', 'Q'
+            sort_by = BY_QUEUE
+            rev = false
+          when '#', 'c', 'C'
+            sort_by = BY_COUNT
+            rev = false
+          when '?', 's', 'S'
+            sort_by = BY_STATE
+            rev = false
+          when 'r', 'R'
+            rev = !rev
+          when '+'
+            delay /= 2.0 unless delay <= 0.1
+          when '-'
+            delay *= 2.0 unless 3.0 <= delay
+          end
+        end
+      end
+      o.pl()
     end
 
     def tab(cmd, listener)
-      super
-      # TBD handle expansion of task names
+      start = cmd.index(' ')
+      if start.nil?
+        super
+        return
+      end
+      op = cmd[0...start]
+      start = cmd.rindex(' ')
+      pre = cmd[0...start]
+      last = cmd[start + 1..-1]
+
+      return if '-' == last[0]
+
+      # Tab completion is different depending on the command.
+      names = []
+      case op.downcase()
+      when 'verbosity'
+        names = ['fatal', 'error', 'warn', 'info', 'debug'].select { |s| s.start_with?(last.downcase()) }
+      else # expect id or options
+        with_colon = ':' == last[0]
+        Env.walk_tasks(false) do |t|
+          fn = t.full_name
+          fn = fn[1..-1] unless with_colon
+          names << fn if fn.start_with?(last)
+        end
+      end
+      
+      return if 0 == names.size
+      if 1 == names.size
+        listener.move_col(1000)
+        listener.insert(names[0][last.size..-1])
+        listener.out.prompt()
+        listener.out.p(listener.buf)
+      else
+        listener.out.pl()
+        names.each do |name|
+          listener.out.pl("#{pre} #{name}")
+        end
+        best = best_completion(last, names)
+        if best == last
+          listener.update_cmd(0)
+        else
+          listener.move_col(1000)
+          listener.insert(best[last.size..-1])
+          listener.out.prompt()
+          listener.out.p(listener.buf)
+        end
+      end
     end
 
-    def _parse_opt_id_args(args, opt)
+    def _parse_opt_id_args(args, opt, listener)
       opt_cnt = 0
       id = nil
       args.strip!
@@ -247,6 +445,44 @@ or queue size.|)
         block.yield(flow)
       end
     end
+
+    class TaskStat
+      attr_reader :task
+      attr_reader :queued
+      attr_reader :activity
+      attr_reader :name
+      attr_reader :proc_cnt
+      attr_reader :count
+      attr_reader :state
+
+      STATE_MAP = {
+        Task::STARTING => '^',
+        Task::STOPPED => '*',
+        Task::RUNNING => ' ',
+        Task::CLOSING => 'X',
+        Task::BLOCKED => '-',
+        Task::STEP => 's',
+      }
+      def initialize(t)
+        @task = t
+        @proc_cnt = t.proc_count()
+        @activity = 0
+        @queued = t.queue_count()
+        @name = t.full_name
+        @count = @proc_cnt.to_s
+        @state = STATE_MAP.fetch(t.state, '?')
+      end
+
+      def refresh()
+        cnt = @task.proc_count()
+        @activity = cnt - @proc_cnt
+        @proc_cnt = cnt
+        @queued = @task.queue_count()
+        @count = cnt.to_s
+        @state = STATE_MAP.fetch(@task.state, '?')
+      end
+
+    end # TaskStat
 
   end # Inspector
 end # OFlow

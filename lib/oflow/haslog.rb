@@ -1,8 +1,12 @@
 
 module OFlow
 
+  # Adds the ability to log by sending log requests to a log Task.
   module HasLog
 
+    # Returns a log Task by looking for that Task in an attribute and then in
+    # the contained Tasks or Tasks in outer Flows.
+    # @return [Task] log Task.
     def log()
       return @log if instance_variable_defined?(:@log) && !@log.nil?
       # Log task take precedence over log variable.
@@ -14,11 +18,17 @@ module OFlow
       nil
     end
 
+    # Sets the log attribute.
+    # @param t [Task] log Task
     def log=(t)
       @log = t
     end
 
-
+    # Lower level logging method. Generally only used when one of the primary
+    # severity methods are called.
+    # @param level [String] message severity or level
+    # @param msg [String] message to log
+    # @param fn [String] full name of Task or Flow calling the log function
     def log_msg(level, msg, fn)
       lt = log()
       unless lt.nil?

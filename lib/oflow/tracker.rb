@@ -3,7 +3,11 @@ require 'socket'
 
 module OFlow
 
+  # A Tracker is used to track data through the system. They are attached to
+  # Boxes and are updated when they are received by Flows and Tasks.
   class Tracker
+    # Gets the machine address. This is used for generating unique identifiers
+    # for the Tracker instances.
     def self.get_machine()
       machine = "unknown"
       Socket.ip_address_list.each do |addr|
@@ -22,9 +26,13 @@ module OFlow
     @@last_nano = 0
     @@nano_mutex = Mutex.new()
 
+    # The identifier of the Tracker.
     attr_reader :id
+    # The Stamps that were placed in the Tracker as it is received.
     attr_reader :track
 
+    # Create a new Tracker at the location specified.
+    # @param location [String] where the Tracker was created
     def initialize(location)
       # if an internal new then return leaving fields unset
       return if location.nil?
@@ -41,6 +49,11 @@ module OFlow
       @track.freeze
     end
 
+    # Returns an updated instance with a Stamp for the location, operation, and
+    # current time.
+    # @param location [String] full name of Task where the Tracker was received
+    # @param op [Symbol] operation that caused the Stamp to be created
+    # @return [Tracker] updated Tracker
     def receive(location, op)
       t = Tracker.new(nil)
       t.id = @id
@@ -48,11 +61,16 @@ module OFlow
       t
     end
 
+    # Returns a String representation of the Tracker.
     def to_s()
       "Tracker{#{@id}, track: #{@track}}"
     end
     alias inspect to_s
 
+    # When a package is split and travels on more than one route the Tracker can
+    # be merged with this method. The returned Tracker contains both tracks.
+    # @param t2 [Tracker] other Tracker
+    # @return [Tracker] merged Tracker
     def merge(t2)
       raise Exception.new("Can not merge #{t2.id} into #{@id}. Different IDs.") if t2.id != @id
       comb = []

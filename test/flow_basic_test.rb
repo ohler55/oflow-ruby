@@ -17,7 +17,7 @@ class Stutter < ::OFlow::Actor
     @collector = nil
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     if @collector.nil?
       @collector = task.ship(:collector, ::OFlow::Box.new([task.full_name, op, box.contents]))
     else

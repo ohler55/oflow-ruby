@@ -42,7 +42,7 @@ module OFlow
       # new request is placed on the Task queue so it exits if there is a
       # request on the queue even if it has not triggered a ship() know that it
       # will be re-entered.
-      def perform(task, op, box)
+      def perform(op, box)
         op = op.to_sym unless op.nil?
         case op
         when :stop
@@ -71,12 +71,23 @@ module OFlow
           # If the Task is blocked or shutting down.
           return if Task::CLOSING == task.state || Task::BLOCKED == task.state
 
-          if @pending <= now && Task::STOPPED != task.state
-            @count += 1
-            now = Time.now()
-            tracker = @with_tracker ? Tracker.new(@label) : nil
-            box = Box.new([@label, @count, now.utc()], tracker)
-            task.links.each_key { |key| task.ship(key, box) }
+          if @pending <= now
+            # Skip if stopped but do not increment counter.
+            unless Task::STOPPED == task.state
+              @count += 1
+              now = Time.now()
+              tracker = @with_tracker ? Tracker.new(@label) : nil
+              box = Box.new([@label, @count, now.utc()], tracker)
+              task.links.each_key do |key|
+                begin
+                  task.ship(key, box)
+                rescue BlockedError => e
+                  task.warn("Failed to ship timer #{box.contents} to #{key}. Task blocked.")
+                rescue BusyError => e
+                  task.warn("Failed to ship timer #{box.contents} to #{key}. Task busy.")
+                end
+              end
+            end
             if @period.nil? || @period == 0
               @pending = now
             else

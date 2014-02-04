@@ -39,7 +39,7 @@ module OFlow
       # Writes a log entry. op is the severity. The box contents is expected to be
       # an Array with the first element as the full task name of the logging task
       # and the second argument being the message to log
-      def perform(task, op, box)
+      def perform(op, box)
         op = op.to_sym unless op.nil?
         a = box.contents
         case op
@@ -90,9 +90,9 @@ module OFlow
 
       # Writes a message if the severity is high enough. This method is
       # executed asynchronously.
-      # @param [Fixnum] level one of the Logger levels
-      # @param [String] message string to log
-      # @param [Fixnum|String] tid Task id of the Task generating the message
+      # @param level [Fixnum] one of the Logger levels
+      # @param message [String] string to log
+      # @param tid [Fixnum|String] Task id of the Task generating the message
       def log(level, message, tid)
         now = Time.now
         ss = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'][level]
@@ -117,9 +117,9 @@ module OFlow
 
       # Creates a new Logger to write log messages to using the parameters
       # specified. This method is executed asynchronously.
-      # @param [String] filename filename of active log file
-      # @param [Fixmun] shift_age maximum number of archive files to save
-      # @param [Fixmun] shift_size maximum file size
+      # @param filename [String] filename of active log file
+      # @param shift_age [Fixmun] maximum number of archive files to save
+      # @param shift_size [Fixmun] maximum file size
       def set_filename(filename, shift_age=7, shift_size=1048576)
         logger = Logger.new(filename, shift_age, shift_size)
         logger.level = @logger.level
@@ -129,14 +129,14 @@ module OFlow
 
       # Replace the logger with a new Logger Object. This method is executed
       # asynchronously.
-      # @param [Logger] logger replacement logger
+      # @param logger [Logger] replacement logger
       def logger=(logger)
         @logger = logger
       end
 
       # Sets the severity level of the logger. This method is executed
       # asynchronously.
-      # @param [String|Fixnum] level value to set the severity to
+      # @param level [String|Fixnum] value to set the severity to
       def severity=(level)
         if level.is_a?(String)
           sev = {
@@ -165,7 +165,7 @@ module OFlow
 
       # Sets the formatter procedure of the logger. This method is executed
       # asynchronously.
-      # @param [Proc] proc value to set the formatter to
+      # @param proc [Proc] value to set the formatter to
       def formatter=(proc)
         @formatter = proc
       end

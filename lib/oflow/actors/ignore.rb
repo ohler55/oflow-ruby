@@ -1,13 +1,15 @@
 
 module OFlow
   module Actors
+    # Does nothing but can be used to terminate a Link to assure all output from
+    # a Task terminate somewhere.
     class Ignore < Actor
 
       def initialize(task, options)
         super
       end
 
-      def perform(task, op, box)
+      def perform(op, box)
         # ignore
       end
 

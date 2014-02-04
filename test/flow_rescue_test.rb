@@ -15,7 +15,7 @@ class Crash < ::OFlow::Actor
     super
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     nil.crash()
   end
 

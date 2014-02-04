@@ -16,7 +16,7 @@ class Dummy < ::OFlow::Actor
     super
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     task.ship(op, box)
   end
 
@@ -28,7 +28,7 @@ class Miss < ::OFlow::Actor
     super
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     case op
     when :one
       task.ship(:one, box)

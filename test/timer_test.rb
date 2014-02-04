@@ -14,7 +14,6 @@ class TimerTest < ::Test::Unit::TestCase
 
   def test_timer_repeat
     period = 0.1
-    now = Time.now
     timer = nil
     collector = nil
     ::OFlow::Env.flow('one-time') { |f|

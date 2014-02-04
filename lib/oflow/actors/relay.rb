@@ -2,13 +2,15 @@
 module OFlow
   module Actors
 
+    # Relays a shipment to another location. This is useful for creating aliases
+    # for a Task.
     class Relay < Actor
 
       def initialize(task, options)
         super
       end
 
-      def perform(task, op, box)
+      def perform(op, box)
         task.ship(op, box)
       end
 

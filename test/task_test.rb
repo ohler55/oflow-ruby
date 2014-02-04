@@ -16,7 +16,7 @@ class Gather < ::OFlow::Actor
     @requests = {}
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     if @requests[op].nil?
       @requests[op] = [box]
     else

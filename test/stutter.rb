@@ -13,7 +13,7 @@ class Stutter < ::OFlow::Actor
     super
   end
 
-  def perform(task, op, box)
+  def perform(op, box)
     task.ship(:collector, ::OFlow::Box.new([task.full_name, op, box.contents]))
     task.ship(op, box)
   end

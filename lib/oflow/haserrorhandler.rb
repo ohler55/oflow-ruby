@@ -1,8 +1,16 @@
 
 module OFlow
 
+  # Provides functionality to find an error handler Task which is how error are
+  # handled in the system. Each Flow or Task can have a different error
+  # handler. If a Flow does not have an error handler the error bubbles up to
+  # the next Flow until an error handler is found.
   module HasErrorHandler
 
+    # Returns an error handler Task by checking for an @error_handler variable,
+    # then looking for a Task with a base name of :error in itself or any of the
+    # containing Flows.
+    # @return [Task|nil] Task to handle errors
     def error_handler()
       return @error_handler if instance_variable_defined?(:@error_handler) && !@error_handler.nil?
       if instance_variable_defined?(:@flow)
@@ -18,10 +26,14 @@ module OFlow
       nil
     end
 
+    # Sets avaliable for handling errors.
+    # @param t [Task|nil] Task for handling error or nil to unset
     def error_handler=(t)
       @error_handler = t
     end
 
+    # Handles errors by putting a requestion on the error handler Task.
+    # @param e [Exception] error to handle
     def handle_error(e)
       handler = error_handler()
       unless handler.nil?
