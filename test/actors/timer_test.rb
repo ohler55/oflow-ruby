@@ -71,30 +71,76 @@ class TimerTest < ::Test::Unit::TestCase
   end
 
   def test_timer_options_stop
-    # TBD
+    now = Time.now()
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, stop: now, state: ::OFlow::Task::BLOCKED)
+    assert_equal(now, t.actor.stop, 'is the stop time now?')
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, stop: nil, state: ::OFlow::Task::BLOCKED)
+    assert_equal(nil, t.actor.stop, 'is the stop time nil?')
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, stop: 2, state: ::OFlow::Task::BLOCKED)
+    assert_equal(Time, t.actor.stop.class, 'is the stop time a Time?')
+    assert(0.1 > (Time.now() + 2 - t.actor.stop), 'is the stop time now + 2?')
+
+    assert_raise(::OFlow::ConfigError) do
+      ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, stop: 'now')
+    end
   end
 
   def test_timer_options_period
-    # TBD
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, period: nil, state: ::OFlow::Task::BLOCKED)
+    assert_equal(nil, t.actor.period, 'is the period nil?')
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, period: 2, state: ::OFlow::Task::BLOCKED)
+    assert_equal(2, t.actor.period, 'is the period 2?')
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, period: 2.0, state: ::OFlow::Task::BLOCKED)
+    assert_equal(2.0, t.actor.period, 'is the period 2.0?')
+
+    assert_raise(::OFlow::ConfigError) do
+      ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, period: 'now')
+    end
   end
 
   def test_timer_options_repeat
-    # TBD
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, repeat: nil, state: ::OFlow::Task::BLOCKED)
+    assert_equal(nil, t.actor.repeat, 'is the repeat nil?')
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, repeat: 2, state: ::OFlow::Task::BLOCKED)
+    assert_equal(2, t.actor.repeat, 'is the repeat 2?')
+
+    assert_raise(::OFlow::ConfigError) do
+      ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, repeat: 2.0)
+    end
   end
 
   def test_timer_options_with_tracker
-    # TBD
-    #  with tracker, verify a tracker is added
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, with_tracker: nil, state: ::OFlow::Task::BLOCKED)
+    assert_equal(false, t.actor.with_tracker, 'is the with_tracker false?')
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, with_tracker: false, state: ::OFlow::Task::BLOCKED)
+    assert_equal(false, t.actor.with_tracker, 'is the with_tracker false?')
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, with_tracker: true, state: ::OFlow::Task::BLOCKED)
+    assert_equal(true, t.actor.with_tracker, 'is the with_tracker true?')
+
+    assert_raise(::OFlow::ConfigError) do
+      ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, with_tracker: 'now')
+    end
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, with_tracker: true, repeat: 2, label: 'fast')
+    assert_equal(2, t.history.size, 'are there 2 items in the history?')
+    assert_equal(false, t.history[0].box.tracker.nil?, 'is there a tracker on the box that shipped?')
   end
 
   def test_timer_repeat
-    # TBD
-  #  nil period and limited repeat
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, repeat: 2, label: 'fast')
+    assert_equal(2, t.history.size, 'are there 2 items in the history?')
   end
 
   def test_timer_time
-    # TBD
-  #  start and stop time with fixed period (count number of callbacks)
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, stop: 2, period: 0.5, label: 'time')
+    assert_equal(4, t.history.size, 'are there 4 items in the history?')
   end
 
 end # TimerTest

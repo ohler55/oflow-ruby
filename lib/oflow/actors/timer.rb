@@ -75,7 +75,7 @@ module OFlow
             unless Task::STOPPED == task.state
               @count += 1
               now = Time.now()
-              tracker = @with_tracker ? Tracker.new(@label) : nil
+              tracker = @with_tracker ? Tracker.create(@label) : nil
               box = Box.new([@label, @count, now.utc()], tracker)
               task.links.each_key do |key|
                 begin
@@ -136,7 +136,8 @@ module OFlow
         end
         @label = options[:label].to_s
         @with_tracker = options[:with_tracker]
-        unless @with_tracker.nil? || true == @with_tracker || false == @with_tracker
+        @with_tracker = false if @with_tracker.nil?
+        unless true == @with_tracker || false == @with_tracker
           raise ConfigError.new("Expected with_tracker to be a boolean, not a #{@with_tracker.class}.")
         end
       end

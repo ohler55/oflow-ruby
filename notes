@@ -26,8 +26,6 @@
 
 - TBDs
  - timer
-  - options validation
-   - validate and write actor test for bad values
   - dynamic updates
   - more tests
 
@@ -38,6 +36,8 @@
   - fetch
   - persist
   - http
+   - GET http://rubygems.org/api/v1/owners/ohler/gems.json
+   - GET http://rubygems.org/api/v1/gems/oj.json
    - fetch data
    - fetch page template
    - form page
