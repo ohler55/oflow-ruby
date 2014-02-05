@@ -11,8 +11,15 @@ module OFlow
 
       def initialize(name, actor_class, options={})
         @name = name
+        @before = []
+        @state = options.fetch(:state, Task::RUNNING)
+        @starting = true
         @actor = actor_class.new(self, options)
+        @starting = false
         @history = []
+        @before.each do |req|
+          receive(req[0], req[1])
+        end
       end
 
       def reset()
@@ -23,9 +30,27 @@ module OFlow
         ":test:#{@name}"
       end
 
+      def state()
+        @state
+      end
+
+      def links()
+        lnk = Link.new(@name, nil)
+        lnk.instance_variable_set(:@target, self)
+        { nil => lnk }
+      end
+
+      def queue_count()
+        0
+      end
+
       # Calls perform on the actor instance
       def receive(op, box)
-        @actor.perform(op, box)
+        if @starting
+          @before << [op, box]
+        else
+          @actor.perform(op, box)
+        end
       end
 
       # Task API that adds entry to history.

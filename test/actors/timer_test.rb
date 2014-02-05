@@ -8,12 +8,13 @@
 
 require 'test/unit'
 require 'oflow'
+require 'oflow/test'
 
 require 'collector'
 
 class TimerTest < ::Test::Unit::TestCase
 
-  def test_timer_repeat
+  def test_timer_period_repeat
     period = 0.1
     timer = nil
     collector = nil
@@ -51,6 +52,49 @@ class TimerTest < ::Test::Unit::TestCase
     ::OFlow::Env.clear()
   end
 
-  # TBD more tests on start, stop, combinations of options, and error conditions
+  def test_timer_options_start
+    now = Time.now()
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, start: now, state: ::OFlow::Task::BLOCKED)
+    assert_equal(now, t.actor.start, 'is the start time now?')
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, start: nil, state: ::OFlow::Task::BLOCKED)
+    assert_equal(Time, t.actor.start.class, 'is the start time a Time?')
+    assert(0.1 > (Time.now() - t.actor.start), 'is the start time now?')
+
+    t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, start: 2, state: ::OFlow::Task::BLOCKED)
+    assert_equal(Time, t.actor.start.class, 'is the start time a Time?')
+    assert(0.1 > (Time.now() + 2 - t.actor.start), 'is the start time now + 2?')
+
+    assert_raise(::OFlow::ConfigError) do
+      ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, start: 'now')
+    end
+  end
+
+  def test_timer_options_stop
+    # TBD
+  end
+
+  def test_timer_options_period
+    # TBD
+  end
+
+  def test_timer_options_repeat
+    # TBD
+  end
+
+  def test_timer_options_with_tracker
+    # TBD
+    #  with tracker, verify a tracker is added
+  end
+
+  def test_timer_repeat
+    # TBD
+  #  nil period and limited repeat
+  end
+
+  def test_timer_time
+    # TBD
+  #  start and stop time with fixed period (count number of callbacks)
+  end
 
 end # TimerTest

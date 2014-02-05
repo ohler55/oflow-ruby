@@ -18,7 +18,7 @@ module OFlow
     # Tasks and Flows.
     # @param target_name [Symbol] target Task base name
     # @param op [Symbol] operation to use on the target
-    # @param ingress [Boolean] indicates the Link is internal
+    # @param ingress [true|false] indicates the Link is internal
     # @return [Link] new Link
     def initialize(target_name, op, ingress=false)
       @target_name = target_name

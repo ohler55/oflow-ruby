@@ -31,7 +31,6 @@ module OFlow
         @count = 0
         @pending = nil
         set_options(options)
-        @start = Time.now() if @start.nil?
         @pending = @start
         super
         task.receive(:init, nil)
@@ -112,13 +111,34 @@ module OFlow
       end
 
       def set_options(options)
+        now = Time.now()
         @start = options[:start]
+        if @start.is_a?(Numeric)
+          @start = now + @start
+        elsif @start.nil?
+          @start = Time.now()
+        elsif !@start.kind_of?(Time) && !@start.kind_of?(Date)
+          raise ConfigError.new("Expected start to be a Time or Numeric, not a #{@start.class}.")
+        end
         @stop = options[:stop]
+        if @stop.is_a?(Numeric)
+          @stop = now + @stop
+        elsif !@stop.nil? && !@stop.kind_of?(Time) && !@stop.kind_of?(Date)
+          raise ConfigError.new("Expected stop to be a Time or Numeric, not a #{@stop.class}.")
+        end
         @period = options[:period]
+        unless @period.nil? || @period.kind_of?(Numeric)
+          raise ConfigError.new("Expected period to be a Numeric, not a #{@period.class}.")
+        end
         @repeat = options[:repeat]
-        @label = options[:label]
+        unless @repeat.nil? || @repeat.kind_of?(Fixnum)
+          raise ConfigError.new("Expected repeat to be a Fixnum, not a #{@repeat.class}.")
+        end
+        @label = options[:label].to_s
         @with_tracker = options[:with_tracker]
-        # TBD check values for type and range
+        unless @with_tracker.nil? || true == @with_tracker || false == @with_tracker
+          raise ConfigError.new("Expected with_tracker to be a boolean, not a #{@with_tracker.class}.")
+        end
       end
 
     end # Timer

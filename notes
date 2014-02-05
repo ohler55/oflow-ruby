@@ -6,22 +6,29 @@
 - todo
  
  - features
+  - Timer w/ dynamic update, validation of options, more tests
   - workqueue task/actor that distributes to 1 or n others based on how busy
   - collector waits for n number of boxes to be recieved before continuing
-  - other actors
-   - http server
-   - cache or persister (write to disk and ready on start)
-   - call out using pipe and fork
-   - timer
-  - file input for configuration
-   - .graffle OmniGraffle
-   - .svg vector graphics
-   - .vdx Visio
+  - 0.4.0
+  - Persister Actor (write to disk and ready on start)
+  - 0.5.0
+  - HttpServer Actor
+  - 0.6.0
+  - .graffle OmniGraffle input
+  - 0.7.0
+  - .svg vector graphics input
+  - .vdx Visio input
+  - 0.8.0
+  - call out using pipe and fork
+  - 0.9.0
+  - rubygems graphs example
+  - 1.0.0
 
 - TBDs
  - timer
-  - dynamic updates
   - options validation
+   - validate and write actor test for bad values
+  - dynamic updates
   - more tests
 
 
@@ -52,63 +59,3 @@
   - join back
   - queue to 2+ sleepers (random sleep)
   - reply
-
- - store front?
-
-
-- idea
- - define env
-  - require, link, whatever
-  - register TaskHandlers with TaskType name
- - should be able to write a program to build a workflow
-  - create task
-  - hook outputs to other tasks
-   - task id
-   - op (optional)
-   - path to data
-  - configure task
-   - options that are static
- - should be able to build from the inspector
-  - better ability to set local variables that are there next time
-   - or maybe implement limited env instead
-
-- language (Ruby)
- - Workflow(name)
-  - all commands are in the context of a wf so set the current wf
- - NewTask(name, type)
- - Task.SetOption(opt_id, value)
- - Task.SetOut(target, op, data_path)
-
- - Workflow is a Task
-  - how to connect Workflow inputs and output to inner tasks
-
-- steps
- - registration
-  - register task types
-   - define TaskHandler
-   - register each and verify respond_to
- - define
- - run
-
-
-Task("foo", Workflow) {
-  In(target, op, data_path)
-  Task(name, type) {
-    Option(bar, value)
-    Out(target, op, data_path)
-    Out(target, op, data_path)
-  }
-  name = Task(type) {
-  }
-  # create a Kernel method for each registered task type
-  name = type(bar: value) { |task|
-    # how to set the context to new object just created?
-    task.Out(target, op, data_path)
-  }
-  Send(op, data_value)
-  name.Send(op, data_value)
-  name.Out(target, op, data_path)
-}
-
- - ct (change task)
-  - in inspector, show task path

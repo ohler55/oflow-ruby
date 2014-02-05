@@ -74,7 +74,7 @@ module OFlow
 
     # Performs a recursive walk over all Tasks and yields to the provided block
     # for each. Flows are followed recusively.
-    # @param tasks_only [Boolean] indicates on Tasks and not Flows are yielded to
+    # @param tasks_only [true|false] indicates on Tasks and not Flows are yielded to
     # @param blk [Proc] Proc to call on each iteration
     def walk_tasks(tasks_only=true, &blk)
       @tasks.each_value do |t|
@@ -185,7 +185,7 @@ module OFlow
     end
 
     # Shuts down all Tasks.
-    # @param flush_first [Boolean] flag indicating shutdown should occur after the system becomes idle
+    # @param flush_first [true|false] flag indicating shutdown should occur after the system becomes idle
     def shutdown(flush_first=false)
       # block all tasks first so threads can empty queues
       @tasks.each_value do |task|

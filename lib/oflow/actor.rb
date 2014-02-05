@@ -25,7 +25,7 @@ module OFlow
     # Returns whether the Actor should have it's own thread or not. In almost
     # all cases the Actor should have it's own thread. The exception is when the
     # action is trivial such as a relay.
-    # @return [Boolean] indicator of whether a new thread should be created.
+    # @return [true|false] indicator of whether a new thread should be created.
     def with_own_thread()
       true
     end
