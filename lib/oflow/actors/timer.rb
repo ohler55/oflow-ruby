@@ -45,17 +45,25 @@ module OFlow
         op = op.to_sym unless op.nil?
         case op
         when :stop
-          # TBD if no arg (or earlier than now) then stop now else set to new stop time
+          set_stop(box.nil? ? nil : box.contents)
         when :start
-          # TBD if stopped then start if no arg, if arg then set start time
+          old = @start
+          set_start(box.nil? ? nil : box.contents)
+          @pending = @start if @start < old
         when :period
-          # TBD
+          old = @period
+          set_period(box.nil? ? nil : box.contents)
+          if old.nil? || @pending.nil? || @pending.nil?
+            @pending = nil
+          else
+            @pending = @pending - old + @period
+          end
         when :repeat
-          # TBD
+          set_repeat(box.nil? ? nil : box.contents)
         when :label
-          # TBD
+          set_label(box.nil? ? nil : box.contents)
         when :with_tracker
-          # TBD
+          set_with_tracker(box.nil? ? nil : box.contents)
         end
         while true
           now = Time.now()
@@ -111,35 +119,61 @@ module OFlow
       end
 
       def set_options(options)
-        now = Time.now()
-        @start = options[:start]
-        if @start.is_a?(Numeric)
-          @start = now + @start
-        elsif @start.nil?
-          @start = Time.now()
-        elsif !@start.kind_of?(Time) && !@start.kind_of?(Date)
-          raise ConfigError.new("Expected start to be a Time or Numeric, not a #{@start.class}.")
-        end
-        @stop = options[:stop]
-        if @stop.is_a?(Numeric)
-          @stop = now + @stop
-        elsif !@stop.nil? && !@stop.kind_of?(Time) && !@stop.kind_of?(Date)
-          raise ConfigError.new("Expected stop to be a Time or Numeric, not a #{@stop.class}.")
-        end
-        @period = options[:period]
-        unless @period.nil? || @period.kind_of?(Numeric)
-          raise ConfigError.new("Expected period to be a Numeric, not a #{@period.class}.")
-        end
-        @repeat = options[:repeat]
-        unless @repeat.nil? || @repeat.kind_of?(Fixnum)
-          raise ConfigError.new("Expected repeat to be a Fixnum, not a #{@repeat.class}.")
-        end
+        set_start(options[:start]) # if nil let start get set to now
+        set_stop( options[:stop]) if options.has_key?(:stop)
+        set_period(options[:period]) if options.has_key?(:period)
+        set_repeat(options[:repeat]) if options.has_key?(:repeat)
+        set_with_tracker(options[:with_tracker])
         @label = options[:label].to_s
-        @with_tracker = options[:with_tracker]
-        @with_tracker = false if @with_tracker.nil?
-        unless true == @with_tracker || false == @with_tracker
-          raise ConfigError.new("Expected with_tracker to be a boolean, not a #{@with_tracker.class}.")
+      end
+
+      def set_start(v)
+        now = Time.now()
+        if v.is_a?(Numeric)
+          v = now + v
+        elsif v.nil?
+          v = Time.now()
+        elsif !v.kind_of?(Time) && !v.kind_of?(Date)
+          raise ConfigError.new("Expected start to be a Time or Numeric, not a #{v.class}.")
         end
+        @start = v
+      end
+
+      def set_stop(v)
+        now = Time.now()
+        if v.is_a?(Numeric)
+          v = now + v
+        elsif !v.nil? && !v.kind_of?(Time) && !v.kind_of?(Date)
+          raise ConfigError.new("Expected stop to be a Time or Numeric, not a #{v.class}.")
+        end
+        @stop = v
+      end
+
+      def set_period(v)
+        unless v.nil? || v.kind_of?(Numeric)
+          raise ConfigError.new("Expected period to be a Numeric, not a #{v.class}.")
+        end
+        @period = v
+      end
+
+      def set_repeat(v)
+        unless v.nil? || v.kind_of?(Fixnum)
+          raise ConfigError.new("Expected repeat to be a Fixnum, not a #{v.class}.")
+        end
+        @repeat = v
+      end
+
+      def set_label(v)
+        v = v.to_s unless v.nil?
+        @label = v
+      end
+
+      def set_with_tracker(v)
+        v = false if v.nil?
+        unless true == v || false == v
+          raise ConfigError.new("Expected with_tracker to be a boolean, not a #{v.class}.")
+        end
+        @with_tracker = v
       end
 
     end # Timer

@@ -23,7 +23,13 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 [![Build Status](https://travis-ci.org/ohler55/oflow-ruby.png?branch=master)](https://travis-ci.org/ohler55/oflow-ruby)
 
-### Current Release 0.3
+## Release Notes
+
+### Release 0.4
+
+ - Added support for dynamic Timer options updates.
+
+### Release 0.3
 
  - Initial release with minimal features.
 

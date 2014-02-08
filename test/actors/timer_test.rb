@@ -143,4 +143,142 @@ class TimerTest < ::Test::Unit::TestCase
     assert_equal(4, t.history.size, 'are there 4 items in the history?')
   end
 
+  def test_timer_perform_period
+    period = 0.1
+    timer = nil
+    collector = nil
+    ::OFlow::Env.flow('one-time') { |f|
+      f.task('once', ::OFlow::Actors::Timer, repeat: 2, period: 2) { |t|
+        timer = t
+        t.link(:ping, :collector, :tick)
+      }
+      f.task(:collector, Collector) { |t|
+        collector = t.actor
+      }
+    }
+    timer.receive(:period, ::OFlow::Box.new(period))
+    ::OFlow::Env.flush()
+    prev = nil
+    ticks = collector.collection.map do |t|
+      tf = t[2].to_f
+      if prev.nil?
+        tick = [t[1], tf, 0.0]
+      else
+        tick = [t[1], tf, tf - prev]
+      end
+      prev = tf
+      tick
+    end
+    
+    ticks.size.times do |i|
+      tick = ticks[i]
+      assert_equal(i + 1, tick[0])
+      next if 0 == i
+      dif = tick[2] - period
+      limit = period / 10 # 10% accuracy
+      assert(-limit < dif && dif < limit, "Verify timer fires are within 10% of expected. (dif: #{dif}, limit: #{limit})")
+    end
+
+    ::OFlow::Env.clear()
+  end
+
+  def test_timer_perform_repeat
+    repeat = 2
+    timer = nil
+    collector = nil
+    ::OFlow::Env.flow('one-time') { |f|
+      f.task('once', ::OFlow::Actors::Timer, repeat: 4, period: 0.1) { |t|
+        timer = t
+        t.link(:ping, :collector, :tick)
+      }
+      f.task(:collector, Collector) { |t|
+        collector = t.actor
+      }
+    }
+    timer.receive(:repeat, ::OFlow::Box.new(repeat))
+    ::OFlow::Env.flush()
+    assert_equal(2, collector.collection.size)
+
+    ::OFlow::Env.clear()
+  end
+
+  def test_timer_perform_start
+    now = Time.now()
+    timer = nil
+    collector = nil
+    ::OFlow::Env.flow('one-time') { |f|
+      f.task('once', ::OFlow::Actors::Timer, repeat: 1, period: 0.1, start: 2) { |t|
+        timer = t
+        t.link(:ping, :collector, :tick)
+      }
+      f.task(:collector, Collector) { |t|
+        collector = t.actor
+      }
+    }
+    timer.receive(:start, ::OFlow::Box.new(nil))
+    ::OFlow::Env.flush()
+    first_fire = collector.collection[0][2] - now
+    assert(0.01 > first_fire, "first fire was at #{first_fire}, expected less than 0.01 msecs?")
+
+    ::OFlow::Env.clear()
+  end
+
+  def test_timer_perform_stop
+    now = Time.now()
+    timer = nil
+    collector = nil
+    ::OFlow::Env.flow('one-time') { |f|
+      f.task('once', ::OFlow::Actors::Timer, repeat: 10, period: 0.1, stop: 2) { |t|
+        timer = t
+        t.link(:ping, :collector, :tick)
+      }
+      f.task(:collector, Collector) { |t|
+        collector = t.actor
+      }
+    }
+    timer.receive(:stop, ::OFlow::Box.new(0.25))
+    ::OFlow::Env.flush()
+    assert_equal(3, collector.collection.size)
+
+    ::OFlow::Env.clear()
+  end
+
+  def test_timer_perform_label
+    timer = nil
+    collector = nil
+    ::OFlow::Env.flow('one-time') { |f|
+      f.task('once', ::OFlow::Actors::Timer, repeat: 2, period: 0.1, label: 'first') { |t|
+        timer = t
+        t.link(:ping, :collector, :tick)
+      }
+      f.task(:collector, Collector) { |t|
+        collector = t.actor
+      }
+    }
+    timer.receive(:label, ::OFlow::Box.new('second'))
+    ::OFlow::Env.flush()
+    assert_equal(['first', 'second'], collector.collection.map { |x| x[0] })
+
+    ::OFlow::Env.clear()
+  end
+
+  def test_timer_perform_tracker
+    timer = nil
+    collector = nil
+    ::OFlow::Env.flow('one-time') { |f|
+      f.task('once', ::OFlow::Actors::Timer, repeat: 2, period: 0.1, with_tracker: false) { |t|
+        timer = t
+        t.link(:ping, :collector, :tick)
+      }
+      f.task(:collector, Collector, contents_only: false) { |t|
+        collector = t.actor
+      }
+    }
+    timer.receive(:with_tracker, ::OFlow::Box.new(true))
+    ::OFlow::Env.flush()
+    assert_equal([false, true], collector.collection.map { |x| !x.tracker.nil? })
+
+    ::OFlow::Env.clear()
+  end
+
 end # TimerTest

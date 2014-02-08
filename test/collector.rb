@@ -13,10 +13,15 @@ class Collector < ::OFlow::Actor
   def initialize(task, options)
     super
     @collection = []
+    @contents_only = options.fetch(:contents_only, true)
   end
 
   def perform(op, box)
-    @collection << box.contents
+    if @contents_only
+      @collection << box.contents
+    else
+      @collection << box
+    end
   end
 
 end # Collector
