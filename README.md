@@ -29,6 +29,8 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
  - Added support for dynamic Timer options updates.
 
+ - Added balancer load balancing of processing across multiple tasks.
+
 ### Release 0.3
 
  - Initial release with minimal features.

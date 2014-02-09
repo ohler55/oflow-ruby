@@ -90,7 +90,7 @@ module OFlow
               sleep(1.0)
             end
           rescue Exception => e
-                puts "*** #{full_name} #{e.class}: #{e.message}"
+            puts "*** #{full_name} #{e.class}: #{e.message}"
             @current_req = nil
             # TBD Env.rescue(e)
           end
@@ -159,7 +159,7 @@ module OFlow
     # selecting an Actor when stepping from the Inspector.
     # @return [Fixnum] a measure of how backed up a Task is
     def backed_up()
-      cnt = @queue.size()
+      cnt = @queue.size() + (@current_req.nil? ? 0 : 1)
       return 0 if 0 == cnt
       if @max_queue_count.nil? || 0 == @max_queue_count
         cnt = 80 if 80 < cnt
@@ -217,6 +217,7 @@ module OFlow
 
     # Wakes up the Task if it has been stopped or if Env.shutdown() has been called.
     def wakeup()
+      # don't wake if the task is currently processing
       @loop.wakeup() unless @loop.nil?
     end
 
