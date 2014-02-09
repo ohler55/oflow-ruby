@@ -30,6 +30,9 @@ module OFlow
       def initialize(task, options={})
         @count = 0
         @pending = nil
+        @stop = nil
+        @period = nil
+        @repeat = nil
         set_options(options)
         @pending = @start
         super

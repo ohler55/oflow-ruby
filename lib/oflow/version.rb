@@ -1,5 +1,5 @@
 
 module OFlow
   # Current version of the module. 
-  VERSION = '0.4.0a1'
+  VERSION = '0.4.0'
 end

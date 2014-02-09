@@ -29,7 +29,9 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
  - Added support for dynamic Timer options updates.
 
- - Added balancer load balancing of processing across multiple tasks.
+ - Added Balancer Actor for load balancing of processing across multiple tasks.
+
+ - Added Merger Actor that merges two or more processing paths.
 
 ### Release 0.3
 

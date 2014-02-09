@@ -224,7 +224,6 @@ class TimerTest < ::Test::Unit::TestCase
   end
 
   def test_timer_perform_stop
-    now = Time.now()
     timer = nil
     collector = nil
     ::OFlow::Env.flow('one-time') { |f|

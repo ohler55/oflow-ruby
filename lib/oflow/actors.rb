@@ -8,5 +8,7 @@ require 'oflow/actors/ignore'
 require 'oflow/actors/relay'
 require 'oflow/actors/log'
 require 'oflow/actors/errorhandler'
-require 'oflow/actors/timer'
+
 require 'oflow/actors/balancer'
+require 'oflow/actors/merger'
+require 'oflow/actors/timer'

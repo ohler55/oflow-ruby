@@ -36,7 +36,6 @@ end # Busy
 class BalancerTest < ::Test::Unit::TestCase
 
   def test_balancer_fair
-    period = 0.1
     balancer = nil
     collector = nil
     ::OFlow::Env.flow('fair') { |f|
@@ -71,10 +70,9 @@ class BalancerTest < ::Test::Unit::TestCase
   end
 
   def test_balancer_less_busy
-    period = 0.1
     balancer = nil
     collector = nil
-    ::OFlow::Env.flow('fair') { |f|
+    ::OFlow::Env.flow('less-busy') { |f|
       f.task('balance', ::OFlow::Actors::Balancer) { |t|
         balancer = t
         t.link(:one, :one, nil)
