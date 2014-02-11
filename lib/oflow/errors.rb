@@ -29,6 +29,14 @@ module OFlow
     end
   end # ConfigError
 
+  # An Exception indicating an invalid operation used in a call to receive() or
+  # perform().
+  class OpError < Exception
+    def initialize(name, op)
+      super("'#{op}' is not a valid operation for #{name}.")
+    end
+  end # OpError
+
   # An Exception raised when no destination is found.
   class LinkError < Exception
     def initialize(dest)

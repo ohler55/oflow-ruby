@@ -4,9 +4,9 @@
 ^c^s show subtree
 
 - todo
+ - add log entries to actors
  
  - features
-  - 0.4.0
   - Persister Actor (write to disk and ready on start)
   - 0.5.0
   - HttpServer Actor
@@ -20,6 +20,36 @@
   - 0.9.0
   - rubygems graphs example
   - 1.0.0
+
+
+- Persister
+ - ops to handle
+  - insert (or create)
+  - read (or get)
+  - update
+  - delete (or remove)
+  - query
+  - clear/dump
+ - options
+  - dir to write to
+   - default is db/full_name.gsub(':', '/')
+  - key - path to key for the box
+  - cache flag - future  feature
+  - option for write to one file or separate
+   - first separate files
+   - single file - future  feature
+ - general feature, error can follow error link
+ - store using oj object mode
+ - option to send results to different places
+  - specify link dest in request
+  - box
+   - get { dest: xxx, key: xxx }
+   - insert { key: optional, data: xxx }
+   - update { key: optional, data: xxx }
+   - delete { key: optional }
+   - query { dest: xxx, expr: xxx }
+    - expr is a block or proc
+    - string expr - future feature
 
 - TBDs
 
