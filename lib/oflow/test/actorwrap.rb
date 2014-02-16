@@ -51,6 +51,7 @@ module OFlow
         else
           @actor.perform(op, box)
         end
+        nil
       end
 
       # Task API that adds entry to history.

@@ -11,4 +11,5 @@ require 'oflow/actors/errorhandler'
 
 require 'oflow/actors/balancer'
 require 'oflow/actors/merger'
+require 'oflow/actors/persister'
 require 'oflow/actors/timer'

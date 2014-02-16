@@ -23,6 +23,11 @@
 
 
 - Persister
+ - impl
+  - test for config
+  - make sure dir is created
+  - 
+
  - ops to handle
   - insert (or create)
   - read (or get)
