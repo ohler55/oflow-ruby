@@ -25,6 +25,10 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 ## Release Notes
 
+### Release 0.5
+
+ - Added Persister Actor that acts as a simple local store database.
+
 ### Release 0.4
 
  - Added support for dynamic Timer options updates.

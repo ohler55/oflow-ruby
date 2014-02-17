@@ -21,7 +21,10 @@ module OFlow
       yield(f) if block_given?
       f.resolve_all_links()
       # Wait to validate until at the top so up-links don't fail validation.
-      f.validate() if Env == self
+      if Env == self
+        f.validate() 
+        f.start()
+      end
       f
     end
 
@@ -33,6 +36,8 @@ module OFlow
     # @param block [Proc] block to yield to with the new Task instance
     # @return [Task] new Task
     def task(name, actor_class, options={}, &block)
+      has_state = options.has_key?(:state)
+      options[:state] = Task::STOPPED unless has_state
       t = Task.new(self, name, actor_class, options)
       @tasks[t.name] = t
       yield(t) if block_given?

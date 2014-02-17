@@ -55,7 +55,7 @@ module OFlow
       @actor = actor_class.new(self, options)
       raise Exception.new("#{actor} does not respond to the perform() method.") unless @actor.respond_to?(:perform)
 
-      @state = RUNNING
+      @state = options.fetch(:state, RUNNING)
       return unless @actor.with_own_thread()
 
       @loop = Thread.start(self) do |me|

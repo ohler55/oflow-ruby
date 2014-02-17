@@ -49,7 +49,11 @@ module OFlow
         if @starting
           @before << [op, box]
         else
-          @actor.perform(op, box)
+          begin
+            @actor.perform(op, box)
+          rescue Exception => e
+            ship(:error, Box.new([e, full_name()]))
+          end
         end
         nil
       end

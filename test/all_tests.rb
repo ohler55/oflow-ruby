@@ -22,8 +22,8 @@ require 'flow_nest_test'
 require 'flow_tracker_test'
 
 # Actor tests
-require 'actors/log_test'
-require 'actors/timer_test'
 require 'actors/balancer_test'
+require 'actors/log_test'
 require 'actors/merger_test'
-
+require 'actors/persister_test'
+require 'actors/timer_test'
