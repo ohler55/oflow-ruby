@@ -74,7 +74,11 @@ module OFlow
 
     # Returns a string representation of the Box and contents.
     def to_s()
-      "Box{#{@contents}, tracker: #{@tracker}}"
+      if @tracker.nil?
+        "Box{#{@contents}}"
+      else
+        "Box{#{@contents}, tracker: #{@tracker}}"
+      end
     end
     alias inspect to_s
 

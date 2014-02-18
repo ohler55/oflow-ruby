@@ -17,7 +17,7 @@ class Hop < ::OFlow::Actor
   end
 
   def perform(op, box)
-    task.info("#{op} #{box.contents}")
+    task.warn("#{op} #{box.contents}")
     task.ship(op, box)
   end
 

@@ -14,6 +14,11 @@ module OFlow
         :warn => Logger::Severity::WARN,
         :info => Logger::Severity::INFO,
         :debug => Logger::Severity::DEBUG,
+        :FATAL => Logger::Severity::FATAL,
+        :ERROR => Logger::Severity::ERROR,
+        :WARN => Logger::Severity::WARN,
+        :INFO => Logger::Severity::INFO,
+        :DEBUG => Logger::Severity::DEBUG,
       }
       def initialize(task, options={})
         @logger = nil

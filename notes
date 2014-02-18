@@ -4,7 +4,6 @@
 ^c^s show subtree
 
 - todo
- - add log entries to actors
  
  - features
   - HttpServer Actor

@@ -30,7 +30,14 @@ module OFlow
     # @param msg [String] message to log
     # @param fn [String] full name of Task or Flow calling the log function
     def log_msg(level, msg, fn)
+      # Abort early if the log severity/level would not log the message. This
+      # also allows non-Loggers to be used in place of the Log Actor.
+      return if Env.log_level > Actors::Log::SEVERITY_MAP[level]
+
       lt = log()
+      # To prevent infinite looping, don't allow the logger to log to itself.
+      return if self == lt
+
       unless lt.nil?
         lt.receive(level, Box.new([msg, fn]))
       else

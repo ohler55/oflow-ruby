@@ -119,25 +119,19 @@ Hello World!
 
 ## Future Features
 
- - Balancer Actor that distributes to a set of others Tasks based on how busy each is.
-
- - Merger Actor that waits for a criteria to be met before continuing.
-
  - HTTP Server Actor
-
- - Persister Actor that writes to disk and reads on start)
-
- - CallOut Actor that uses pipes and fork to use a non-Ruby actor.
-
- - Cross linking Tasks and Flows.
-
- - Dynamic links to Tasks and Flows.
 
  - OmniGraffle file input for configuration.
 
  - .svg file input for configuration.
 
  - Visio file input for configuration.
+
+ - CallOut Actor that uses pipes and fork to use a non-Ruby actor.
+
+ - Cross linking Tasks and Flows.
+
+ - Dynamic links to Tasks and Flows.
 
  - High performance C version. Proof of concept puts the performance range at
    around 10M operations per second where an operation is one task execution per

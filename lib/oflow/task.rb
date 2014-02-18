@@ -52,6 +52,7 @@ module OFlow
       init_links()
       set_options(options)
 
+      info("Creating actor #{actor_class} with options #{options}.")
       @actor = actor_class.new(self, options)
       raise Exception.new("#{actor} does not respond to the perform() method.") unless @actor.respond_to?(:perform)
 
@@ -76,6 +77,7 @@ module OFlow
 
               @current_req = req
               begin
+                info("perform(#{req.op}, #{req.box})")
                 @actor.perform(req.op, req.box) unless req.nil?
               rescue Exception => e
                 handle_error(e)
@@ -279,6 +281,8 @@ module OFlow
     # @param op [Symbol] operation to perform
     # @param box [Box] contents or data for the request
     def receive(op, box)
+      info("receive(#{op}, #{box}) #{state_string}")
+
       return if CLOSING == @state
 
       raise BlockedError.new() if BLOCKED == @state
@@ -313,6 +317,7 @@ module OFlow
       box.freeze() unless box.nil?
       link = resolve_link(dest)
       raise LinkError.new(dest) if link.nil? || link.target.nil?
+      info("shipping #{box} to #{link.target_name}:#{link.op}")
       link.target.receive(link.op, box)
       link
     end

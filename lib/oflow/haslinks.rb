@@ -59,6 +59,10 @@ module OFlow
     def links()
       @links
     end
-    
+
+    def has_links?()
+      !@links.nil? && !@links.empty?
+    end
+
   end # HasLinks
 end # OFlow
