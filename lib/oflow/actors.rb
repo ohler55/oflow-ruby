@@ -10,6 +10,8 @@ require 'oflow/actors/log'
 require 'oflow/actors/errorhandler'
 
 require 'oflow/actors/balancer'
+require 'oflow/actors/trigger'
 require 'oflow/actors/merger'
 require 'oflow/actors/persister'
 require 'oflow/actors/timer'
+require 'oflow/actors/httpserver'

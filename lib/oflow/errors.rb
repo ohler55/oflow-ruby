@@ -44,6 +44,13 @@ module OFlow
     end
   end # LinkError
 
+  # An Exception indicating an item was not found.
+  class NotFoundError < Exception
+    def initialize(name, type, id)
+      super("The #{type} identified as '#{id}' was not found in #{name}.")
+    end
+  end # NotFoundError
+
   # An Exception raised when there are validation errors.
   class ValidateError < Exception
     attr_accessor :problems
