@@ -18,6 +18,11 @@
   - rubygems graphs example
   - 1.0.0
 
+- HttpServer
+ - Trigger parent class
+ - try http client (other methods)
+ - non-blocking
+ - 
 
 - TBDs
 

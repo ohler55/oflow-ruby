@@ -1,3 +1,4 @@
+*~
 *.gem
 *.rbc
 .bundle
@@ -16,3 +17,4 @@ tmp
 .yardoc
 _yardoc
 doc/
+.ruby-version

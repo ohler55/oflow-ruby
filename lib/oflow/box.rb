@@ -156,14 +156,14 @@ module OFlow
           value[ps] = _aset(path[1..-1], value[ps], rv)
         end
       when NilClass
-        begin
-          i = p.to_i
-          value = []
-          value[i] = _aset(path[1..-1], nil, rv)
-        rescue
+        if /^\d+$/.match(p).nil?
           ps = p.to_sym
           value = {}
           value[ps] = _aset(path[1..-1], nil, rv)
+        else
+          i = p.to_i
+          value = []
+          value[i] = _aset(path[1..-1], nil, rv)
         end
       else
         raise FrozenError.new(p, value)
