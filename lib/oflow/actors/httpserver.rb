@@ -6,6 +6,9 @@ require 'fcntl'
 module OFlow
   module Actors
 
+    # Provides a simple HTTP server that accepts requests which then trigger a
+    # flow. The execution flow should end back at the server so it can sent a
+    # response to the requester.
     class HttpServer < Trigger
 
       def initialize(task, options)
