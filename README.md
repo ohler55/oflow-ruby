@@ -25,6 +25,10 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 ## Release Notes
 
+### Release 0.6
+
+ - Added HTTP Server Actor that acts as a simple HTTP server.
+
 ### Release 0.5
 
  - Added Persister Actor that acts as a simple local store database.

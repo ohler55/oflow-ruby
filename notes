@@ -6,16 +6,14 @@
 - todo
  
  - features
-  - HttpServer Actor
-  - 0.6.0
   - .graffle OmniGraffle input
   - 0.7.0
   - .svg vector graphics input
   - .vdx Visio input
   - 0.8.0
-  - call out using pipe and fork
-  - 0.9.0
   - rubygems graphs example
+  - 0.9.0
+  - call out using pipe and fork
   - 1.0.0
 
 - HttpServer

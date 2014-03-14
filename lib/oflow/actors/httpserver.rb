@@ -18,12 +18,15 @@ module OFlow
           Thread.current[:name] = me.task.full_name() + '-server'
           while Task::CLOSING != task.state
             begin
+              if Task::BLOCKED == task.state || Task::STOPPED == task.state
+                sleep(0.1)
+                next
+              end
               session = @server.accept_nonblock()
               session.fcntl(Fcntl::F_SETFL, session.fcntl(Fcntl::F_GETFL, 0) | Fcntl::O_NONBLOCK)
               @count += 1
               req = read_req(session, @count)
               @sessions[@count] = session
-              puts "*** #{req}"
               resp = {
                 status: 200,
                 body: nil,
@@ -81,7 +84,6 @@ module OFlow
             raise NotFoundError.new(task.full_name, 'session', req_id)
           end
           @sessions.delete(req_id)
-          # TBD options to set attributes
         else
           raise OpError.new(task.full_name, op)
         end
