@@ -16,13 +16,15 @@
   - call out using pipe and fork
   - 1.0.0
 
-- HttpServer
- - Trigger parent class
- - try http client (other methods)
- - non-blocking
- - 
+- graffle reader
+ - in bin/oflow
+ - decide on formats
+  - properties
+  - text in block
 
 - TBDs
+
+
 
 - example
  - rubygems graphs
