@@ -53,8 +53,7 @@ files.each do |file|
   when 'rb'
     load(file)
   when 'graffle'
-    # TBD
-    usage("OmniGraffle files not supported yet.")
+    OFlow::Graffle.load(file)
   when 'vdx'
     # TBD
     usage("Visio files not supported yet.")

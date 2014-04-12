@@ -17,6 +17,21 @@
   - 1.0.0
 
 - graffle reader
+ - rtf stripper
+  - look for {\rtf1 to start
+  - skip \xxx until space or {
+   - regexp or one char at a time
+  - if \\, \{ or \} \<newline> then keep those chars
+  - \xxx will end with space
+  - replacements
+   - \\
+   - \{
+   - \}
+   - \line
+   - \tab
+   - \page (use \n)
+ - get name from label 
+
  - in bin/oflow
  - decide on formats
   - properties

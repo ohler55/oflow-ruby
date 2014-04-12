@@ -19,5 +19,7 @@ require 'oflow/flow'
 
 require 'oflow/actors'
 
+require 'oflow/graffle'
+
 require 'oflow/env'
 require 'oflow/inspector'
