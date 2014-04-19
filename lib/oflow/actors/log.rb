@@ -78,6 +78,7 @@ module OFlow
       # @option options [String|Fixnum] :severity initial setting for severity
       # @option options [Proc] :formatter initial setting for the formatter procedure
       def set_options(options)
+        @formatter = options.fetch(:formatter, nil)
         if !(filename = options[:filename]).nil?
           max_file_size = options.fetch(:max_file_size, options.fetch(:shift_size, 1048576))
           max_file_count = options.fetch(:max_file_count, options.fetch(:shift_age, 7))
@@ -86,9 +87,9 @@ module OFlow
           @logger = Logger.new(stream)
         else
           @logger = Logger.new(STDOUT)
+          @formatter = proc { |s,t,p,m| "#{s[0]} #{p}> #{m}\n" } if @formatter.nil?
         end
         @logger.level = options.fetch(:severity, Env.log_level)
-        @formatter = options.fetch(:formatter, nil)
         @logger.formatter = proc { |s,t,p,m| m }
         @name = 'Logger' if @name.nil?
       end
@@ -103,7 +104,7 @@ module OFlow
         ss = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'][level]
         ss = '' if ss.nil?
         if @formatter.nil?
-          msg = "#{ss[0]}, [#{now.strftime('%Y-%m-%dT%H:%M:%S.%6N')} #{tid}] #{ss} -- #{message}\n"
+          msg = "#{ss[0]} #{now.strftime('%Y-%m-%dT%H:%M:%S.%6N')} #{tid}> #{message}\n"
         else
           msg = @formatter.call(ss, now, tid, message)
         end

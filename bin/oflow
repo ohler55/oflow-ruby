@@ -30,11 +30,13 @@ Executes flows defined by the files specified. Files can be
  - .svg
 Each file format has a specific expected format.
 |)
-$opts.on('-s', 'decrease verbosity')                                   { Env.log_level = Env.log_level += 1 }
-$opts.on('-v', 'increase verbosity')                                   { Env.log_level = Env.log_level -= 1 }
+$opts.on('-s', 'decrease verbosity')                                   { ::OFlow::Env.log_level = ::OFlow::Env.log_level += 1 }
+$opts.on('-v', 'increase verbosity')                                   { ::OFlow::Env.log_level = ::OFlow::Env.log_level -= 1 }
 $opts.on('-b', "don't exit when no longer busy")                       { $exit_not_busy = false }
 $opts.on('-e', '--exit-after Integer', Integer, 'exit after <secs>')   { |secs| $exit_after = secs }
 $opts.on('-i', '--inspector-port Integer', Integer, 'inspector port')  { |port| $inspector_port = port }
+$opts.on('-I', '--load-path String', String, 'load path')              { |path| $: << path }
+$opts.on('-r', '--require String', String, 'require gem')              { |req| require req }
 $opts.on('-h', '--help', 'Show this display')                          { puts $opts.help; Process.exit!(0) }
 files = $opts.parse(ARGV)
 
@@ -63,6 +65,10 @@ files.each do |file|
   else
     usage("Unknown file type for #{file}.")
   end
+end
+
+if Logger::Severity::DEBUG >= ::OFlow::Env.log_level
+  ::OFlow::Env.debug(::OFlow::Env.describe())
 end
 
 inspector = nil

@@ -26,6 +26,7 @@ module OFlow
     # @param level [Fixnum] Logger::Severity to set the default log level to
     def self.log_level=(level)
       @@log_level = level unless level < Logger::Severity::DEBUG || Logger::Severity::FATAL < level
+      @log.receive(:severity, Box.new(@@log_level)) unless @log.nil?
     end
 
     # Resets the error handler and log. Usually called on init and by the

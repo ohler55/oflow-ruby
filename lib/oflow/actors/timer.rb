@@ -70,7 +70,6 @@ module OFlow
         end
         while true
           now = Time.now()
-
           # If past stop time then it is done. A future change in options can
           # restart the timer.
           return if !@stop.nil? && @stop < now
@@ -123,7 +122,7 @@ module OFlow
 
       def set_options(options)
         set_start(options[:start]) # if nil let start get set to now
-        set_stop( options[:stop]) if options.has_key?(:stop)
+        set_stop(options[:stop]) if options.has_key?(:stop)
         set_period(options[:period]) if options.has_key?(:period)
         set_repeat(options[:repeat]) if options.has_key?(:repeat)
         set_with_tracker(options[:with_tracker])
@@ -131,6 +130,7 @@ module OFlow
       end
 
       def set_start(v)
+        # TBD handle string
         now = Time.now()
         if v.is_a?(Numeric)
           v = now + v
@@ -143,6 +143,7 @@ module OFlow
       end
 
       def set_stop(v)
+        # TBD handle string
         now = Time.now()
         if v.is_a?(Numeric)
           v = now + v
@@ -153,17 +154,23 @@ module OFlow
       end
 
       def set_period(v)
-        unless v.nil? || v.kind_of?(Numeric)
+        if v.kind_of?(Numeric)
+          @period = v
+        elsif v.is_a?(String)
+          @period = v.strip().to_f
+        else
           raise ConfigError.new("Expected period to be a Numeric, not a #{v.class}.")
         end
-        @period = v
       end
 
       def set_repeat(v)
-        unless v.nil? || v.kind_of?(Fixnum)
+        if v.kind_of?(Fixnum)
+          @repeat = v
+        elsif v.is_a?(String)
+          @repeat = v.strip().to_i
+        else
           raise ConfigError.new("Expected repeat to be a Fixnum, not a #{v.class}.")
         end
-        @repeat = v
       end
 
       def set_label(v)

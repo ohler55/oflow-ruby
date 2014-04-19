@@ -32,18 +32,30 @@ module OFlow
       task_info.each do |id,ti|
         next if ti.line_id.nil?
         if !(li = line_info[ti.line_id]).nil?
-          li.target, li.op = ti.first_option
+          li.label, li.op = ti.first_option
           break
         end
       end
       task_info.each do |_, ti|
-        if ti.name.nil? && !(n = ti.options['Flow']).nil?
+        if ti.name.nil? && !(n = ti.options[:flow]).nil?
           @name = n.strip
         end
       end
-
-      # TBD process into Flow and Nodes
-
+      ::OFlow::Env.flow(@name.to_sym) { |f|
+        task_info.each_value { |ti|
+          next unless ti.line_id.nil?
+          next if ti.name.nil?
+          c = ti.get_class()
+          next if c.nil?
+          f.task(ti.name, c, ti.options) { |t|
+            line_info.each_value { |li|
+              next unless li.tail == ti.id
+              next if (target_info = task_info[li.head]).nil? || target_info.name.nil?
+              t.link(li.label, target_info.name, li.op)
+            }
+          }
+        }
+      }
     end
 
     def load_node(node)
@@ -175,18 +187,17 @@ module OFlow
     class LineInfo < Element
       attr_accessor :tail
       attr_accessor :head
-      attr_accessor :target
+      attr_accessor :label
       attr_accessor :op
 
       def initialize(nodes)
         super
         @tail = Graffle.get_key_value(Graffle.get_key_value(nodes, 'Tail'), 'ID')
         @head = Graffle.get_key_value(Graffle.get_key_value(nodes, 'Head'), 'ID')
-        @label = nil
       end
       
       def to_s()
-        "LineInfo{id:#{@id}, tail:#{@tail}, head:#{@head}, label: #{target}:#{op}}"
+        "LineInfo{id:#{@id}, tail:#{@tail}, head:#{@head}, label: #{label}:#{op}}"
       end
     end # LineInfo
 
@@ -210,7 +221,13 @@ module OFlow
             if 1 == pair.length
               @name = pair[0]
             else
-              @options[pair[0]] = pair[1]
+              k = pair[0]
+              if 0 == k.length
+                k = nil
+              else
+                k = k.to_sym
+              end
+              @options[k] = pair[1]
             end
           end
         end
@@ -225,6 +242,23 @@ module OFlow
           target = name
         end
         [target, op]
+      end
+
+      def get_class()
+        return nil if options.nil?
+        return nil if (s = options[:class]).nil?
+        s.strip!
+        c = nil
+        begin
+          # TBD search all modules and classes for a match that is also an Actor
+
+          # Assume the environment is safe since it is being used to create
+          # processes from user provided code anyway.
+          c = Object.class_eval(s)
+        rescue Exception
+          c = ::OFlow::Actors.module_eval(s)
+        end
+        c
       end
 
       def to_s()
