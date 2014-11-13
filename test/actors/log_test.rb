@@ -1,16 +1,13 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../../lib"),
-  File.join(File.dirname(__FILE__), "..")
-].each { |path| $: << path unless $:.include?(path) }
+$: << File.dirname(File.dirname(__FILE__))
 
-require 'test/unit'
+require 'helper'
 require 'stringio'
 require 'oflow'
 
-class LogTest < ::Test::Unit::TestCase
+class LogTest < ::MiniTest::Test
 
   def test_log
     stream = StringIO.new()

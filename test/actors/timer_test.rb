@@ -1,18 +1,15 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../../lib"),
-  File.join(File.dirname(__FILE__), "..")
-].each { |path| $: << path unless $:.include?(path) }
+$: << File.dirname(File.dirname(__FILE__))
 
-require 'test/unit'
+require 'helper'
 require 'oflow'
 require 'oflow/test'
 
 require 'collector'
 
-class TimerTest < ::Test::Unit::TestCase
+class TimerTest < ::MiniTest::Test
 
   def test_timer_period_repeat
     period = 0.1
@@ -65,7 +62,7 @@ class TimerTest < ::Test::Unit::TestCase
     assert_equal(Time, t.actor.start.class, 'is the start time a Time?')
     assert(0.1 > (Time.now() + 2 - t.actor.start), 'is the start time now + 2?')
 
-    assert_raise(::OFlow::ConfigError) do
+    assert_raises(::OFlow::ConfigError) do
       ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, start: 'now')
     end
   end
@@ -82,7 +79,7 @@ class TimerTest < ::Test::Unit::TestCase
     assert_equal(Time, t.actor.stop.class, 'is the stop time a Time?')
     assert(0.1 > (Time.now() + 2 - t.actor.stop), 'is the stop time now + 2?')
 
-    assert_raise(::OFlow::ConfigError) do
+    assert_raises(::OFlow::ConfigError) do
       ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, stop: 'now')
     end
   end
@@ -97,7 +94,7 @@ class TimerTest < ::Test::Unit::TestCase
     t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, period: 2.0, state: ::OFlow::Task::BLOCKED)
     assert_equal(2.0, t.actor.period, 'is the period 2.0?')
 
-    assert_raise(::OFlow::ConfigError) do
+    assert_raises(::OFlow::ConfigError) do
       ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, period: 'now')
     end
   end
@@ -109,7 +106,7 @@ class TimerTest < ::Test::Unit::TestCase
     t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, repeat: 2, state: ::OFlow::Task::BLOCKED)
     assert_equal(2, t.actor.repeat, 'is the repeat 2?')
 
-    assert_raise(::OFlow::ConfigError) do
+    assert_raises(::OFlow::ConfigError) do
       ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, repeat: 2.0)
     end
   end
@@ -124,7 +121,7 @@ class TimerTest < ::Test::Unit::TestCase
     t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, with_tracker: true, state: ::OFlow::Task::BLOCKED)
     assert_equal(true, t.actor.with_tracker, 'is the with_tracker true?')
 
-    assert_raise(::OFlow::ConfigError) do
+    assert_raises(::OFlow::ConfigError) do
       ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, with_tracker: 'now')
     end
 

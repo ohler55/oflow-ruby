@@ -1,12 +1,9 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../../lib"),
-  File.join(File.dirname(__FILE__), "..")
-].each { |path| $: << path unless $:.include?(path) }
+$: << File.dirname(File.dirname(__FILE__))
 
-require 'test/unit'
+require 'helper'
 require 'oflow'
 require 'oflow/test'
 
@@ -39,7 +36,7 @@ class Multiplier < ::OFlow::Actor
 
 end # Multiplier
 
-class MergerTest < ::Test::Unit::TestCase
+class MergerTest < ::MiniTest::Test
 
   def test_merger_any
     start = nil
@@ -109,7 +106,7 @@ class MergerTest < ::Test::Unit::TestCase
     assert(result.include?(3), 'box should include 3')
     
     t = box.tracker()
-    assert_not_nil(t, 'should have a tracker')
+    refute_nil(t, 'should have a tracker')
     assert_equal(t.id, tracker.id, 'tracker id should be carried through')
     track = t.track
     

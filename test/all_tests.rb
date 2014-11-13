@@ -1,12 +1,9 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../lib")
-].each { |path| $: << path unless $:.include?(path) }
+$: << File.dirname(__FILE__)
 
-
-require 'test/unit'
+require 'helper'
 
 require 'box_test'
 require 'task_test'
@@ -28,3 +25,4 @@ require 'actors/merger_test'
 require 'actors/persister_test'
 require 'actors/timer_test'
 require 'actors/httpserver_test'
+

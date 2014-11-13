@@ -1,12 +1,9 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../../lib"),
-  File.join(File.dirname(__FILE__), "..")
-].each { |path| $: << path unless $:.include?(path) }
+$: << File.dirname(File.dirname(__FILE__))
 
-require 'test/unit'
+require 'helper'
 require 'oflow'
 require 'oflow/test'
 
@@ -33,7 +30,7 @@ class Busy < ::OFlow::Actor
 
 end # Busy
 
-class BalancerTest < ::Test::Unit::TestCase
+class BalancerTest < ::MiniTest::Test
 
   def test_balancer_fair
     balancer = nil

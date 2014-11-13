@@ -1,11 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../lib")
-].each { |path| $: << path unless $:.include?(path) }
-
-require 'test/unit'
+require 'helper'
 require 'oflow'
 
 require 'collector'
@@ -23,7 +19,7 @@ class Hop < ::OFlow::Actor
 
 end # Hop
 
-class FlowNestTest < ::Test::Unit::TestCase
+class FlowNestTest < ::MiniTest::Test
 
   def test_flow_nest
     trigger = nil

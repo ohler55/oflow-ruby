@@ -1,13 +1,10 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../../lib"),
-  File.join(File.dirname(__FILE__), "..")
-].each { |path| $: << path unless $:.include?(path) }
+$: << File.dirname(File.dirname(__FILE__))
 
+require 'helper'
 require 'net/http'
-require 'test/unit'
 require 'oflow'
 require 'oflow/test'
 
@@ -25,7 +22,7 @@ class Reply < ::OFlow::Actor
 
 end # Reply
 
-class HttpServerTest < ::Test::Unit::TestCase
+class HttpServerTest < ::MiniTest::Test
 
   def test_httpserver
     ::OFlow::Env.flow('http-server', port: 6060) { |f|

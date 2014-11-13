@@ -1,11 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../lib")
-].each { |path| $: << path unless $:.include?(path) }
-
-require 'test/unit'
+require 'helper'
 require 'oflow'
 
 class Gather < ::OFlow::Actor
@@ -27,7 +23,7 @@ class Gather < ::OFlow::Actor
 end # Gather
 
 
-class TaskTest < ::Test::Unit::TestCase
+class TaskTest < ::MiniTest::Test
 
   def test_task_queue_count
     task = ::OFlow::Task.new(nil, 'test', Gather)
@@ -72,7 +68,7 @@ class TaskTest < ::Test::Unit::TestCase
   def test_task_raise_after_close
     task = ::OFlow::Task.new(nil, 'test', Gather)
     task.shutdown()
-    assert_raise(ThreadError) { task.start() }
+    assert_raises(ThreadError) { task.start() }
   end
 
   def test_task_max_queue_count

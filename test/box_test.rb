@@ -1,15 +1,9 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-# Ubuntu does not accept arguments to ruby when called using env. To get warnings to show up the -w options is
-# required. That can be set in the RUBYOPT environment variable.
-# export RUBYOPT=-w
+$: << File.dirname(__FILE__)
 
-$VERBOSE = true
-
-$: << File.join(File.dirname(__FILE__), "../lib")
-
-require 'test/unit'
+require 'helper'
 require 'oflow'
 
 class Access
@@ -20,7 +14,7 @@ class Access
   end
 end # Access
 
-class BoxTest < ::Test::Unit::TestCase
+class BoxTest < ::MiniTest::Test
 
   def test_box_new
     data = { a: [1, 'first'], b: true }
@@ -121,7 +115,7 @@ class BoxTest < ::Test::Unit::TestCase
     assert_equal(nil, b2.get('f:0'), 'get f:0')
     assert_equal('new', b2.get('f:1'), 'get f:1')
 
-    assert_raise(::OFlow::FrozenError) { box.set('d:x:1', 'three') }
+    assert_raises(::OFlow::FrozenError) { box.set('d:x:1', 'three') }
   end
 
 end # BoxTest

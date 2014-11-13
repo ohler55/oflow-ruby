@@ -1,24 +1,16 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-# Ubuntu does not accept arguments to ruby when called using env. To get warnings to show up the -w options is
-# required. That can be set in the RUBYOPT environment variable.
-# export RUBYOPT=-w
-
-$VERBOSE = true
-
-$: << File.join(File.dirname(__FILE__), "../lib")
-
-require 'test/unit'
+require 'helper'
 require 'oflow'
 
-class TrackerTest < ::Test::Unit::TestCase
+class TrackerTest < ::MiniTest::Test
 
   def test_tracker_new
     t = ::OFlow::Tracker.create('here')
     t2 = ::OFlow::Tracker.create('here')
 
-    assert_not_equal(t.id, t2.id, 'id must be unique')
+    refute_equal(t.id, t2.id, 'id must be unique')
     assert_equal('here', t.track[0].location)
   end
 

@@ -1,11 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../lib")
-].each { |path| $: << path unless $:.include?(path) }
-
-require 'test/unit'
+require 'helper'
 require 'oflow'
 
 require 'collector'
@@ -21,7 +17,7 @@ class Crash < ::OFlow::Actor
 
 end # Crash
 
-class FlowRescueTest < ::Test::Unit::TestCase
+class FlowRescueTest < ::MiniTest::Test
 
   # Make sure the error handler works and forwards to the 'error' task if it
   # exists.

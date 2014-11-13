@@ -1,11 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-[ File.dirname(__FILE__),
-  File.join(File.dirname(__FILE__), "../lib")
-].each { |path| $: << path unless $:.include?(path) }
-
-require 'test/unit'
+require 'helper'
 require 'oflow'
 
 require 'collector'
@@ -23,7 +19,7 @@ class Noise < ::OFlow::Actor
 
 end # Noise
 
-class FlowLogTest < ::Test::Unit::TestCase
+class FlowLogTest < ::MiniTest::Test
 
   # Make sure the log works and relays to a log task if it exists.
   def test_flow_log_relay
