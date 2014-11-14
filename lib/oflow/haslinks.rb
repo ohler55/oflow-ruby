@@ -18,7 +18,6 @@ module OFlow
       label = label.to_sym unless label.nil?
       op = op.to_sym unless op.nil?
       raise ConfigError.new("Link #{label} already exists.") unless @links[label].nil?
-      label = label.to_sym unless label.nil?
       @links[label] = Link.new(target.to_sym, op)
     end
 
@@ -38,12 +37,12 @@ module OFlow
     # Sets the target Task for a Link.
     # @param lnk [Link] Link to find the target Task for.
     def set_link_target(lnk)
-        if lnk.ingress
-          task = find_task(lnk.target_name)
-        else
-          task = @flow.find_task(lnk.target_name)
-        end
-        lnk.instance_variable_set(:@target, task)
+      if lnk.ingress
+        task = find_task(lnk.target_name)
+      else
+        task = @flow.find_task(lnk.target_name)
+      end
+      lnk.instance_variable_set(:@target, task)
     end
 
     # Attempts to find the Link identified by the label.

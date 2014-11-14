@@ -6,10 +6,13 @@ module OFlow
   # data by the receive() method. The request is put on a queue and popped off
   # one at a time and handed to an Actor associatesd with the Task.
   class Task
-    include HasName
+
     include HasLinks
     include HasErrorHandler
     include HasLog
+
+    # The name.
+    attr_reader :name
 
     # value of @state that indicates the Task is being created.
     STARTING = 0
@@ -36,6 +39,8 @@ module OFlow
     # @param actor_class [Class] _class Class of the Actor to create
     # @param options [Hash] additional options for the Task or Actor
     def initialize(flow, name, actor_class, options={})
+      @flow = flow
+      @name = name.to_sym
       @state = STARTING
       @queue = []
       @req_mutex = Mutex.new()
@@ -48,7 +53,6 @@ module OFlow
       @proc_cnt = 0
       @loop = nil
 
-      init_name(flow, name)
       init_links()
       set_options(options)
 
@@ -99,6 +103,13 @@ module OFlow
           end
         end
       end
+    end
+
+    # Similar to a full file path. The full_name described the containment of
+    # the named item.
+    # @return [String] full name of item
+    def full_name()
+      @flow.full_name() + ':' + @name.to_s
     end
 
     # Returns the state of the Task as a String.
