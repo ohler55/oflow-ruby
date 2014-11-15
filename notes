@@ -4,6 +4,11 @@
 ^c^s show subtree
 
 - todo
+ - test
+  - build env with multiple flows
+  - build, validate, start
+   - flag for validate to avoid double validate on start
+   - need to reset falg when flow or task is added
  - handle links to other flows
   - validate also
 

@@ -9,7 +9,7 @@ module OFlow
     attr_reader :target_name
     # Operation to provide the target.
     attr_reader :op
-    # The actual target Task or Flow.
+    # The actual target Task.
     attr_reader :target
     # Flag indicating the Link is from a Flow to a Task contained in the Flow.
     attr_reader :ingress

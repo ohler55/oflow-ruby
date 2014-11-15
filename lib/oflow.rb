@@ -4,9 +4,6 @@ end
 
 require 'oflow/errors'
 require 'oflow/stamp'
-require 'oflow/hasname'
-require 'oflow/hastasks'
-require 'oflow/haslinks'
 require 'oflow/haserrorhandler'
 require 'oflow/haslog'
 require 'oflow/pattern'
