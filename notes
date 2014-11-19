@@ -4,6 +4,11 @@
 ^c^s show subtree
 
 - todo
+
+ - make env an object, not a class
+  - log() should change
+   - separate for each type
+
  - test
   - build env with multiple flows
   - build, validate, start
@@ -12,20 +17,7 @@
  - handle links to other flows
   - validate also
 
- - get rid of nested
-  - env
-   - has flows
-  - flow
-   - has tasks
-   - has inputs
-  - task
-   - has links
-    - to tasks/ops
-    - to flows/input
-  - input
-   - name
-   - task
-   - op
+
 
   - use flow-call or flow-wrap task or something instead
    - connect links to input of flow

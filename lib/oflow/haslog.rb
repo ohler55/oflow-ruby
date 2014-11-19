@@ -4,26 +4,12 @@ module OFlow
   # Adds the ability to log by sending log requests to a log Task.
   module HasLog
 
-    # Returns a log Task by looking for that Task in an attribute and then in
-    # the contained Tasks or Tasks in outer Flows.
-    # @return [Task] log Task.
-    def log()
-      return @log if instance_variable_defined?(:@log) && !@log.nil?
-      # Log task take precedence over log variable.
-      if respond_to?(:find_task)
-        lg = find_task(:log)
-        return lg unless lg.nil?
-      end
-      return @flow.log if instance_variable_defined?(:@flow) && @flow.respond_to?(:log)
-      nil
-    end
-
     # Sets the log attribute.
     # @param t [Task] log Task
     def log=(t)
       @log = t
     end
-
+    
     # Lower level logging method. Generally only used when one of the primary
     # severity methods are called.
     # @param level [String] message severity or level

@@ -52,6 +52,7 @@ module OFlow
       @proc_cnt = 0
       @loop = nil
       @links = {}
+      @log = nil
 
       set_options(options)
 
@@ -104,16 +105,19 @@ module OFlow
       end
     end
 
-    # Creates a Link identified by the label that has a target Task or Flow and
+    # Creates a Link identified by the label that has a target Task and
     # operation.
+
     # @param label [Symbol|String] identifer of the Link
     # @param target [Symbol|String] identifer of the target Task
     # @param op [Symbol|String] operation to perform on the target Task
-    def link(label, target, op)
+    # @param flow_name [Symbol|String] parent flow name to find the target task in or nil for this parent
+    def link(label, target, op, flow_name=nil)
       label = label.to_sym unless label.nil?
       op = op.to_sym unless op.nil?
+      flow_name = flow_name.to_sym unless flow_name.nil?
       raise ConfigError.new("Link #{label} already exists.") unless @links[label].nil?
-      @links[label] = Link.new(target.to_sym, op)
+      @links[label] = Link.new(flow_name, target.to_sym, op)
     end
 
     # Similar to a full file path. The full_name described the containment of
@@ -121,6 +125,14 @@ module OFlow
     # @return [String] full name of item
     def full_name()
       @flow.full_name() + ':' + @name.to_s
+    end
+
+    # Returns a log Task by looking for that Task in an attribute and then in
+    # the contained Tasks or Tasks in outer Flows.
+    # @return [Task] log Task.
+    def log()
+      return @log unless @log.nil?
+      @flow.log()
     end
 
     # Returns the state of the Task as a String.
@@ -416,12 +428,9 @@ module OFlow
     # Sets the target Task for a Link.
     # @param lnk [Link] Link to find the target Task for.
     def set_link_target(lnk)
-      if lnk.ingress
-        task = find_task(lnk.target_name)
-      else
-        task = @flow.find_task(lnk.target_name)
-      end
-      lnk.instance_variable_set(:@target, task)
+      f = @flow
+      f = env.find_flow(lnk.flow_name) unless lnk.flow_name.nil?
+      lnk.instance_variable_set(:@target, f.find_task(lnk.target_name))
     end
 
     # Attempts to find the Link identified by the label.

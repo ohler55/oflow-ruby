@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
+$: << File.dirname(__FILE__)
+
 require 'helper'
 require 'oflow'
 
@@ -23,85 +25,101 @@ class FlowLogTest < ::MiniTest::Test
 
   # Make sure the log works and relays to a log task if it exists.
   def test_flow_log_relay
+    env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
-    ::OFlow::Env.log_level = Logger::WARN
-    ::OFlow::Env.flow('log_relay') { |f|
+    env.log_level = Logger::WARN
+    env.flow('log_relay') { |f|
       trigger = f.task('noise', Noise)
       f.task(:log, Collector) { |t|
         collector = t.actor
       }
     }
+    env.prepare()
+    env.start()
+
     trigger.receive(:speak, ::OFlow::Box.new(7))
-    ::OFlow::Env.flush()
+    env.flush()
 
-    assert_equal(collector.collection.size, 1)
-    assert_equal(collector.collection[0][0], 'op: speak, box: 7')
-    assert_equal(collector.collection[0][1], ':log_relay:noise')
+    assert_equal(1, collector.collection.size)
+    assert_equal('op: speak, box: 7', collector.collection[0][0])
+    assert_equal('log_relay:noise', collector.collection[0][1])
 
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
   # Make sure the log in the flow var is used.
   def test_flow_log_var
+    env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
-    ::OFlow::Env.log_level = Logger::WARN
-    ::OFlow::Env.flow('log_var') { |f|
+    env.log_level = Logger::WARN
+    env.flow('log_var') { |f|
       trigger = f.task('noise', Noise)
       f.log = f.task(:collector, Collector) { |t|
         collector = t.actor
       }
     }
+    env.prepare()
+    env.start()
+
     trigger.receive(:speak, ::OFlow::Box.new(7))
-    ::OFlow::Env.flush()
+    env.flush()
 
-    assert_equal(collector.collection.size, 1)
-    assert_equal(collector.collection[0][0], 'op: speak, box: 7')
-    assert_equal(collector.collection[0][1], ':log_var:noise')
+    assert_equal(1, collector.collection.size)
+    assert_equal('op: speak, box: 7', collector.collection[0][0])
+    assert_equal('log_var:noise', collector.collection[0][1])
 
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
   # Make sure the log in the Env var is used.
   def test_flow_log_env
+    env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
-    ::OFlow::Env.log_level = Logger::WARN
-    ::OFlow::Env.flow('log_env') { |f|
+    env.log_level = Logger::WARN
+    env.flow('log_env') { |f|
       trigger = f.task('noise', Noise)
-      ::OFlow::Env.log = f.task(:collector, Collector) { |t|
+      env.log = f.task(:collector, Collector) { |t|
         collector = t.actor
       }
     }
+    env.prepare()
+    env.start()
+
     trigger.receive(:speak, ::OFlow::Box.new(7))
-    ::OFlow::Env.flush()
+    env.flush()
 
-    assert_equal(collector.collection.size, 1)
-    assert_equal(collector.collection[0][0], 'op: speak, box: 7')
-    assert_equal(collector.collection[0][1], ':log_env:noise')
+    assert_equal(1, collector.collection.size)
+    assert_equal('op: speak, box: 7', collector.collection[0][0])
+    assert_equal('log_env:noise', collector.collection[0][1])
 
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
   def test_flow_log_info
+    env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
-    ::OFlow::Env.log_level = Logger::WARN
-    ::OFlow::Env.flow('log_info') { |f|
+    env.log_level = Logger::WARN
+    env.flow('log_info') { |f|
       f.log = f.task(:collector, Collector) { |t|
         collector = t.actor
       }
       # Set after log to avoid race condition with the creation of the collector
       # and the assignment to f.log. The race is whether a log message is
       # displayed on the output.
-      ::OFlow::Env.log_level = Logger::INFO
+      env.log_level = Logger::INFO
       trigger = f.task('noise', Noise) { |t|
         t.link(nil, :collector, nil)
       }
     }
+    env.prepare()
+    env.start()
+
     trigger.receive(:speak, ::OFlow::Box.new(7))
-    ::OFlow::Env.flush()
+    env.flush()
 
     entries = collector.collection.map { |entry| entry[0] }
     assert_equal(["Creating actor Noise with options {:state=>1}.",
@@ -111,8 +129,8 @@ class FlowLogTest < ::MiniTest::Test
                   "shipping Box{[7]} to collector:",
                   7], entries)
 
-    ::OFlow::Env.clear()
-    ::OFlow::Env.log_level = Logger::WARN
+    env.clear()
+    env.log_level = Logger::WARN
   end
 
 end # FlowLogTest

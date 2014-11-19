@@ -6,8 +6,9 @@ module OFlow
   class Inspector < ::OTerm::Executor
     attr_reader :running
 
-    def initialize(port=6060)
+    def initialize(env, port=6060)
       super()
+      @env = env
       @running = true
       
       register('busy', self, :busy, 'returns the busy state of the system.', nil)
@@ -44,7 +45,7 @@ available for sorting on name, activity, or queue size.|)
     def shutdown(listener, args)
       super
       @running = false
-      Env.shutdown()
+      @env.shutdown()
     end
 
     def greeting()
@@ -56,7 +57,7 @@ available for sorting on name, activity, or queue size.|)
     end
 
     def busy(listener, args)
-      if Env.busy?()
+      if @env.busy?()
         listener.out.pl("One or more Tasks is busy.")
       else
         listener.out.pl("All Tasks are idle.")
@@ -64,14 +65,14 @@ available for sorting on name, activity, or queue size.|)
     end
 
     def flows(listener, args)
-      Env.each_task() do |t|
+      @env.each_task() do |t|
         listener.out.pl(t.full_name)
       end
     end
 
     def list(listener, args)
       if nil == args
-        Env.each_task() do |task|
+        @env.each_task() do |task|
           listener.out.pl(task.full_name)
         end
         return
@@ -81,7 +82,7 @@ available for sorting on name, activity, or queue size.|)
       if id.nil?
         flow = Env
       else
-        flow = Env.locate(id)
+        flow = @env.locate(id)
       end
       if flow.nil?
         listener.out.pl("--- No Flow or Task found for #{id}")
@@ -100,7 +101,7 @@ available for sorting on name, activity, or queue size.|)
       detail, id, ok = _parse_opt_id_args(args, 'v', listener)
       return unless ok
 
-      task = Env.locate(id)
+      task = @env.locate(id)
       if task.nil?
         listener.out.pl("--- Failed to find '#{id}'")
         return
@@ -110,11 +111,11 @@ available for sorting on name, activity, or queue size.|)
 
     def start(listener, args)
       if nil == args || 0 == args.size()
-        Env.start()
+        @env.start()
         listener.out.pl("All Tasks restarted")
       else
         args.strip!
-        task = Env.locate(args)
+        task = @env.locate(args)
         if task.nil?
           listener.out.pl("--- Failed to find '#{args}'")
         else
@@ -125,7 +126,7 @@ available for sorting on name, activity, or queue size.|)
     end
 
     def step(listener, args)
-      lg = Env.log()
+      lg = @env.log()
       stop_after = false
       if !lg.nil? && Task::STOPPED == lg.state
         lg.start()
@@ -136,7 +137,7 @@ available for sorting on name, activity, or queue size.|)
         task = Env
       else
         args.strip!
-        task = Env.locate(args)
+        task = @env.locate(args)
       end
       if task.nil?
         listener.out.pl("--- Failed to find '#{args}'")
@@ -153,11 +154,11 @@ available for sorting on name, activity, or queue size.|)
 
     def stop(listener, args)
       if nil == args || 0 == args.size()
-        Env.stop()
+        @env.stop()
         listener.out.pl("All Tasks stopped(paused)")
       else
         args.strip!
-        task = Env.locate(args)
+        task = @env.locate(args)
         if task.nil?
           listener.out.pl("--- Failed to find '#{args}'")
         else
@@ -168,7 +169,7 @@ available for sorting on name, activity, or queue size.|)
     end
 
     def verbosity(listener, args)
-      lg = Env.log
+      lg = @env.log
       if lg.nil?
         listener.out.pl("--- No logger")
         return
@@ -188,10 +189,10 @@ available for sorting on name, activity, or queue size.|)
     def watch(listener, args)
       tasks = []
       if args.nil? || 0 == args.size()
-        Env.walk_tasks() { |t| tasks << t }
+        @env.walk_tasks() { |t| tasks << t }
       else
         args.strip!
-        task = Env.locate(args)
+        task = @env.locate(args)
         if task.nil?
           listener.out.pl("--- Failed to find '#{args}'")
           return
@@ -388,7 +389,7 @@ available for sorting on name, activity, or queue size.|)
         names = ['fatal', 'error', 'warn', 'info', 'debug'].select { |s| s.start_with?(last.downcase()) }
       else # expect id or options
         with_colon = ':' == last[0]
-        Env.walk_tasks(false) do |t|
+        @env.walk_tasks(false) do |t|
           fn = t.full_name
           fn = fn[1..-1] unless with_colon
           names << fn if fn.start_with?(last)

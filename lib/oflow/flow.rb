@@ -19,7 +19,9 @@ module OFlow
     def initialize(env, name, options)
       @name = name.to_sym
       @tasks = {}
-      @inputs = {}
+      @prepared = false
+      @log = nil
+      @env = env
     end
 
     # Similar to a full file path. The full_name described the containment of
@@ -27,6 +29,16 @@ module OFlow
     # @return [String] full name of item
     def full_name()
       @name.to_s
+    end
+
+    # Returns a log Task by looking for that Task in an attribute and then in
+    # the contained Tasks or Tasks in outer Flows.
+    # @return [Task] log Task.
+    def log()
+      return @log unless @log.nil?
+      lg = find_task(:log)
+      return lg unless lg.nil?
+      @env.log
     end
 
     # Creates a Task and yield to a block with the newly create Task. Used to
@@ -64,15 +76,10 @@ module OFlow
     # Resolves all the Links on all the Tasks and Flows being managed as well as
     # any Links in the instance itself.
     def resolve_all_links()
-      @inputs.each_value { |lnk|
-        if lnk.target.nil?
-          task = find_task(lnk.target_name)
-          lnk.instance_variable_set(:@target, task)
-        end
-      }
       @tasks.each_value { |t|
         t.resolve_all_links()
       }
+      @prepared = true
     end
 
     # Iterates over each Task and yields to the provided block with each Task.
@@ -166,6 +173,7 @@ module OFlow
 
     # Calls the start() method on all Tasks.
     def start()
+      raise ValidateError.new("#{full_name} not validated.") unless @prepared
       @tasks.each_value { |task| task.start() }
     end
 
@@ -213,68 +221,6 @@ module OFlow
       _clear()
     end
 
-    # Creates a Link identified by the label that has a target Task and
-    # operation.
-    # @param label [Symbol|String] identifer of the Link
-    # @param target [Symbol|String] identifer of the target Task
-    # @param op [Symbol|String] operation to perform on the target Task
-    def input(label, target, op)
-      label = label.to_sym unless label.nil?
-      op = op.to_sym unless op.nil?
-      raise ConfigError.new("Input #{label} already exists.") unless @inputs[label].nil?
-      @inputs[label] = Link.new(target.to_sym, op)
-    end
-
-    # Attempts to find and resolve the input identified by the label. Resolving
-    # a input uses the target identifier to find the target Task and saves that
-    # in the Link.
-    # @param label [Symbol|String] identifer of the Input
-    # @return [Link] returns the input for the label
-    def resolve_link(label)
-      label = label.to_sym unless label.nil?
-      lnk = @inputs[label] || @links[nil]
-      return nil if lnk.nil?
-      if lnk.target.nil?
-        task = find_task(lnk.target_name)
-        lnk.instance_variable_set(:@target, task)
-      end
-      lnk
-    end
-
-    # Receive a request which is redirected to a Linked target Task.
-    # @param input [Symbol] identifies the link that points to the destination Task or Flow
-    # @param box [Box] contents or data for the request
-    def receive(input, box)
-      box = box.receive(full_name, input)
-      lnk = find_input(input) # find input
-      raise LinkError.new(op) if lnk.nil? || lnk.target.nil?
-      lnk.target.receive(lnk.op, box)
-    end
-
-    # Attempts to find the input identified by the label.
-    # @param label [Symbol|String] identifer of the input
-    # @return [Link] returns the input Link for the label
-    def find_input(label)
-      label = label.to_sym unless label.nil?
-      @inputs[label] || @inputs[nil]
-    end
-
-    # Returns true if the Flow has a Link identified by the op.
-    # @param op [Symbol] identifies the Link in question
-    def has_input(op)
-      !find_input(op).nil?
-    end
-
-    # Returns the input Links.
-    # @return [Hash] Hash of Links with the keys as Symbols that are the labels of the Links.
-    def inputs()
-      @inputs
-    end
-
-    def has_inputs?()
-      !@inputs.nil? && !@inputs.empty?
-    end
-
     # Returns a String describing the Flow.
     # @param detail [Fixnum] higher values result in more detail in the description
     # @param indent [Fixnum] the number of spaces to indent the description
@@ -283,9 +229,6 @@ module OFlow
       lines = ["#{i}#{name} (#{self.class}) {"]
       @tasks.each_value { |t|
         lines << t.describe(detail, indent + 2)
-      }
-      @inputs.each { |local,link|
-        lines << "  #{i}#{local} => #{link.target_name}:#{link.op}"
       }
       lines << i + "}"
       lines.join("\n")
