@@ -10,8 +10,17 @@ module OFlow
 
     @@log_level = Logger::WARN
 
+    # Returns the default log level.
+    # @return [Fixnum] the default log level which is one of the Logger::Severity values.
     def self.log_level()
       @@log_level
+    end
+
+    # Sets the default log level.
+    # @param level [Fixnum] Logger::Severity to set the default log level to
+    def self.log_level=(level)
+      @@log_level = level unless level < Logger::Severity::DEBUG || Logger::Severity::FATAL < level
+      #@log.receive(:severity, Box.new(@log_level)) unless @log.nil?
     end
 
     def initialize(name='')
@@ -19,7 +28,7 @@ module OFlow
       @flows = {}
       @prepared = false
       @name = name
-      @log = nil
+      _clear()
     end
 
     def full_name()
@@ -217,19 +226,6 @@ module OFlow
       shutdown()
       @flows = {}
       _clear()
-    end
-
-    # Returns the default log level.
-    # @return [Fixnum] the default log level which is one of the Logger::Severity values.
-    def log_level()
-      @log_level
-    end
-
-    # Sets the default log level.
-    # @param level [Fixnum] Logger::Severity to set the default log level to
-    def log_level=(level)
-      @log_level = level unless level < Logger::Severity::DEBUG || Logger::Severity::FATAL < level
-      @log.receive(:severity, Box.new(@log_level)) unless @log.nil?
     end
 
     # Resets the error handler and log. Usually called on init and by the

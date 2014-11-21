@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-$: << File.dirname(__FILE__)
+$: << File.dirname(__FILE__) unless $:.include? File.dirname(__FILE__)
 
 require 'helper'
 require 'oflow'
@@ -28,7 +28,7 @@ class FlowLogTest < ::MiniTest::Test
     env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
-    env.log_level = Logger::WARN
+    ::OFlow::Env.log_level = Logger::WARN
     env.flow('log_relay') { |f|
       trigger = f.task('noise', Noise)
       f.task(:log, Collector) { |t|
@@ -53,7 +53,7 @@ class FlowLogTest < ::MiniTest::Test
     env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
-    env.log_level = Logger::WARN
+    ::OFlow::Env.log_level = Logger::WARN
     env.flow('log_var') { |f|
       trigger = f.task('noise', Noise)
       f.log = f.task(:collector, Collector) { |t|
@@ -78,7 +78,7 @@ class FlowLogTest < ::MiniTest::Test
     env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
-    env.log_level = Logger::WARN
+    ::OFlow::Env.log_level = Logger::WARN
     env.flow('log_env') { |f|
       trigger = f.task('noise', Noise)
       env.log = f.task(:collector, Collector) { |t|
@@ -102,7 +102,7 @@ class FlowLogTest < ::MiniTest::Test
     env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
-    env.log_level = Logger::WARN
+    ::OFlow::Env.log_level = Logger::WARN
     env.flow('log_info') { |f|
       f.log = f.task(:collector, Collector) { |t|
         collector = t.actor
@@ -110,7 +110,7 @@ class FlowLogTest < ::MiniTest::Test
       # Set after log to avoid race condition with the creation of the collector
       # and the assignment to f.log. The race is whether a log message is
       # displayed on the output.
-      env.log_level = Logger::INFO
+    ::OFlow::Env.log_level = Logger::INFO
       trigger = f.task('noise', Noise) { |t|
         t.link(nil, :collector, nil)
       }
@@ -130,7 +130,7 @@ class FlowLogTest < ::MiniTest::Test
                   7], entries)
 
     env.clear()
-    env.log_level = Logger::WARN
+    ::OFlow::Env.log_level = Logger::WARN
   end
 
 end # FlowLogTest

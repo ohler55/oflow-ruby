@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
+$: << File.dirname(__FILE__) unless $:.include? File.dirname(__FILE__)
+
 require 'helper'
 require 'oflow'
 
@@ -49,7 +51,8 @@ class FlowCfgErrTest < ::MiniTest::Test
 
   def test_flow_link_unresolved
     begin
-      ::OFlow::Env.flow('unresolved', :opt1 => 1) { |f|
+      env = ::OFlow::Env.new('')
+      env.flow('unresolved', :opt1 => 1) { |f|
         f.task(:one, Dummy) { |t|
           t.link(:two, :two, nil)
         }
@@ -57,17 +60,20 @@ class FlowCfgErrTest < ::MiniTest::Test
           t.link(:second, :two, nil)
         }
       }
+      env.prepare()
+      env.start()
       assert(false, "expected a ValidateError")
     rescue ::OFlow::ValidateError => ve
-      assert_equal([":unresolved:one: Failed to find task 'two'.",
-                    ":unresolved:three: Failed to find task 'two'."], ve.problems.map { |p| p.to_s })
+      assert_equal(["unresolved:one: Failed to find task 'two'.",
+                    "unresolved:three: Failed to find task 'two'."], ve.problems.map { |p| p.to_s })
     end
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
   def test_flow_link_missing
+    env = ::OFlow::Env.new('')
     begin
-      ::OFlow::Env.flow('miss-me') { |f|
+      env.flow('miss-me') { |f|
         f.task(:sort, Miss) { |t|
           t.link(:fixnum, :fix, nil)
         }
@@ -76,12 +82,14 @@ class FlowCfgErrTest < ::MiniTest::Test
           t.link(:wrong, :sort, :complex)
         }
       }
+      env.prepare()
+      env.start()
       assert(false, "expected a ValidateError")
     rescue ::OFlow::ValidateError => ve
-      assert_equal([":miss-me:sort: Missing link for 'float'.",
-                    ":miss-me:fix: 'complex' not allowed on ':miss-me:sort'."], ve.problems.map { |p| p.to_s })
+      assert_equal(["miss-me:sort: Missing link for 'float'.",
+                    "miss-me:fix: 'complex' not allowed on 'miss-me:sort'."], ve.problems.map { |p| p.to_s })
     end
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
   # TBD missing links for output spec
