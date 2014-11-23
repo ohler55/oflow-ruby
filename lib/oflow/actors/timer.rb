@@ -154,23 +154,29 @@ module OFlow
       end
 
       def set_period(v)
+        p = 0.0
         if v.kind_of?(Numeric)
-          @period = v
+          p = v
         elsif v.is_a?(String)
-          @period = v.strip().to_f
+          p = v.strip().to_f
         else
           raise ConfigError.new("Expected period to be a Numeric, not a #{v.class}.")
         end
+        raise ConfigError.new("period must be greater than 0.0.") if 0.0 >= p
+        @period = p
       end
 
       def set_repeat(v)
+        r = nil
         if v.kind_of?(Fixnum)
-          @repeat = v
+          r = v
         elsif v.is_a?(String)
-          @repeat = v.strip().to_i
-        else
+          r = v.strip().to_i
+        elsif !v.nil?
           raise ConfigError.new("Expected repeat to be a Fixnum, not a #{v.class}.")
         end
+        raise ConfigError.new("repeat must be greater than or equal 0.0 or nil") if !r.nil? && 0.0 >= r
+        @repeat = r
       end
 
       def set_label(v)

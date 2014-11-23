@@ -14,7 +14,7 @@ require 'flow_basic_test'
 require 'flow_log_test'
 require 'flow_cfg_error_test'
 require 'flow_rescue_test'
-require 'flow_nest_test'
+require 'flow_linked_test'
 require 'flow_tracker_test'
 
 # Actor tests
@@ -24,4 +24,3 @@ require 'actors/merger_test'
 require 'actors/persister_test'
 require 'actors/timer_test'
 require 'actors/httpserver_test'
-

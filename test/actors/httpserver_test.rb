@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-$: << File.dirname(File.dirname(__FILE__))
+$: << File.dirname(File.dirname(__FILE__)) unless $:.include? File.dirname(File.dirname(__FILE__))
 
 require 'helper'
 require 'net/http'
@@ -25,14 +25,18 @@ end # Reply
 class HttpServerTest < ::MiniTest::Test
 
   def test_httpserver
-    ::OFlow::Env.flow('http-server', port: 6060) { |f|
-      f.task('server', ::OFlow::Actors::HttpServer) { |t|
+    env = ::OFlow::Env.new('')
+    env.flow('http-server') { |f|
+      f.task('server', ::OFlow::Actors::HttpServer, port: 6060) { |t|
         t.link(nil, :reply, nil)
       }
       f.task(:reply, Reply) { |t|
         t.link(nil, :server, :reply)
       }
     }
+    env.prepare()
+    env.start()
+
     # GET
     uri = URI('http://localhost:6060/test?a=1&b=two')
     reply = Net::HTTP.get(uri)
@@ -47,8 +51,8 @@ class HttpServerTest < ::MiniTest::Test
     assert_equal(%|{:id=>2, :method=>\"POST\", :protocol=>\"HTTP/1.1\", :path=>\"/test\", :args=>nil, \"Accept-Encoding\"=>\"gzip;q=1.0,deflate;q=0.6,identity;q=0.3\", \"Accept\"=>\"*/*\", \"User-Agent\"=>\"Ruby\", \"Host\"=>\"localhost:6060\", \"Content-Type\"=>\"application/x-www-form-urlencoded\", \"Content-Length\"=>9, :body=>\"a=1&b=two\"}|,
                  reply, 'expected reply from POST')
 
-    ::OFlow::Env.flush()
-    ::OFlow::Env.clear()
+    env.flush()
+    env.clear()
   end
 
 end # HttpServerTest

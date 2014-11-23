@@ -32,7 +32,7 @@ class FlowBasicTest < ::MiniTest::Test
     env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
-    flow = env.flow('basic', :opt1 => 1) { |f|
+    env.flow('basic') { |f|
       # collects results
       f.task(:collector, Collector) { |t|
         collector = t.actor
@@ -59,13 +59,13 @@ class FlowBasicTest < ::MiniTest::Test
     collector (Collector) {
     }
     trigger (Stutter) {
-      collector => collector:trigger
-      once => dub:twice
+      collector => :collector:trigger
+      once => :dub:twice
     }
     dub (Stutter) {
-      collector => collector:dub
-      twice => dub:once
-      once => ignore:
+      collector => :collector:dub
+      twice => :dub:once
+      once => :ignore:
     }
     ignore (OFlow::Actors::Ignore) {
     }

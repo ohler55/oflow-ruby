@@ -35,7 +35,7 @@ module OFlow
       end
 
       def links()
-        lnk = Link.new(@name, nil)
+        lnk = Link.new(@name, nil, nil)
         lnk.instance_variable_set(:@target, self)
         { nil => lnk }
       end

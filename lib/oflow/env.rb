@@ -41,6 +41,11 @@ module OFlow
       @log
     end
 
+    # Returns a error_handler Task if one is set on the instance.
+    # @return [Task] error_handler Task.
+    def error_handler()
+      @error_handler
+    end
 
     # Creates a Flow and yield to a block with the newly create Flow. Used to
     # contruct Flows.
@@ -48,8 +53,8 @@ module OFlow
     # @param options [Hash] optional parameters
     # @param block [Proc] block to yield to with the new Flow instance
     # @return [Flow] new Flow
-    def flow(name, options={}, &block)
-      f = Flow.new(self, name, options)
+    def flow(name, &block)
+      f = Flow.new(self, name)
       @flows[f.name] = f
       yield(f) if block_given?
       f
@@ -152,6 +157,8 @@ module OFlow
     # @return [true|false] the busy state across all Tasks
     def busy?
       @flows.each_value { |f| return true if f.busy? }
+      return true if !@log.nil? && @log.busy?
+      return true if !@error_handler.nil? && @error_handler.busy?
       false
     end
 

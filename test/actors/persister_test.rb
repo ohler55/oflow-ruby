@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-$: << File.dirname(File.dirname(__FILE__))
+$: << File.dirname(File.dirname(__FILE__)) unless $:.include? File.dirname(File.dirname(__FILE__))
 
 require 'helper'
 require 'oflow'

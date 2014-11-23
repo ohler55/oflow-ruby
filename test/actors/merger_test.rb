@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-$: << File.dirname(File.dirname(__FILE__))
+$: << File.dirname(File.dirname(__FILE__)) unless $:.include? File.dirname(File.dirname(__FILE__))
 
 require 'helper'
 require 'oflow'
@@ -39,9 +39,10 @@ end # Multiplier
 class MergerTest < ::MiniTest::Test
 
   def test_merger_any
+    env = ::OFlow::Env.new('')
     start = nil
     collector = nil
-    ::OFlow::Env.flow('merge') { |f|
+    env.flow('merge') { |f|
       f.task(:split, Splitter) { |t|
         start = t
         t.link(:left, :one, nil)
@@ -60,21 +61,25 @@ class MergerTest < ::MiniTest::Test
         collector = t.actor
       }
     }
+    env.prepare()
+    env.start()
+
     start.receive(nil, ::OFlow::Box.new(1))
-    ::OFlow::Env.flush()
+    env.flush()
 
     result = collector.collection[0]
     assert_equal(2, result.size, 'should be 2 values in the box')
     assert(result.include?(2), 'box should include 2')
     assert(result.include?(3), 'box should include 3')
 
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
   def test_merger_tracker
+    env = ::OFlow::Env.new('')
     start = nil
     collector = nil
-    ::OFlow::Env.flow('merge') { |f|
+    env.flow('merge') { |f|
       f.task(:split, Splitter) { |t|
         start = t
         t.link(:left, :one, nil)
@@ -93,11 +98,14 @@ class MergerTest < ::MiniTest::Test
         collector = t.actor
       }
     }
+    env.prepare()
+    env.start()
+
     tracker = ::OFlow::Tracker.create('start')
     start.receive(nil, ::OFlow::Box.new(1, tracker))
     tracker2 = ::OFlow::Tracker.create('start2')
     start.receive(nil, ::OFlow::Box.new(10, tracker2))
-    ::OFlow::Env.flush()
+    env.flush()
 
     box = collector.collection[0]
     result = box.contents
@@ -111,14 +119,14 @@ class MergerTest < ::MiniTest::Test
     track = t.track
     
     assert_equal('start', track[0].location)
-    assert_equal(':merge:split', track[1].location)
+    assert_equal('merge:split', track[1].location)
     split = track[2].map { |a| a.map { |stamp| stamp.location } }
 
     assert_equal(2, split.size, 'should be 2 values in the split')
-    assert(split.include?([':merge:one']), 'split should include [merge:one]')
-    assert(split.include?([':merge:two']), 'split should include [merge:two]')
-    assert_equal(':merge:merge', track[3].location)
-    assert_equal(':merge:collector', track[4].location)
+    assert(split.include?(['merge:one']), 'split should include [merge:one]')
+    assert(split.include?(['merge:two']), 'split should include [merge:two]')
+    assert_equal('merge:merge', track[3].location)
+    assert_equal('merge:collector', track[4].location)
 
     box = collector.collection[1]
     result = box.contents
@@ -126,7 +134,7 @@ class MergerTest < ::MiniTest::Test
     assert(result.include?(20), 'box should include 20')
     assert(result.include?(30), 'box should include 30')
 
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
 end # MergerTest

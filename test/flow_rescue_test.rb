@@ -45,9 +45,9 @@ class FlowRescueTest < ::MiniTest::Test
     trigger.receive(:knock, ::OFlow::Box.new(7))
     env.flush()
 
-    assert_equal(collector.collection.size, 1)
-    assert_equal(collector.collection[0][0].class, NoMethodError)
-    assert_equal(collector.collection[0][1], ':rescue:crash')
+    assert_equal(1, collector.collection.size)
+    assert_equal(NoMethodError, collector.collection[0][0].class)
+    assert_equal('rescue:crash', collector.collection[0][1])
 
     env.clear()
   end
@@ -72,9 +72,9 @@ class FlowRescueTest < ::MiniTest::Test
     trigger.receive(:knock, ::OFlow::Box.new(7))
     env.flush()
 
-    assert_equal(collector.collection.size, 1)
-    assert_equal(collector.collection[0][0].class, NoMethodError)
-    assert_equal(collector.collection[0][1], ':rescue:crash')
+    assert_equal(1, collector.collection.size)
+    assert_equal(NoMethodError, collector.collection[0][0].class)
+    assert_equal('rescue:crash', collector.collection[0][1])
 
     env.clear()
   end
@@ -93,12 +93,15 @@ class FlowRescueTest < ::MiniTest::Test
         t.link(nil, 'collector', 'log')
       }
     }
+    env.prepare()
+    env.start()
+
     trigger.receive(:knock, ::OFlow::Box.new(7))
     env.flush()
 
     assert_equal(1, collector.collection.size)
     assert_equal(NoMethodError, collector.collection[0][0].class)
-    assert_equal(':rescue:crash', collector.collection[0][1])
+    assert_equal('rescue:crash', collector.collection[0][1])
 
     env.clear()
   end
@@ -114,6 +117,9 @@ class FlowRescueTest < ::MiniTest::Test
         collector = t.actor
       }
     }
+    env.prepare()
+    env.start()
+
     trigger.receive(:knock, ::OFlow::Box.new(7))
     env.flush()
 
@@ -123,7 +129,7 @@ class FlowRescueTest < ::MiniTest::Test
                   "/task.rb:0:in `block in initialize'"],
                  simplify(collector.collection[0][0]))
 
-    assert_equal(':rescue:crash', collector.collection[0][1])
+    assert_equal('rescue:crash', collector.collection[0][1])
 
     env.clear()
   end

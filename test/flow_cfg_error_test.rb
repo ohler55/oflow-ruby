@@ -52,7 +52,7 @@ class FlowCfgErrTest < ::MiniTest::Test
   def test_flow_link_unresolved
     begin
       env = ::OFlow::Env.new('')
-      env.flow('unresolved', :opt1 => 1) { |f|
+      env.flow('unresolved') { |f|
         f.task(:one, Dummy) { |t|
           t.link(:two, :two, nil)
         }

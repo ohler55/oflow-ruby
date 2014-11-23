@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
+$: << File.dirname(__FILE__) unless $:.include? File.dirname(__FILE__)
+
 require 'helper'
 require 'oflow'
 
@@ -35,44 +37,42 @@ end # Catch
 class FlowTrackerTest < ::MiniTest::Test
 
   def test_flow_tracker
+    env = ::OFlow::Env.new('')
     trigger = nil
     catcher = nil
-    ::OFlow::Env.flow(:nest, :opt1 => 1) { |f|
-
+    env.flow(:prime) { |f|
       # starts off the process
       trigger = f.task(:trigger, Throw) { |t|
-        t.link(nil, :deep, nil)
+        t.link(nil, :one, nil, :deep)
       }
-      # a nested flow
-      f.flow(:deep) { |f2|
-        f2.route(nil, :one, nil)
-        f2.task(:one, Throw) { |t|
-          t.link(nil, :two, nil)
-        }
-        f2.task(:two, Throw) { |t|
-          t.link(nil, :flow, :bye)
-        }
-        f2.link(:bye, :out, nil)
-      }
-      f.task(:out, Throw) { |t|
+      f.task(:in, Throw) { |t|
           t.link(nil, :done, nil)
       }
       catcher = f.task(:done, Catch)
     }
+    env.flow(:deep) { |f|
+      f.task(:one, Throw) { |t|
+        t.link(nil, :two, nil)
+      }
+      f.task(:two, Throw) { |t|
+        t.link(nil, :in, :bye, :prime)
+      }
+    }
+
+    env.prepare()
+    env.start()
 
     # run it and check the output
     trigger.receive(:go, ::OFlow::Box.new(7, ::OFlow::Tracker.create('test')))
-    ::OFlow::Env.flush()
+    env.flush()
     assert_equal(["test-",
-                  ":nest:trigger-go",
-                  ":nest:deep-",
-                  ":nest:deep:one-",
-                  ":nest:deep:two-",
-                  ":nest:deep-bye",
-                  ":nest:out-",
-                  ":nest:done-"], catcher.actor.ball.tracker.track.map {|s| s.where })
+                  "prime:trigger-go",
+                  "deep:one-",
+                  "deep:two-",
+                  "prime:in-bye",
+                  "prime:done-"], catcher.actor.ball.tracker.track.map {|s| s.where })
 
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
 end # FlowTrackerTest

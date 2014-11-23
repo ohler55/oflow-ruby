@@ -11,16 +11,17 @@ module OFlow
 
     # The name.
     attr_reader :name
+    attr_reader :env
 
     # Create a new Flow.
     # @param env [Env] Env containing the Flow
     # @param name [name] Flow base name
-    # @param options [Hash] additional options for the Flow
-    def initialize(env, name, options)
+    def initialize(env, name)
       @name = name.to_sym
       @tasks = {}
       @prepared = false
       @log = nil
+      @error_handler = nil
       @env = env
     end
 
@@ -39,6 +40,16 @@ module OFlow
       lg = find_task(:log)
       return lg unless lg.nil?
       @env.log
+    end
+
+    # Returns a error_handler Task by looking for that Task in an attribute and then in
+    # the contained Tasks or Tasks in outer Flows.
+    # @return [Task] error_handler Task.
+    def error_handler()
+      return @error_handler unless @error_handler.nil?
+      eh = find_task(:error)
+      return eh unless eh.nil?
+      @env.error_handler
     end
 
     # Creates a Task and yield to a block with the newly create Task. Used to

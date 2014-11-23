@@ -53,6 +53,7 @@ module OFlow
       @loop = nil
       @links = {}
       @log = nil
+      @error_handler = nil
 
       set_options(options)
 
@@ -124,15 +125,27 @@ module OFlow
     # the named item.
     # @return [String] full name of item
     def full_name()
-      @flow.full_name() + ':' + @name.to_s
+      if @flow.nil?
+        ':' + @name.to_s
+      else
+        @flow.full_name() + ':' + @name.to_s
+      end
     end
 
-    # Returns a log Task by looking for that Task in an attribute and then in
-    # the contained Tasks or Tasks in outer Flows.
+    # Returns a log Task by looking for that Task as an attribute and then in
+    # the parent Flow.
     # @return [Task] log Task.
     def log()
       return @log unless @log.nil?
       @flow.log()
+    end
+
+    # Returns an error handler Task by looking for that Task as an attribute and then in
+    # the parent Flow.
+    # @return [Task] error handler Task.
+    def error_handler()
+      return @error_handler unless @error_handler.nil?
+      @flow.error_handler()
     end
 
     # Returns the state of the Task as a String.
@@ -159,7 +172,11 @@ module OFlow
       i = ' ' * indent
       lines = ["#{i}#{name} (#{actor.class}) {"]
       @links.each { |local,link|
-        lines << "  #{i}#{local} => #{link.target_name}:#{link.op}"
+        if link.flow_name.nil?
+          lines << "  #{i}#{local} => :#{link.target_name}:#{link.op}"
+        else
+          lines << "  #{i}#{local} => #{link.flow_name}:#{link.target_name}:#{link.op}"
+        end
       }
       if 1 <= detail
         lines << "  #{i}queued: #{queue_count()} (#{busy? ? 'busy' : 'idle'})"
@@ -429,7 +446,7 @@ module OFlow
     # @param lnk [Link] Link to find the target Task for.
     def set_link_target(lnk)
       f = @flow
-      f = env.find_flow(lnk.flow_name) unless lnk.flow_name.nil?
+      f = @flow.env.find_flow(lnk.flow_name) unless lnk.flow_name.nil?
       lnk.instance_variable_set(:@target, f.find_task(lnk.target_name))
     end
 

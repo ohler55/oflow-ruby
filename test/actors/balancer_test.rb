@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
 
-$: << File.dirname(File.dirname(__FILE__))
+$: << File.dirname(File.dirname(__FILE__)) unless $:.include? File.dirname(File.dirname(__FILE__))
 
 require 'helper'
 require 'oflow'
@@ -33,9 +33,10 @@ end # Busy
 class BalancerTest < ::MiniTest::Test
 
   def test_balancer_fair
+    env = ::OFlow::Env.new('')
     balancer = nil
     collector = nil
-    ::OFlow::Env.flow('fair') { |f|
+    env.flow('fair') { |f|
       f.task('balance', ::OFlow::Actors::Balancer) { |t|
         balancer = t
         t.link(:one, :one, nil)
@@ -55,21 +56,25 @@ class BalancerTest < ::MiniTest::Test
         collector = t.actor
       }
     }
+    env.prepare()
+    env.start()
+
     9.times { |i| balancer.receive(nil, ::OFlow::Box.new(i)) }
-    ::OFlow::Env.flush()
+    env.flush()
     counts = {}
     collector.collection.each { |a| counts[a[0]] = counts.fetch(a[0], 0) + 1 }
 
     assert_equal(counts[:one], counts[:two], 'all counts should be the same')
     assert_equal(counts[:two], counts[:three], 'all counts should be the same')
 
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
   def test_balancer_less_busy
+    env = ::OFlow::Env.new('')
     balancer = nil
     collector = nil
-    ::OFlow::Env.flow('less-busy') { |f|
+    env.flow('less-busy') { |f|
       f.task('balance', ::OFlow::Actors::Balancer) { |t|
         balancer = t
         t.link(:one, :one, nil)
@@ -89,8 +94,11 @@ class BalancerTest < ::MiniTest::Test
         collector = t.actor
       }
     }
+    env.prepare()
+    env.start()
+
     40.times { |i| balancer.receive(nil, ::OFlow::Box.new(i)); sleep(0.005) }
-    ::OFlow::Env.flush()
+    env.flush()
     counts = {}
     collector.collection.each { |a| counts[a[0]] = counts.fetch(a[0], 0) + 1 }
     #puts "*** #{counts}"
@@ -98,7 +106,7 @@ class BalancerTest < ::MiniTest::Test
     assert(counts[:one] > counts[:two], 'one is faster and should have processed more than two')
     assert(counts[:two] > counts[:three], 'two is faster and should have processed more than three')
 
-    ::OFlow::Env.clear()
+    env.clear()
   end
 
 end # BalancerTest

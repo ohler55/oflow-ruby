@@ -13,8 +13,6 @@ module OFlow
     attr_reader :op
     # The actual target Task.
     attr_reader :target
-    # Flag indicating the Link is from a Flow to a Task contained in the Flow.
-    attr_reader :ingress
 
     # Creates a new Link. This is called from link() and route() methods on
     # Tasks and Flows.
@@ -23,12 +21,11 @@ module OFlow
     # @param op [Symbol] operation to use on the target
     # @param ingress [true|false] indicates the Link is internal
     # @return [Link] new Link
-    def initialize(flow_name, target_name, op, ingress=false)
+    def initialize(flow_name, target_name, op)
       @target_name = target_name
       @flow_name = flow_name
       @op = op
       @target = nil
-      @ingress = ingress
     end
 
     # Delivers a package (Box) to the target.
@@ -40,9 +37,9 @@ module OFlow
     # Returns a string representation of the Link.
     def to_s()
       if @flow_name.nil?
-        "Link{ingress: #{@ingress}, target_name: #{@target_name}, op: #{op}, target: #{@target}}"
+        "Link{target_name: #{@target_name}, op: #{op}, target: #{@target}}"
       else
-        "Link{ingress: #{@ingress}, target_name: #{@flow_name}:#{@target_name}, op: #{op}, target: #{@target}}"
+        "Link{target_name: #{@flow_name}:#{@target_name}, op: #{op}, target: #{@target}}"
       end
     end
     alias inspect to_s
