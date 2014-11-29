@@ -9,8 +9,10 @@ while (index = ARGV.index('-I'))
 end
 
 # TBD tmp for testing
-$: << ::File.join(::File.dirname(__FILE__), "../../oterm/lib")
-$: << ::File.join(::File.dirname(__FILE__), "../lib")
+top = ::File.dirname(::File.dirname(__FILE__))
+['lib', '../oterm/lib', '../oj/ext', '../oj/lib', '../ox/ext', '../ox/lib'].each do |path|
+  $: << ::File.join(top, path)
+end
 
 require 'optparse'
 
@@ -48,6 +50,9 @@ end
 
 usage('No files specified.') if 0 == files.size()
 
+# TBD create env
+$oflow_env = ::OFlow::Env.new('')
+
 # Load flow configuration files.
 files.each do |file|
   usage("Unknown file type for #{file}.") if (i = file.rindex('.')).nil?
@@ -55,7 +60,7 @@ files.each do |file|
   when 'rb'
     load(file)
   when 'graffle'
-    OFlow::Graffle.load(file)
+    OFlow::Graffle.load($oflow_env, file)
   when 'vdx'
     # TBD
     usage("Visio files not supported yet.")
@@ -68,13 +73,16 @@ files.each do |file|
 end
 
 if Logger::Severity::DEBUG >= ::OFlow::Env.log_level
-  ::OFlow::Env.debug(::OFlow::Env.describe())
+  $oflow_env.debug($oflow_env.describe())
 end
 
 inspector = nil
 if 0 < $inspector_port
   inspector = OFlow::Inspector.new($inspector_port)
 end
+
+$oflow_env.prepare()
+$oflow_env.start()
 
 # Exit either when processing is complete or if there is an inspector present it
 # can be used to force the exit. It is also possible to not exit at all if there
@@ -89,7 +97,7 @@ if !$exit_after.nil?
     end
   end  
 elsif $exit_not_busy
-  ::OFlow::Env.flush()
+  $oflow_env.flush()
 else !inspector.nil?
   inspector.join()
 end

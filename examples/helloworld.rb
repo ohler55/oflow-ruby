@@ -19,8 +19,8 @@ class HelloWorld < ::OFlow::Actor
 end # HelloWorld
 
 def hello_flow(period)
-    ::OFlow::Env.flow('hello_world') { |f|
-      f.task(:repeater, ::OFlow::Actors::Timer, repeat: 300, period: period) { |t|
+    $oflow_env.flow('hello_world') { |f|
+      f.task(:repeater, ::OFlow::Actors::Timer, repeat: 10, period: period) { |t|
         t.link(nil, :hello, nil)
       }
       f.task(:hello, HelloWorld)
@@ -30,5 +30,5 @@ end
 hello_flow(1.0)
 
 if $0 == __FILE__
-  ::OFlow::Env.flush()
+  $oflow_env.flush()
 end

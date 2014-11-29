@@ -28,6 +28,7 @@ module OFlow
       @flows = {}
       @prepared = false
       @name = name
+      @log = nil
       _clear()
     end
 

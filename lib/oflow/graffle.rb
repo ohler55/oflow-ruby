@@ -8,13 +8,13 @@ module OFlow
     attr_accessor :line_info
     attr_accessor :task_info
 
-    def self.load(filename)
+    def self.load(env, filename)
       doc = Ox.load_file(filename, mode: :generic)
-      g = Graffle.new(filename, doc)
-      puts g
+      g = Graffle.new(env, filename, doc)
+      env.debug(g.to_s()) if Logger::Severity::DEBUG >= ::OFlow::Env.log_level
     end
 
-    def initialize(filename, doc)
+    def initialize(env, filename, doc)
       @line_info = { } # key is id
       @task_info = { } # key is id
       @name = File.basename(filename, '.graffle')
@@ -22,7 +22,7 @@ module OFlow
       nodes = doc.locate('plist/dict')[0].nodes
       nodes = Graffle.get_key_value(nodes, 'GraphicsList')
 
-      # TBD raise if nodes is nil
+      raise ConfigError.new("Empty flow.") if nodes.nil?
       
       nodes.each do |node|
         load_node(node)
@@ -33,7 +33,6 @@ module OFlow
         next if ti.line_id.nil?
         if !(li = line_info[ti.line_id]).nil?
           li.label, li.op = ti.first_option
-          break
         end
       end
       task_info.each do |_, ti|
@@ -41,17 +40,25 @@ module OFlow
           @name = n.strip
         end
       end
-      ::OFlow::Env.flow(@name.to_sym) { |f|
+      env.flow(@name.to_sym) { |f|
         task_info.each_value { |ti|
           next unless ti.line_id.nil?
           next if ti.name.nil?
           c = ti.get_class()
           next if c.nil?
           f.task(ti.name, c, ti.options) { |t|
+            t.bounds = ti.bounds
+            t.color = ti.color
+            t.shape = ti.shape
             line_info.each_value { |li|
               next unless li.tail == ti.id
-              next if (target_info = task_info[li.head]).nil? || target_info.name.nil?
-              t.link(li.label, target_info.name, li.op)
+              target_info = task_info[li.head]
+              if target_info.nil?
+                flow_name, task_name, op = li.op.split('/')
+                t.link(li.label, task_name, op, flow_name)
+              else
+                t.link(li.label, target_info.name, li.op)
+              end
             }
           }
         }
@@ -65,8 +72,6 @@ module OFlow
         line = LineInfo.new(nodes)
         @line_info[line.id] = line
       when 'ShapedGraphic'
-        # TBD look for no fill, shadow, or stroke, that is label of diagram or
-        # maybe with label:Sample or title:Sample
         task = TaskInfo.new(nodes)
         @task_info[task.id] = task unless task.nil?
       end
@@ -82,6 +87,7 @@ module OFlow
     end
 
     def self.get_key_value(nodes, key)
+      return if nodes.nil?
       nodes.each_with_index do |node,i|
         next unless 'key' == node.name && key == node.text
         n = nodes[i + 1]
@@ -205,6 +211,9 @@ module OFlow
       attr_accessor :line_id
       attr_accessor :name
       attr_accessor :options
+      attr_accessor :color
+      attr_accessor :shape
+      attr_accessor :bounds
       
       def initialize(nodes)
         super
@@ -212,6 +221,19 @@ module OFlow
           @line_id = nil
         else
           @line_id = Graffle.get_key_value(ln, 'ID')
+        end
+        @shape = Graffle.get_key_value(nodes, 'Shape')
+        color_node = Graffle.get_key_value(Graffle.get_key_value(Graffle.get_key_value(nodes, 'Style'), 'fill'), 'Color')
+        if color_node.nil?
+          @color = nil
+        else
+          @color = [Graffle.get_key_value(color_node, 'r').to_f,
+                    Graffle.get_key_value(color_node, 'g').to_f,
+                    Graffle.get_key_value(color_node, 'b').to_f]
+        end
+        unless (@bounds = Graffle.get_key_value(nodes, 'Bounds')).nil?
+          @bounds = @bounds.delete('{}').split(',')
+          @bounds.map! { |s| s.to_i }
         end
         @options = { }
         text = Graffle.get_text(Graffle.get_key_value(nodes, 'Text'))
@@ -262,7 +284,7 @@ module OFlow
       end
 
       def to_s()
-        "TaskInfo{id:#{@id}, line_id:#{line_id}, name: #{name}, options: #{options}}"
+        "TaskInfo{id:#{@id}, line_id:#{line_id}, name: #{name}, options: #{options}, bounds: #{@bounds}, shape: #{@shape}, color: #{@color}}"
       end
 
     end # TaskInfo

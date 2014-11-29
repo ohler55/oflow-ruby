@@ -61,7 +61,10 @@ module OFlow
     # @return [Task] new Task
     def task(name, actor_class, options={}, &block)
       has_state = options.has_key?(:state)
-      options[:state] = Task::STOPPED unless has_state
+      unless has_state
+        options = options.clone
+        options[:state] = Task::STOPPED
+      end
       t = Task.new(self, name, actor_class, options)
       @tasks[t.name] = t
       yield(t) if block_given?

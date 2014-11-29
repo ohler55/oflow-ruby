@@ -4,28 +4,6 @@
 ^c^s show subtree
 
 - todo
-
- - make env an object, not a class
-  - log() should change
-   - separate for each type
-
- - test
-  - build env with multiple flows
-  - build, validate, start
-   - flag for validate to avoid double validate on start
-   - need to reset falg when flow or task is added
- - handle links to other flows
-  - validate also
-
-
-
-  - use flow-call or flow-wrap task or something instead
-   - connect links to input of flow
-   - add input connections to flow that connect to links
-    - or maybe just use task/link to identify an input
-    - probably better to use explicit input (docs and reuse)
-   - how to draw this nicely?
-  - treat flows as functions
  
  - features
   - .graffle OmniGraffle input

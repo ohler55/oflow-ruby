@@ -13,6 +13,10 @@ module OFlow
     # The name.
     attr_reader :name
 
+    attr_accessor :bounds
+    attr_accessor :shape
+    attr_accessor :color
+
     # value of @state that indicates the Task is being created.
     STARTING = 0
     # value of @state that indicates the Task is not currently processing requests
@@ -41,6 +45,9 @@ module OFlow
       @flow = flow
       @name = name.to_sym
       @state = STARTING
+      @bounds = nil # [x, y, w, h] as fixnums
+      @color = nil  # [r, g, b] as floats
+      @shape = nil  # Rectangle is the default
       @queue = []
       @req_mutex = Mutex.new()
       @req_thread = nil
@@ -83,7 +90,7 @@ module OFlow
 
               @current_req = req
               begin
-                info("perform(#{req.op}, #{req.box})")
+                info("perform(#{req.op}, #{req.box.nil? ? '<nil>' : req.box})")
                 @actor.perform(req.op, req.box) unless req.nil?
               rescue Exception => e
                 handle_error(e)
@@ -153,12 +160,16 @@ module OFlow
     def state_string()
       ss = 'UNKNOWN'
       case @state
+      when STARTING
+        ss = 'STARTING'
       when STOPPED
         ss = 'STOPPED'
       when RUNNING
         ss = 'RUNNING'
       when CLOSING
         ss = 'CLOSING'
+      when BLOCKED
+        ss = 'BLOCKED'
       when STEP
         ss = 'STEP'
       end
@@ -333,7 +344,7 @@ module OFlow
     # @param op [Symbol] operation to perform
     # @param box [Box] contents or data for the request
     def receive(op, box)
-      info("receive(#{op}, #{box}) #{state_string}")
+      info("receive(#{op}, #{box.nil? ? '<nil>' : box}) #{state_string}")
 
       return if CLOSING == @state
 
@@ -447,6 +458,7 @@ module OFlow
     def set_link_target(lnk)
       f = @flow
       f = @flow.env.find_flow(lnk.flow_name) unless lnk.flow_name.nil?
+      raise ConfigError.new("Flow '#{lnk.flow_name}' not found.") if f.nil?
       lnk.instance_variable_set(:@target, f.find_task(lnk.target_name))
     end
 
