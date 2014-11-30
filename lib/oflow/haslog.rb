@@ -31,6 +31,26 @@ module OFlow
       end
     end
 
+    # @return true if errors would be logged.
+    def error?()
+      Env.log_level <= Logger::Severity::ERROR
+    end
+
+    # @return true if warn messages would be logged.
+    def warn?()
+      Env.log_level <= Logger::Severity::WARN
+    end
+
+    # @return true if info messages would be logged.
+    def info?()
+      Env.log_level <= Logger::Severity::INFO
+    end
+
+    # @return true if debug messages would be logged.
+    def debug?()
+      Env.log_level <= Logger::Severity::DEBUG
+    end
+
     # Logs the message if logging level is at least debug.
     # @param msg [String] message to log
     def debug(msg)

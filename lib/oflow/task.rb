@@ -90,7 +90,11 @@ module OFlow
 
               @current_req = req
               begin
-                info("perform(#{req.op}, #{req.box.nil? ? '<nil>' : req.box})")
+                if debug?
+                  debug("perform(#{req.op}, #{req.box.nil? ? '<nil>' : req.box})")
+                else
+                  info("perform(#{req.op})")
+                end
                 @actor.perform(req.op, req.box) unless req.nil?
               rescue Exception => e
                 handle_error(e)
@@ -344,8 +348,11 @@ module OFlow
     # @param op [Symbol] operation to perform
     # @param box [Box] contents or data for the request
     def receive(op, box)
-      info("receive(#{op}, #{box.nil? ? '<nil>' : box}) #{state_string}")
-
+      if debug?
+        debug("receive(#{op}, #{box.nil? ? '<nil>' : box}) #{state_string}")
+      else
+        info("receive(#{op})")
+      end
       return if CLOSING == @state
 
       raise BlockedError.new() if BLOCKED == @state
@@ -380,7 +387,11 @@ module OFlow
       box.freeze() unless box.nil?
       link = resolve_link(dest)
       raise LinkError.new(dest) if link.nil? || link.target.nil?
-      info("shipping #{box} to #{link.target_name}:#{link.op}")
+      if debug?
+        debug("shipping #{box} to #{link.target_name}:#{link.op}")
+      else
+        info("shipping to #{link.target_name}:#{link.op}")
+      end
       link.target.receive(link.op, box)
       link
     end
