@@ -6,26 +6,20 @@
 - todo
  
  - features
-  - .graffle OmniGraffle input
-  - 0.7.0
+  - rubygems graphs example
+  - 0.8.0 
+  - call out using pipe and fork
+  - 0.9.0
   - .svg vector graphics input
   - .vdx Visio input
-  - 0.8.0
-  - rubygems graphs example
-  - 0.9.0
-  - call out using pipe and fork
   - 1.0.0
 
-- graffle reader
- - make simple flow
-  - write to file actor to capture completed flows
-   - class in test dir, use -I and -r
- - add multiple flow load and link
-
- - in bin/oflow
- - decide on formats
-  - properties
-  - text in block
+ - gemgraph
+  - GemStatus
+  - http server
+   - separate task handling requests
+    - get data and format
+    - send back to server for delivery
 
 - TBDs
 

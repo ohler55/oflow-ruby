@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://www.ohler.com/oflow"
   s.summary = 'Operations Workflow in Ruby'
   s.description = %|Operations Workflow in Ruby. This implements a workflow/process flow using multiple task nodes that each have their own queues and execution thread.|
-  s.licenses = ['MIT', 'GPL-3.0']
+  s.licenses = ['MIT']
 
   s.files = Dir["{lib,test}/**/*.rb"] + ['LICENSE', 'README.md']
 

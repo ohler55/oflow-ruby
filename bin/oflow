@@ -8,20 +8,12 @@ while (index = ARGV.index('-I'))
   $: << path
 end
 
-# TBD tmp for testing
-top = ::File.dirname(::File.dirname(__FILE__))
-['lib', '../oterm/lib', '../oj/ext', '../oj/lib', '../ox/ext', '../ox/lib'].each do |path|
-  $: << ::File.join(top, path)
-end
-
 require 'optparse'
-
-require 'oterm'
-require 'oflow'
 
 $inspector_port = 0
 $exit_not_busy = true
 $exit_after = nil
+$log_level = 0
 
 $opts = OptionParser.new(%|Usage: oflow [options] <filename>...
 
@@ -29,18 +21,29 @@ Executes flows defined by the files specified. Files can be
  - Ruby .rb
  - OmniGraffle .graffle
  - Visio .vdx
- - .svg
+ - Scalable Vector Graphics .svg
 Each file format has a specific expected format.
 |)
-$opts.on('-s', 'decrease verbosity')                                   { ::OFlow::Env.log_level = ::OFlow::Env.log_level += 1 }
-$opts.on('-v', 'increase verbosity')                                   { ::OFlow::Env.log_level = ::OFlow::Env.log_level -= 1 }
+$opts.on('-s', 'decrease verbosity')                                   { $log_level += 1 }
+$opts.on('-v', 'increase verbosity')                                   { $log_level -= 1 }
 $opts.on('-b', "don't exit when no longer busy")                       { $exit_not_busy = false }
 $opts.on('-e', '--exit-after Integer', Integer, 'exit after <secs>')   { |secs| $exit_after = secs }
 $opts.on('-i', '--inspector-port Integer', Integer, 'inspector port')  { |port| $inspector_port = port }
 $opts.on('-I', '--load-path String', String, 'load path')              { |path| $: << path }
 $opts.on('-r', '--require String', String, 'require gem')              { |req| require req }
 $opts.on('-h', '--help', 'Show this display')                          { puts $opts.help; Process.exit!(0) }
+$opts.on('-t', 'local paths for gems while testing')                   {
+  top = ::File.dirname(::File.dirname(__FILE__))
+  ['lib', '../oterm/lib', '../oj/ext', '../oj/lib', '../ox/ext', '../ox/lib'].each { |path|
+    $: << ::File.join(top, path)
+  }
+}
 files = $opts.parse(ARGV)
+
+require 'oterm'
+require 'oflow'
+
+::OFlow::Env.log_level += $log_level
 
 def usage(msg)
   puts msg
@@ -50,7 +53,6 @@ end
 
 usage('No files specified.') if 0 == files.size()
 
-# TBD create env
 $oflow_env = ::OFlow::Env.new('')
 
 # Load flow configuration files.
@@ -63,7 +65,7 @@ files.each do |file|
     OFlow::Graffle.load($oflow_env, file)
   when 'vdx'
     # TBD
-    usage("Visio files not supported yet.")
+    usage("Visio files not implemented yet.")
   when 'svg'
     # TBD
     usage("Scalable Vector Graphics files not implemented yet.")

@@ -37,16 +37,19 @@ module OFlow
         if @dir.nil?
           @dir = File.join('db', task.full_name.gsub(':', '/'))
         end
-        @key_path = options.fetch(:key_path, 'key')
-        @seq_path = options.fetch(:seq_path, 'seq')
+        @dir = File.expand_path(@dir.strip)
+        
+        @key_path = options.fetch(:key_path, 'key').strip
+        @seq_path = options.fetch(:seq_path, 'seq').strip
         @data_path = options.fetch(:data_path, nil) # nil means all contents
+        @data_path.strip! unless @data_path.nil?
         if options.fetch(:cache, true)
           # key is record key, value is [seq, rec]
           @cache = {}
         else
           @cache = nil
         end
-        @historic = options.fetch(:historic, false)
+        @historic = ('true' == options.fetch(:historic, 'false').to_s)
 
         if Dir.exist?(@dir)
           unless @cache.nil?
@@ -85,7 +88,7 @@ module OFlow
         else
           raise OpError.new(task.full_name, op)
         end
-        task.ship(dest, Box.new(result, box.tracker))
+        task.ship(dest, Box.new(result, box.tracker)) unless dest.nil?
       end
 
       def insert(box)
