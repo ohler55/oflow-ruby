@@ -14,6 +14,7 @@ $inspector_port = 0
 $exit_not_busy = true
 $exit_after = nil
 $log_level = 0
+$task_args = []
 
 $opts = OptionParser.new(%|Usage: oflow [options] <filename>...
 
@@ -31,6 +32,7 @@ $opts.on('-e', '--exit-after Integer', Integer, 'exit after <secs>')   { |secs| 
 $opts.on('-i', '--inspector-port Integer', Integer, 'inspector port')  { |port| $inspector_port = port }
 $opts.on('-I', '--load-path String', String, 'load path')              { |path| $: << path }
 $opts.on('-r', '--require String', String, 'require gem')              { |req| require req }
+$opts.on('-a', '--arg String', String, 'task argument flow:task:option=value'){ |a| $task_args << a }
 $opts.on('-h', '--help', 'Show this display')                          { puts $opts.help; Process.exit!(0) }
 $opts.on('-t', 'local paths for gems while testing')                   {
   top = ::File.dirname(::File.dirname(__FILE__))
@@ -82,6 +84,14 @@ inspector = nil
 if 0 < $inspector_port
   inspector = OFlow::Inspector.new($inspector_port)
 end
+
+$task_args.each { |a|
+  path,value = a.split('=')
+  fn,tn,o = path.split(':')
+  raise "#{fn} is not a flow." if (f = $oflow_env.find_flow(fn)).nil?
+  raise "#{tn} is not a task of flow #{fn}." if (t = f.find_task(tn)).nil?
+  t.set_option(o, value)
+}
 
 $oflow_env.prepare()
 $oflow_env.start()

@@ -1,4 +1,6 @@
 
+require 'date'
+
 require 'logger'
 
 module OFlow
@@ -130,10 +132,11 @@ module OFlow
       end
 
       def set_start(v)
-        # TBD handle string
-        now = Time.now()
-        if v.is_a?(Numeric)
-          v = now + v
+        if v.is_a?(String)
+          v = DateTime.parse(v).to_time
+          v = v - v.gmtoff
+        elsif v.is_a?(Numeric)
+          v = Time.now() + v
         elsif v.nil?
           v = Time.now()
         elsif !v.kind_of?(Time) && !v.kind_of?(Date)
@@ -143,10 +146,11 @@ module OFlow
       end
 
       def set_stop(v)
-        # TBD handle string
-        now = Time.now()
-        if v.is_a?(Numeric)
-          v = now + v
+        if v.is_a?(String)
+          v = DateTime.parse(v).to_time
+          v = v - v.gmtoff
+        elsif v.is_a?(Numeric)
+          v = Time.now() + v
         elsif !v.nil? && !v.kind_of?(Time) && !v.kind_of?(Date)
           raise ConfigError.new("Expected stop to be a Time or Numeric, not a #{v.class}.")
         end

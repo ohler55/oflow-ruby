@@ -407,6 +407,17 @@ module OFlow
       @req_timeout = options.fetch(:request_timeout, @req_timeout).to_f
     end
     
+    def set_option(key, value)
+      case key.to_sym()
+      when :max_queue_count
+        @max_queue_count = value.to_i
+      when :request_timeout
+        @req_timeout = value.to_f
+      else
+        @actor.set_option(key, value)
+      end
+    end
+
     def _validation_errors()
       errors = []
       @links.each_value { |lnk| _check_link(lnk, errors) }

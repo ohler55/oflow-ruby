@@ -98,7 +98,7 @@ class FlowLogTest < ::MiniTest::Test
     env.clear()
   end
 
-  def test_flow_log_info
+  def test_flow_log_debug
     env = ::OFlow::Env.new('')
     trigger = nil
     collector = nil
@@ -110,7 +110,7 @@ class FlowLogTest < ::MiniTest::Test
       # Set after log to avoid race condition with the creation of the collector
       # and the assignment to f.log. The race is whether a log message is
       # displayed on the output.
-    ::OFlow::Env.log_level = Logger::INFO
+    ::OFlow::Env.log_level = Logger::DEBUG
       trigger = f.task('noise', Noise) { |t|
         t.link(nil, :collector, nil)
       }

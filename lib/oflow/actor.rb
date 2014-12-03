@@ -42,6 +42,9 @@ module OFlow
       nil
     end
 
+    def set_option(key, value)
+    end
+
     # Return any options that should be displayed as part of a Task.describe().
     # @return [Hash] Hash of options with String keys.
     def options()

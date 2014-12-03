@@ -29,6 +29,8 @@ module OFlow
       #  - :key_data [String] path to record data (default: nil (all))
       #  - :key_path [String] path to key for the record (default: 'key')
       #  - :seq_path [String] path to sequence for the record (default: 'seq')
+      #  - :results_path [String] path to where the results should be placed in
+      #                           the request (default: nil or ship only results)
       #  - :cache [Boolean] if true, cache records in memory
       #  - :historic [Boolean] if true, do not delete previous versions
       def initialize(task, options)
@@ -43,6 +45,8 @@ module OFlow
         @seq_path = options.fetch(:seq_path, 'seq').strip
         @data_path = options.fetch(:data_path, nil) # nil means all contents
         @data_path.strip! unless @data_path.nil?
+        @results_path = options[:results_path]
+        @results_path.strip! unless @results_path.nil?
         if options.fetch(:cache, true)
           # key is record key, value is [seq, rec]
           @cache = {}
@@ -79,6 +83,8 @@ module OFlow
           result = read(box)
         when :update
           result = update(box)
+        when :insert_update
+          result = insert_update(box)
         when :delete, :remove
           result = delete(box)
         when :query
@@ -88,7 +94,14 @@ module OFlow
         else
           raise OpError.new(task.full_name, op)
         end
-        task.ship(dest, Box.new(result, box.tracker)) unless dest.nil?
+        unless dest.nil?
+          if @results_path.nil?
+            box = Box.new(result, box.tracker)
+          else
+            box = box.set(@results_path, result)
+          end
+          task.ship(dest, box)
+        end
       end
 
       def insert(box)
@@ -152,6 +165,14 @@ module OFlow
         rec = save(rec, key, seq)
         delete_historic(key, seq) unless @historic
         rec
+      end
+
+      def insert_update(box)
+        begin
+          insert(box)
+        rescue ExistsError
+          update(box)
+        end
       end
 
       def delete(box)

@@ -35,7 +35,7 @@ module OFlow
       Box.new(@contents, @tracker.receive(location, op))
     end
 
-    # Sets or adds a value in inside the Box. The Box is changed with the new
+    # Sets or adds a value inside the Box. The Box is changed with the new
     # contents being thawed where necessary. A path is a set of element names in
     # the case of a Hash or index numbers in the case of an Array joined with
     # the ':' character as a separator.
@@ -46,7 +46,7 @@ module OFlow
       aset(path.split(':'), value)
     end
 
-    # Sets or adds a value in inside the Box where the path is an array of
+    # Sets or adds a value inside the Box where the path is an array of
     # element names or indices. Indices can be Fixnum or Strings.
     # @param path [Array] location of element to change or add. 
     # @param value value for the addition or change

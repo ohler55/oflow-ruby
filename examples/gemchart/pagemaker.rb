@@ -9,7 +9,15 @@ class PageMaker < ::OFlow::Actor
   end
 
   def perform(op, box)
-    task.ship(:reply, ::OFlow::Box.new({  }))
+    out = {
+      request: {
+        id: box.aget([:request, :id])
+      },
+      response: box.aget([:response])
+    }
+    out_box = ::OFlow::Box.new(out)
+    out_box = out_box.aset([:response, :body], "Not yet")
+    task.ship(:reply, out_box)
   end
 
   def set_options(options)

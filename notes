@@ -4,9 +4,12 @@
 ^c^s show subtree
 
 - todo
+
  - gemgraph
   - implement Query
   - implement PageMaker
+   - javascript to draw a chart
+
 
  - features
   - rubygems graphs example

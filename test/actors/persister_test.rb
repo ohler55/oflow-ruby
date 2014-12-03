@@ -10,6 +10,7 @@ require 'oflow/test'
 class PersisterTest < ::MiniTest::Test
 
   def test_persister_config
+    root_dir = File.dirname(File.dirname(__FILE__))
     t = ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Persister, state: ::OFlow::Task::BLOCKED,
                                      dir: 'db/something',
                                      key_path: 'key',
@@ -19,7 +20,7 @@ class PersisterTest < ::MiniTest::Test
                                      with_seq_num: true,
                                      historic: true,
                                      seq_path: 'seq')
-    assert_equal('db/something', t.actor.dir, 'dir set from options')
+    assert_equal(File.join(root_dir, 'db/something'), t.actor.dir, 'dir set from options')
     assert_equal('key', t.actor.key_path, 'key_path set from options')
     assert_equal('seq', t.actor.seq_path, 'seq_path set from options')
     assert_equal('data', t.actor.data_path, 'data_path set from options')
@@ -29,7 +30,7 @@ class PersisterTest < ::MiniTest::Test
     `rm -r #{t.actor.dir}`
 
     t = ::OFlow::Test::ActorWrap.new('persist', ::OFlow::Actors::Persister, state: ::OFlow::Task::BLOCKED)
-    assert_equal('db/test/persist', t.actor.dir, 'dir set from options')
+    assert_equal(File.join(root_dir, 'db/test/persist'), t.actor.dir, 'dir set from options')
     assert_equal('key', t.actor.key_path, 'key_path set from options')
     assert_equal('seq', t.actor.seq_path, 'seq_path set from options')
     assert_equal(true, t.actor.caching?, 'cache set from options')

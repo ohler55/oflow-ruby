@@ -9,7 +9,9 @@ class Query < ::OFlow::Actor
   end
 
   def perform(op, box)
-    task.ship(:query, ::OFlow::Box.new({ dest: :result, expr: nil }))
+    box = box.set('dest', :result)
+    box = box.set('expr', nil)
+    task.ship(:query, box)
   end
 
   def set_options(options)
