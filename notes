@@ -6,7 +6,9 @@
 - todo
 
  - gemgraph
-  - implement Query
+  - StaticPager
+   - cache files
+   - 
   - implement PageMaker
    - javascript to draw a chart
 

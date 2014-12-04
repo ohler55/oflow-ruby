@@ -72,8 +72,8 @@ class GemStatus < ::OFlow::Actor
     recs.sort_by! { |r| r[:julian] }
     dcnt = 0
     recs.each { |r|
-      dcnt += r[:version_downloads]
       r[:downloads] = dcnt
+      dcnt += r[:version_downloads]
       key = "%s-%s" % [r[:name], r[:date]]
       task.ship(:save, ::OFlow::Box.new({ key: key, rec: r }))
     }

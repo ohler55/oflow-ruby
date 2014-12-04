@@ -1,4 +1,5 @@
 
 require 'gemstatus'
-require 'query'
+require 'switch'
+require 'staticpager'
 require 'pagemaker'
