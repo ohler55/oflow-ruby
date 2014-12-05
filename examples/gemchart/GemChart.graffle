@@ -50,7 +50,7 @@
 	<array>
 		<dict>
 			<key>Bounds</key>
-			<string>{{486.41634640262629, 82.9548064379116}, {37, 23}}</string>
+			<string>{{486.73534833013474, 82.91904232941917}, {37, 23}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -176,8 +176,8 @@
 			<integer>34</integer>
 			<key>Points</key>
 			<array>
-				<string>{510.01471971681241, 109.50000005822898}</string>
-				<string>{510.0335416499957, 70.499999697650821}</string>
+				<string>{510.22825999360344, 109.50001400174253}</string>
+				<string>{510.52013421083899, 70.499927309354774}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -199,7 +199,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{381.26091567397214, 128.50166293295442}, {39, 23}}</string>
+			<string>{{376.73721727728844, 128.5000107149651}, {39, 23}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -323,8 +323,8 @@
 			<integer>30</integer>
 			<key>Points</key>
 			<array>
-				<string>{360.4999999999161, 140.00092526737498}</string>
-				<string>{449.50000000044622, 140.00255593661018}</string>
+				<string>{360.5, 140.0000107149651}</string>
+				<string>{439.5, 140.0000107149651}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -348,7 +348,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{450, 110}, {120, 60}}</string>
+			<string>{{440, 110}, {140, 60}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>ID</key>
@@ -367,7 +367,7 @@
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \f1\fs18 \cf2 class: StaticPager\
-dir: ~/gemchart/pages}</string>
+dir: examples/gemchart/pages}</string>
 			</dict>
 		</dict>
 		<dict>
@@ -1403,7 +1403,7 @@ port: 6060}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-12-04 04:36:57 +0000</string>
+	<string>2014-12-05 01:39:41 +0000</string>
 	<key>Modifier</key>
 	<string>Peter Ohler</string>
 	<key>NotesVisible</key>
