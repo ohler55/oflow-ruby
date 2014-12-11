@@ -28,7 +28,7 @@ class PageMaker < ::OFlow::Actor
         end
         set << [rec[:julian], rec[:downloads], rec[:date]]
       }
-      json = ::Oj.dump(sets, mode: :compat, indent: 0)
+      json = ::Oj.dump(sets, mode: :compat, indent: 2)
     end
     out_box = ::OFlow::Box.new(out)
     out_box = out_box.aset([:response, :headers, 'Content-Type'], 'text/json')
