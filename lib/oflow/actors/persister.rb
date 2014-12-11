@@ -57,8 +57,7 @@ module OFlow
 
         if Dir.exist?(@dir)
           unless @cache.nil?
-            Dir.glob(File.join('**', '*.json')).each do |path|
-              path = File.join(@dir, path)
+            Dir.glob(File.join(@dir, '**', '*.json')).each do |path|
               if File.symlink?(path)
                 rec = load(path)
                 unless @cache.nil?

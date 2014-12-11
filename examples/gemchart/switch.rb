@@ -10,13 +10,21 @@ class Switch < ::OFlow::Actor
 
   def perform(op, box)
     path = box.get('request:path')
+    if path.nil? || '/' == path || '' == path
+      path = '/home.html'
+      box = box.aset([:request, :path], path)
+    end
     if path.end_with?('.json')
-      # TBD narrow down search
       box = box.set('dest', :result)
-      box = box.set('expr', nil)
+      gem = path[1...-5]
+      if 'all' == gem
+        box = box.set('expr', nil)
+      else
+        # TBD narrow down search further with time range
+        box = box.set('expr', Proc.new { |rec, key, seq| gem == rec[:name] })
+      end
       task.ship(:query, box)
     else
-      box = box.aset([:request, :path], '/home.html') if path.nil? || '/' == path || '' == path
       task.ship(:static, box)
     end
   end

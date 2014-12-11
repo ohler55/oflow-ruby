@@ -105,6 +105,7 @@ module OFlow
         req = {
           id: id,
         }
+        # TBD sometimes nil
         line = session.gets()
         parts = line.split(' ')
         req[:method] = parts[0]

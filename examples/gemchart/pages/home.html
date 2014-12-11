@@ -12,12 +12,67 @@
     </p>
     <p>something goes here
     </p>
-    <table class="graph" width="100%">
+    <table >
       <tr>
 	<td>
-	  hello
+	  <canvas id="graph" width="1000" height="500"></canvas>
 	</td>
       </tr>
     </table>
+    <script>
+      function graphIt(pts) {
+          context.font = 'normal 10pt Calibri';
+          context.strokeStyle = '#0000ff';
+          var y = 1;
+          for (var key in pts){
+            y += 20;
+            context.strokeText(key, 2, y);
+            for (var pt in pts[key]){
+              y += 20;
+              context.strokeText("-- " + pt + ":" + pts[key][pt], 10, y);
+            }
+          }
+      }
+
+      var canvas = document.getElementById('graph');
+      var context = canvas.getContext('2d');
+      var w = canvas.width;
+      var h = canvas.height;
+      var r = 8
+
+      context.lineWidth = 1;
+      context.beginPath();
+      context.strokeStyle = '#000080';
+      context.moveTo(r+1, 1);
+      context.lineTo(w-r, 1);
+      context.quadraticCurveTo(w-1, 1, w-1, r);
+      context.lineTo(w-1, h-r);
+      context.quadraticCurveTo(w-1, h-1, w-r, h-1);
+      context.lineTo(r, h-2);
+      context.quadraticCurveTo(1, h-1, 1, h-r);
+      context.lineTo(0, r);
+      context.quadraticCurveTo(1, 1, r, 1);
+      context.stroke();
+      context.fillStyle = 'white';
+      context.fill();
+
+      var pad = 30
+      context.beginPath();
+      context.strokeStyle = '#c08000';
+      context.moveTo(pad, r);
+      context.lineTo(pad, h-pad+4);
+      context.moveTo(pad-4, h-pad);
+      context.lineTo(w-r, h-pad);
+      context.stroke();
+
+      var request = new XMLHttpRequest();
+      request.open('GET', 'oj.json', true);
+      request.onreadystatechange = function() {
+        if(4 == request.readyState && 200 == request.status) {
+          graphIt(JSON.parse(request.responseText));
+        }
+      };
+      request.send(null);
+    </script>
   </body>
 </html>

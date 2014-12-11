@@ -109,7 +109,14 @@ if !$exit_after.nil?
     end
   end  
 elsif $exit_not_busy
-  $oflow_env.flush()
+  begin
+    $oflow_env.flush()
+  rescue Interrupt => i
+    $oflow_env.stop()
+    puts "\nOFlow has shutdown."
+  rescue Exception => e
+    puts "*** #{e.class}: #{e.message}"
+  end
 else !inspector.nil?
   inspector.join()
 end
