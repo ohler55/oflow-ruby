@@ -6,12 +6,11 @@
 - todo
 
  - gemgraph
-  - StaticPager
-   - cache files
-   - 
-  - implement PageMaker
-   - javascript to draw a chart
-
+  - home.html
+   - implement labels
+    - determine multiplier
+    - major lines - darker
+    - minor lines (/5 or /10)
 
  - features
   - rubygems graphs example
