@@ -11,6 +11,7 @@
     - determine multiplier
     - major lines - darker
     - minor lines (/5 or /10)
+    - maybe round up to next increment on chart
 
  - features
   - rubygems graphs example
