@@ -7,11 +7,7 @@
 
  - gemgraph
   - home.html
-   - implement labels
-    - determine multiplier
-    - major lines - darker
-    - minor lines (/5 or /10)
-    - maybe round up to next increment on chart
+   - implement release markers
 
  - features
   - rubygems graphs example

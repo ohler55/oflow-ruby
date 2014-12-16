@@ -29,22 +29,51 @@
       var gw = w - pad - r;
       var gh = h - pad - r;
 
+      function yInc(mx) {
+        var i=1;
+        for(; i<mx; i*=10){}
+        return i/10;
+      }
+      function nextMon(uday){
+        var d=new Date()
+        d.setTime(uday*86400000);
+	var y=d.getFullYear()
+	var m=d.getMonth()+1
+	if (11<m){
+	  m=0;
+	  y++;
+	}
+	d.setFullYear(y);
+	d.setMonth(m);
+	d.setDate(1);
+	return d.getTime()/86400000;
+      }
+      function nextYear(uday){
+        var d=new Date()
+        d.setTime(uday*86400000);
+	var y=d.getFullYear()
+	d.setFullYear(y+1);
+	d.setMonth(0);
+	d.setDate(1);
+	return d.getTime()/86400000;
+      }
       function graphIt(gem, pts) {
         var j0=pts[0][0];
         var je=pts[pts.length-1][0];
+	var jd=je-j0;
         var dj = je-j0;
         var dmx=pts[pts.length-1][1]*1.0;
+        var dd=yInc(dmx)/5;
+	var mx=(dmx/dd+1)*dd;
 
         ctx.fillStyle='black';
         ctx.font='12pt Georgia';
         ctx.lineWidth=1;
 
-        // TBD calculate dd from dmx
-        var dd=200000;
         var y=0;
         ctx.strokeStyle='#dfefff';
-        for(var d=dd;d<dmx;d+=dd){
-          y=h-pad-(d*gh/dmx);
+        for(var d=dd;d<mx;d+=dd){
+          y=h-pad-(d*gh/mx);
           ctx.beginPath();
           ctx.moveTo(pad+1,y);
           ctx.lineTo(w-r,y);
@@ -52,12 +81,37 @@
         }
         dd*=5;
         ctx.strokeStyle='#b0d0f0';
-        for(var d=dd;d<dmx;d+=dd){
-          y=h-pad-(d*gh/dmx);
+        for(var d=dd;d<mx;d+=dd){
+          y=h-pad-(d*gh/mx);
           ctx.fillText((d/dd)+'M',4,y+4);
           ctx.beginPath();
           ctx.moveTo(pad-4,y);
           ctx.lineTo(w-r,y);
+          ctx.stroke();
+        }
+
+        var x=0;
+        var m;
+	var d=new Date();
+        ctx.strokeStyle='#dfffef';
+        for(var j=nextMon(j0);j<je;j=nextMon(j)){
+          x=pad+((j-j0)*gw/jd);
+	  d.setTime(j*86400000);
+	  m=d.getMonth()+1;
+	  if(1<m){ctx.fillText(m,x-6,h-pad+16);}
+          ctx.beginPath();
+          ctx.moveTo(x,r);
+          ctx.lineTo(x,h-pad);
+          ctx.stroke();
+        }
+        ctx.strokeStyle='#b0f0d0';
+        for(var j=nextYear(j0);j<je;j=nextYear(j)){
+          x=pad+((j-j0)*gw/jd);
+	  d.setTime(j*86400000);
+          ctx.fillText(d.getFullYear(),x-18,h-8);
+          ctx.beginPath();
+          ctx.moveTo(x,r);
+          ctx.lineTo(x,h-pad+4);
           ctx.stroke();
         }
 
@@ -70,7 +124,7 @@
         ctx.moveTo(pad, h-pad);
         for (var i in pts){
           var pt=pts[i];
-          ctx.lineTo(pad+((pt[0]-j0)*gw/dj), h-pad-(pt[1]*gh/dmx));
+          ctx.lineTo(pad+((pt[0]-j0)*gw/dj), h-pad-(pt[1]*gh/mx));
         }
         ctx.stroke();
       }
