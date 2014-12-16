@@ -25,12 +25,38 @@ table.graph{
 	color:black;
 	background-color:#ffffff;
 	border-radius:8px;
-	-moz-border-radius:6px;
-	-webkit-border-radius:6px;
+	-moz-border-radius:8px;
+	-webkit-border-radius:8px;
 	border:solid #33aadd 1px;
 	border-collapse:separate;
 	margin:0px;
 }
 div.paragraph{
 	position:relative;
+}
+.buttonOff{
+	width:152px;
+	height:30px;
+	color:black;
+	font-size:18px;
+	background-color:#c0c0c0;
+	border-radius:6px;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border:0px;
+	border-collapse:collapse;
+	margin:20px 6px 0px 6px;
+}
+.buttonOn{
+	width:152px;
+	height:30px;
+	color:black;
+	font-size:18px;
+	background-color:#ffffff;
+	border-radius:6px;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border:0px;
+	border-collapse:collapse;
+	margin:20px 6px 0px 6px;
 }

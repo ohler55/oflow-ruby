@@ -8,6 +8,7 @@
  - gemgraph
   - home.html
    - implement release markers
+   - add button to switch gems
 
  - features
   - rubygems graphs example
