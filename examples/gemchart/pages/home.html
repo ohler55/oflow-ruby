@@ -10,13 +10,13 @@
     <p class="title">
       Pete Ohler's Gem History
     </p>
-    <form> 
-      <input type="button" value="Oj" name="oj-button" class="buttonOn"/>
-      <input type="button" value="Ox" name="ox-button" class="buttonOff"/>
-      <input type="button" value="OFlow" name="oflow-button" class="buttonOff"/>
-      <input type="button" value="Opee" name="opee-button" class="buttonOff"/>
-      <input type="button" value="OTerm" name="oterm-button" class="buttonOff"/>
-      <input type="button" value="ODisk" name="odisk-button" class="buttonOff"/>
+    <form id="pick">
+      <input type="button" value="Oj" name="oj" class="button" onClick="loadGem('oj')"/>
+      <input type="button" value="Ox" name="ox" class="button" onClick="loadGem('ox')"/>
+      <input type="button" value="OFlow" name="oflow" class="button" onClick="loadGem('oflow')"/>
+      <input type="button" value="Opee" name="opee" class="button" onClick="loadGem('opee')"/>
+      <input type="button" value="OTerm" name="oterm" class="button" onClick="loadGem('oterm')"/>
+      <input type="button" value="ODisk" name="odisk" class="button" onClick="loadGem('odisk')"/>
     </form>
     <table >
       <tr>
@@ -26,18 +26,10 @@
       </tr>
     </table>
     <script>
-      var canvas = document.getElementById('graph');
-      var ctx = canvas.getContext('2d');
-      var w = canvas.width;
-      var h = canvas.height;
-      var r = 8;
-      var pad = 30;
-      var gw = w - pad - r;
-      var gh = h - pad - r;
-
       function yInc(mx) {
         var i=1;
         for(; i<mx; i*=10){}
+	// TBD pick one of the normalized sizes along with unit [1000000,'M'] {1000000:'M'}
         return i/10;
       }
       function nextMon(uday){
@@ -64,6 +56,39 @@
 	return d.getTime()/86400000;
       }
       function graphIt(gem, pts) {
+        var canvas = document.getElementById('graph');
+        var ctx = canvas.getContext('2d');
+        var w = canvas.width;
+        var h = canvas.height;
+        var r = 8;
+        var pad = 30;
+        var gw = w - pad - r;
+        var gh = h - pad - r;
+
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.strokeStyle = '#000080';
+        ctx.moveTo(r+1, 1);
+        ctx.lineTo(w-r, 1);
+        ctx.quadraticCurveTo(w-1, 1, w-1, r);
+        ctx.lineTo(w-1, h-r);
+        ctx.quadraticCurveTo(w-1, h-1, w-r, h-1);
+        ctx.lineTo(r, h-2);
+        ctx.quadraticCurveTo(1, h-1, 1, h-r);
+        ctx.lineTo(0, r);
+        ctx.quadraticCurveTo(1, 1, r, 1);
+        ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#c08000';
+        ctx.moveTo(pad, r);
+        ctx.lineTo(pad, h-pad+4);
+        ctx.moveTo(pad-4, h-pad);
+        ctx.lineTo(w-r, h-pad);
+        ctx.stroke();
+
         var j0=pts[0][0];
         var je=pts[pts.length-1][0];
 	var jd=je-j0;
@@ -135,39 +160,23 @@
         ctx.stroke();
       }
 
-      ctx.lineWidth=1;
-      ctx.beginPath();
-      ctx.strokeStyle = '#000080';
-      ctx.moveTo(r+1, 1);
-      ctx.lineTo(w-r, 1);
-      ctx.quadraticCurveTo(w-1, 1, w-1, r);
-      ctx.lineTo(w-1, h-r);
-      ctx.quadraticCurveTo(w-1, h-1, w-r, h-1);
-      ctx.lineTo(r, h-2);
-      ctx.quadraticCurveTo(1, h-1, 1, h-r);
-      ctx.lineTo(0, r);
-      ctx.quadraticCurveTo(1, 1, r, 1);
-      ctx.stroke();
-      ctx.fillStyle = 'white';
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.strokeStyle = '#c08000';
-      ctx.moveTo(pad, r);
-      ctx.lineTo(pad, h-pad+4);
-      ctx.moveTo(pad-4, h-pad);
-      ctx.lineTo(w-r, h-pad);
-      ctx.stroke();
-
-      gem='oj'
-      var request = new XMLHttpRequest();
-      request.open('GET', gem+'.json', true);
-      request.onreadystatechange = function() {
-        if(4 == request.readyState && 200 == request.status) {
-          graphIt(gem, JSON.parse(request.responseText)[gem]);
+      function loadGem(id){
+        var f=document.getElementById('pick');
+        for(var i = f.elements.length - 1; 0 <= i; i--) {
+          f.elements[i].style.background='#a0a0a0';
         }
-      };
-      request.send(null);
+        f.elements[id].style.background='white';
+        // TBD load
+        var request = new XMLHttpRequest();
+        request.open('GET', id+'.json', true);
+        request.onreadystatechange = function() {
+          if(4 == request.readyState && 200 == request.status) {
+            graphIt(id, JSON.parse(request.responseText)[id]);
+          }
+        };
+        request.send(null);
+      }
+      loadGem('oj');
     </script>
   </body>
 </html>

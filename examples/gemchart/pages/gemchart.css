@@ -34,25 +34,12 @@ table.graph{
 div.paragraph{
 	position:relative;
 }
-.buttonOff{
+.button{
 	width:152px;
 	height:30px;
 	color:black;
 	font-size:18px;
-	background-color:#c0c0c0;
-	border-radius:6px;
-	-moz-border-radius:6px;
-	-webkit-border-radius:6px;
-	border:0px;
-	border-collapse:collapse;
-	margin:20px 6px 0px 6px;
-}
-.buttonOn{
-	width:152px;
-	height:30px;
-	color:black;
-	font-size:18px;
-	background-color:#ffffff;
+	background-color:#a0a0a0;
 	border-radius:6px;
 	-moz-border-radius:6px;
 	-webkit-border-radius:6px;
