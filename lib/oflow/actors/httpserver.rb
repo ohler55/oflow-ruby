@@ -28,7 +28,8 @@ module OFlow
               session = @server.accept_nonblock()
               session.fcntl(Fcntl::F_SETFL, session.fcntl(Fcntl::F_GETFL, 0) | Fcntl::O_NONBLOCK)
               @count += 1
-              req = read_req(session, @count)
+              # if nil is returned the request was empty
+              next if (req = read_req(session, @count)).nil?
               @sessions[@count] = session
               resp = {
                 status: 200,
@@ -105,8 +106,8 @@ module OFlow
         req = {
           id: id,
         }
-        # TBD sometimes nil
         line = session.gets()
+        return if line.nil?
         parts = line.split(' ')
         req[:method] = parts[0]
         req[:protocol] = parts[2]

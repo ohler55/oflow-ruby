@@ -147,7 +147,7 @@
         }
 
         ctx.font='16pt Georgia';
-        ctx.fillText(gem+' - '+dmx+' downloads',pad+r, 24);
+        ctx.fillText(gem+' '+pts[pts.length-1][3]+' - '+dmx+' downloads',pad+r, 24);
 
         ctx.lineWidth=2;
         ctx.strokeStyle='#0000ff';
@@ -166,7 +166,6 @@
           f.elements[i].style.background='#a0a0a0';
         }
         f.elements[id].style.background='white';
-        // TBD load
         var request = new XMLHttpRequest();
         request.open('GET', id+'.json', true);
         request.onreadystatechange = function() {

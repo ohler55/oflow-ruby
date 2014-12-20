@@ -6,9 +6,10 @@
 - todo
 
  - gemgraph
-  - home.html
-   - implement release markers
-   - add button to switch gems
+  - web pages
+   - git/web/www.ohler.com/dev/oflow_misc
+   - readme and description with pictures
+
 
  - features
   - rubygems graphs example

@@ -25,6 +25,12 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 ## Release Notes
 
+### Next Release 0.8
+
+ - A somewhat non trivial example. GemChart collects statistics on my gems and
+   stores those statistics. It also provides a web interface to view the
+   statistics as a graph.
+
 ### Current Release 0.7
 
  - Simplified the APIs and structure.

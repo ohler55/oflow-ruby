@@ -27,7 +27,7 @@ class PageMaker < ::OFlow::Actor
           sets[gem] = set
         end
         year,mon,day = rec[:date].split('.')
-        set << [Time.new(year.to_i, mon.to_i, day.to_i).to_i()/86400, rec[:downloads], rec[:date]]
+        set << [Time.new(year.to_i, mon.to_i, day.to_i).to_i()/86400, rec[:downloads], rec[:date], rec[:version]]
       }
       json = ::Oj.dump(sets, mode: :compat, indent: 2)
     end
