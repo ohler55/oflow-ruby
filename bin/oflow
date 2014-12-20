@@ -30,14 +30,14 @@ $opts.on('-v', 'increase verbosity')                                   { $log_le
 $opts.on('-b', "don't exit when no longer busy")                       { $exit_not_busy = false }
 $opts.on('-e', '--exit-after Integer', Integer, 'exit after <secs>')   { |secs| $exit_after = secs }
 $opts.on('-i', '--inspector-port Integer', Integer, 'inspector port')  { |port| $inspector_port = port }
-$opts.on('-I', '--load-path String', String, 'load path')              { |path| $: << path }
+$opts.on('-I', '--load-path String', String, 'load path')              { |p| $: << p }
 $opts.on('-r', '--require String', String, 'require gem')              { |req| require req }
 $opts.on('-a', '--arg String', String, 'task argument flow:task:option=value'){ |a| $task_args << a }
 $opts.on('-h', '--help', 'Show this display')                          { puts $opts.help; Process.exit!(0) }
 $opts.on('-t', 'local paths for gems while testing')                   {
   top = ::File.dirname(::File.dirname(__FILE__))
-  ['lib', '../oterm/lib', '../oj/ext', '../oj/lib', '../ox/ext', '../ox/lib'].each { |path|
-    $: << ::File.join(top, path)
+  ['lib', '../oterm/lib', '../oj/ext', '../oj/lib', '../ox/ext', '../ox/lib'].each { |p|
+    $: << ::File.join(top, p)
   }
 }
 files = $opts.parse(ARGV)
@@ -111,7 +111,7 @@ if !$exit_after.nil?
 elsif $exit_not_busy
   begin
     $oflow_env.flush()
-  rescue Interrupt => i
+  rescue Interrupt
     $oflow_env.stop()
     puts "\nOFlow has shutdown."
   rescue Exception => e
