@@ -7,8 +7,6 @@
 
  - gemgraph
   - web pages
-   - resize
-    - width expands to size of outer - offset from left * 2
    - git/web/www.ohler.com/dev/gemchart
     - readme and description with pictures
     - blurb on home page (/dev)

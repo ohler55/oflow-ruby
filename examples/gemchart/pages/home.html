@@ -6,176 +6,190 @@
     <link rel="stylesheet" href="gemchart.css"/>
   </head>
 
-  <body>
+  <body onresize="resize_graph()">
     <p class="title">
       Pete Ohler's Gem History
     </p>
     <form id="pick">
-      <input type="button" value="Oj" name="oj" class="button" onClick="loadGem('oj')"/>
-      <input type="button" value="Ox" name="ox" class="button" onClick="loadGem('ox')"/>
-      <input type="button" value="OFlow" name="oflow" class="button" onClick="loadGem('oflow')"/>
-      <input type="button" value="Opee" name="opee" class="button" onClick="loadGem('opee')"/>
-      <input type="button" value="OTerm" name="oterm" class="button" onClick="loadGem('oterm')"/>
-      <input type="button" value="ODisk" name="odisk" class="button" onClick="loadGem('odisk')"/>
+      <table class="button-table">
+	<tr>
+	  <td class="button-td"><input type="button" value="Oj" name="oj" class="button" onClick="loadGem('oj')"/></td>
+	  <td class="button-td"><input type="button" value="Ox" name="ox" class="button" onClick="loadGem('ox')"/></td>
+	  <td class="button-td"><input type="button" value="OFlow" name="oflow" class="button" onClick="loadGem('oflow')"/></td>
+	  <td class="button-td"><input type="button" value="Opee" name="opee" class="button" onClick="loadGem('opee')"/></td>
+	  <td class="button-td"><input type="button" value="OTerm" name="oterm" class="button" onClick="loadGem('oterm')"/></td>
+	  <td class="button-td"><input type="button" value="ODisk" name="odisk" class="button" onClick="loadGem('odisk')"/></td>
+	</tr>
+      </table>
     </form>
-    <table >
-      <tr>
-	<td>
-	  <canvas id="graph" width="1000" height="500"></canvas>
-	</td>
-      </tr>
-    </table>
+    <canvas width="1000" id="graph" height="500"></canvas>
+    <input type="hidden" value="oj" id="gem-name"/>
+    <input type="hidden" value="" id="gem-data"/>
     <script>
-      function yInc(mx) {
-        var i=1;
-        for(; i<mx; i*=10){}
-	// TBD pick one of the normalized sizes along with unit [1000000,'M'] {1000000:'M'}
-        return i/10;
-      }
-      function nextMon(uday){
-        var d=new Date()
-        d.setTime(uday*86400000);
-	var y=d.getFullYear()
-	var m=d.getMonth()+1
-	if (11<m){
-	  m=0;
-	  y++;
-	}
-	d.setFullYear(y);
-	d.setMonth(m);
-	d.setDate(1);
-	return d.getTime()/86400000;
-      }
-      function nextYear(uday){
-        var d=new Date()
-        d.setTime(uday*86400000);
-	var y=d.getFullYear()
-	d.setFullYear(y+1);
-	d.setMonth(0);
-	d.setDate(1);
-	return d.getTime()/86400000;
-      }
-      function graphIt(gem, pts) {
-        var canvas = document.getElementById('graph');
-        var ctx = canvas.getContext('2d');
-        var w = canvas.width;
-        var h = canvas.height;
-        var r = 8;
-        var pad = 30;
-        var gw = w - pad - r;
-        var gh = h - pad - r;
+function yInc(mx) {
+    var i=1;
+    for(; i<mx; i*=10){}
+    return i/10;
+}
+function nextMon(uday){
+    var d=new Date()
+    d.setTime(uday*86400000);
+    var y=d.getFullYear()
+    var m=d.getMonth()+1
+    if (11<m){
+	m=0;
+	y++;
+    }
+    d.setFullYear(y);
+    d.setMonth(m);
+    d.setDate(1);
+    return d.getTime()/86400000;
+}
+function nextYear(uday){
+    var d=new Date()
+    d.setTime(uday*86400000);
+    var y=d.getFullYear()
+    d.setFullYear(y+1);
+    d.setMonth(0);
+    d.setDate(1);
+    return d.getTime()/86400000;
+}
+function resize_graph(){
+    document.getElementById('graph').width=document.body.clientWidth-16;
+    var g=document.getElementById('gem-name').value;
+    var j=document.getElementById('gem-data').value;
+    if(0==j.length){
+        loadGem(g);
+    }else{
+        graphIt(g,JSON.parse(j));
+    }
+}
+function graphIt(gem, pts) {
+    var canvas=document.getElementById('graph');
+    var ctx=canvas.getContext('2d');
+    var w=canvas.width;
+    var h=canvas.height;
+    var r=8;
+    var hpad=46;
+    var vpad=30;
+    var gw=w-hpad-r;
+    var gh=h-vpad-r;
 
-        ctx.lineWidth=1;
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.strokeStyle='#000080';
+    ctx.moveTo(r+1, 1);
+    ctx.lineTo(w-r, 1);
+    ctx.quadraticCurveTo(w-1, 1, w-1, r);
+    ctx.lineTo(w-1, h-r);
+    ctx.quadraticCurveTo(w-1, h-1, w-r, h-1);
+    ctx.lineTo(r, h-2);
+    ctx.quadraticCurveTo(1, h-1, 1, h-r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(1, 1, r, 1);
+    ctx.stroke();
+    ctx.fillStyle = 'white';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.strokeStyle = '#c08000';
+    ctx.moveTo(hpad, r);
+    ctx.lineTo(hpad, h-vpad+4);
+    ctx.moveTo(hpad-4, h-vpad);
+    ctx.lineTo(w-r, h-vpad);
+    ctx.stroke();
+
+    var j0=pts[0][0];
+    var je=pts[pts.length-1][0];
+    var jd=je-j0;
+    var dj = je-j0;
+    var dmx=pts[pts.length-1][1]*1.0;
+    var dd=yInc(dmx)/5;
+    var suf={2:'0',20:'00',200:'K',2000:'0K',20000:'00K',200000:'M',2000000:'0M'}[dd];
+    var mx=(dmx/dd+1)*dd;
+
+    ctx.fillStyle='black';
+    ctx.font='12pt Georgia';
+    ctx.lineWidth=1;
+
+    var y=0;
+    ctx.strokeStyle='#dfefff';
+    for(var d=dd;d<mx;d+=dd){
+	y=h-vpad-(d*gh/mx);
         ctx.beginPath();
-        ctx.strokeStyle = '#000080';
-        ctx.moveTo(r+1, 1);
-        ctx.lineTo(w-r, 1);
-        ctx.quadraticCurveTo(w-1, 1, w-1, r);
-        ctx.lineTo(w-1, h-r);
-        ctx.quadraticCurveTo(w-1, h-1, w-r, h-1);
-        ctx.lineTo(r, h-2);
-        ctx.quadraticCurveTo(1, h-1, 1, h-r);
-        ctx.lineTo(0, r);
-        ctx.quadraticCurveTo(1, 1, r, 1);
+        ctx.moveTo(hpad+1,y);
+        ctx.lineTo(w-r,y);
         ctx.stroke();
-        ctx.fillStyle = 'white';
-        ctx.fill();
-
+    }
+    dd*=5;
+    ctx.strokeStyle='#b0d0f0';
+    for(var d=dd;d<mx;d+=dd){
+        y=h-vpad-(d*gh/mx);
+        ctx.fillText((d/dd)+suf,4,y+4);
         ctx.beginPath();
-        ctx.strokeStyle = '#c08000';
-        ctx.moveTo(pad, r);
-        ctx.lineTo(pad, h-pad+4);
-        ctx.moveTo(pad-4, h-pad);
-        ctx.lineTo(w-r, h-pad);
+        ctx.moveTo(hpad-4,y);
+        ctx.lineTo(w-r,y);
         ctx.stroke();
+    }
 
-        var j0=pts[0][0];
-        var je=pts[pts.length-1][0];
-	var jd=je-j0;
-        var dj = je-j0;
-        var dmx=pts[pts.length-1][1]*1.0;
-        var dd=yInc(dmx)/5;
-	var mx=(dmx/dd+1)*dd;
-
-        ctx.fillStyle='black';
-        ctx.font='12pt Georgia';
-        ctx.lineWidth=1;
-
-        var y=0;
-        ctx.strokeStyle='#dfefff';
-        for(var d=dd;d<mx;d+=dd){
-          y=h-pad-(d*gh/mx);
-          ctx.beginPath();
-          ctx.moveTo(pad+1,y);
-          ctx.lineTo(w-r,y);
-          ctx.stroke();
-        }
-        dd*=5;
-        ctx.strokeStyle='#b0d0f0';
-        for(var d=dd;d<mx;d+=dd){
-          y=h-pad-(d*gh/mx);
-          ctx.fillText((d/dd)+'M',4,y+4);
-          ctx.beginPath();
-          ctx.moveTo(pad-4,y);
-          ctx.lineTo(w-r,y);
-          ctx.stroke();
-        }
-
-        var x=0;
-        var m;
-	var d=new Date();
-        ctx.strokeStyle='#dfffef';
-        for(var j=nextMon(j0);j<je;j=nextMon(j)){
-          x=pad+((j-j0)*gw/jd);
-	  d.setTime(j*86400000);
-	  m=d.getMonth()+1;
-	  if(1<m){ctx.fillText(m,x-6,h-pad+16);}
-          ctx.beginPath();
-          ctx.moveTo(x,r);
-          ctx.lineTo(x,h-pad);
-          ctx.stroke();
-        }
-        ctx.strokeStyle='#b0f0d0';
-        for(var j=nextYear(j0);j<je;j=nextYear(j)){
-          x=pad+((j-j0)*gw/jd);
-	  d.setTime(j*86400000);
-          ctx.fillText(d.getFullYear(),x-18,h-8);
-          ctx.beginPath();
-          ctx.moveTo(x,r);
-          ctx.lineTo(x,h-pad+4);
-          ctx.stroke();
-        }
-
-        ctx.font='16pt Georgia';
-        ctx.fillText(gem+' '+pts[pts.length-1][3]+' - '+dmx+' downloads',pad+r, 24);
-
-        ctx.lineWidth=2;
-        ctx.strokeStyle='#0000ff';
+    var x=0;
+    var m;
+    var d=new Date();
+    ctx.strokeStyle='#dfffef';
+    for(var j=nextMon(j0);j<je;j=nextMon(j)){
+        x=hpad+((j-j0)*gw/jd);
+	d.setTime(j*86400000);
+	m=d.getMonth()+1;
+	if(1<m){ctx.fillText(m,x-6,h-vpad+16);}
         ctx.beginPath();
-        ctx.moveTo(pad, h-pad);
-        for (var i in pts){
-          var pt=pts[i];
-          ctx.lineTo(pad+((pt[0]-j0)*gw/dj), h-pad-(pt[1]*gh/mx));
-        }
+        ctx.moveTo(x,r);
+        ctx.lineTo(x,h-vpad);
         ctx.stroke();
-      }
+    }
+    ctx.strokeStyle='#b0f0d0';
+    for(var j=nextYear(j0);j<je;j=nextYear(j)){
+        x=hpad+((j-j0)*gw/jd);
+	d.setTime(j*86400000);
+        ctx.fillText(d.getFullYear(),x-18,h-8);
+        ctx.beginPath();
+        ctx.moveTo(x,r);
+        ctx.lineTo(x,h-vpad+4);
+        ctx.stroke();
+    }
 
-      function loadGem(id){
-        var f=document.getElementById('pick');
-        for(var i = f.elements.length - 1; 0 <= i; i--) {
-          f.elements[i].style.background='#a0a0a0';
+    ctx.font='16pt Georgia';
+    ctx.fillText(gem+' '+pts[pts.length-1][3]+' - '+dmx+' downloads',hpad+r, 24);
+
+    ctx.lineWidth=2;
+    ctx.strokeStyle='#0000ff';
+    ctx.beginPath();
+    ctx.moveTo(hpad, h-vpad);
+    for (var i in pts){
+        var pt=pts[i];
+        ctx.lineTo(hpad+((pt[0]-j0)*gw/dj), h-vpad-(pt[1]*gh/mx));
+    }
+    ctx.stroke();
+}
+function loadGem(id){
+    document.getElementById('gem-name').value=id;
+    var f=document.getElementById('pick');
+    for(var i = f.elements.length - 1; 0 <= i; i--) {
+        f.elements[i].style.background='#a0a0a0';
+    }
+    f.elements[id].style.background='white';
+    var request=new XMLHttpRequest();
+    request.open('GET', id+'.json', true);
+    request.onreadystatechange = function() {
+        if(4 == request.readyState && 200 == request.status) {
+            var pts=JSON.parse(request.responseText)[id];
+            document.getElementById('gem-data').value=JSON.stringify(pts);
+            graphIt(id,pts);
         }
-        f.elements[id].style.background='white';
-        var request = new XMLHttpRequest();
-        request.open('GET', id+'.json', true);
-        request.onreadystatechange = function() {
-          if(4 == request.readyState && 200 == request.status) {
-            graphIt(id, JSON.parse(request.responseText)[id]);
-          }
-        };
-        request.send(null);
-      }
-      loadGem('oj');
+    };
+    request.send(null);
+}
+resize_graph();
+loadGem('oj');
     </script>
   </body>
 </html>
