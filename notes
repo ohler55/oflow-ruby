@@ -5,16 +5,7 @@
 
 - todo
 
- - gemgraph
-  - web pages
-   - git/web/www.ohler.com/dev/gemchart
-    - readme and description with pictures
-    - blurb on home page (/dev)
-
-
  - features
-  - rubygems graphs example
-  - 0.8.0 
   - call out using pipe and fork
   - 0.9.0
   - .svg vector graphics input
