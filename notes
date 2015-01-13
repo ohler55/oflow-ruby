@@ -5,6 +5,8 @@
 
 - todo
 
+ - ShellRepeat (ShellOpen, ShellConnect, ???)
+
  - features
   - call out using pipe and fork
   - 0.9.0

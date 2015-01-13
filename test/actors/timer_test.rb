@@ -66,7 +66,7 @@ class TimerTest < ::MiniTest::Test
     assert_equal(Time, t.actor.start.class, 'is the start time a Time?')
     assert(0.1 > (Time.now() + 2 - t.actor.start), 'is the start time now + 2?')
 
-    assert_raises(::OFlow::ConfigError) do
+    assert_raises(ArgumentError) do
       ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, start: 'now')
     end
   end
@@ -83,7 +83,7 @@ class TimerTest < ::MiniTest::Test
     assert_equal(Time, t.actor.stop.class, 'is the stop time a Time?')
     assert(0.1 > (Time.now() + 2 - t.actor.stop), 'is the stop time now + 2?')
 
-    assert_raises(::OFlow::ConfigError) do
+    assert_raises(ArgumentError) do
       ::OFlow::Test::ActorWrap.new('test', ::OFlow::Actors::Timer, stop: 'now')
     end
   end
