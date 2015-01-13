@@ -6,6 +6,14 @@
 - todo
 
  - ShellRepeat (ShellOpen, ShellConnect, ???)
+  - separate thread listening on stdout and stderr
+   - alway ship when output arrives and is parsed by Oj
+   - input just sends to app
+   - when to restart?
+    - when input is closed
+    - should there be something to check out for each in? (hard to make sync
+      then unless tracking is on
+    
 
  - features
   - call out using pipe and fork
