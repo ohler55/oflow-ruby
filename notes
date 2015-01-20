@@ -6,45 +6,30 @@
 - todo
 
  - ShellRepeat (ShellOpen, ShellConnect, ???)
+  - get app started with attrs set
+  - create thread for output collection (out & err)
+
   - separate thread listening on stdout and stderr
    - alway ship when output arrives and is parsed by Oj
    - input just sends to app
+    - wrap with unique ID to match output
+   - output must include a wrapper with inputId
    - when to restart?
-    - when input is closed
-    - should there be something to check out for each in? (hard to make sync
-      then unless tracking is on
+    - when any of the IO sockets are closed
+    - attempt a kill based on pid
     
 
  - features
-  - call out using pipe and fork
-  - 0.9.0
-  - .svg vector graphics input
-  - .vdx Visio input
   - 1.0.0
-
- - gemgraph
-  - GemStatus
-  - http server
-   - separate task handling requests
-    - get data and format
-    - send back to server for delivery
+   - ShellOne
+   - ShellRepeat
+ - 1.1.0
+   - .svg vector graphics input
+   - .vdx Visio input
 
 - TBDs
 
-
-
 - example
- - rubygems graphs
-  - timer
-  - fetch
-  - persist
-  - http
-   - GET http://rubygems.org/api/v1/owners/ohler/gems.json
-   - GET http://rubygems.org/api/v1/gems/oj.json
-   - fetch data
-   - fetch page template
-   - form page
-   - respond
 
  - data store
   - handles CRUD and simple list
