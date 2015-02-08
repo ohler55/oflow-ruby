@@ -25,7 +25,7 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 ## Release Notes
 
-### Next Release 1.0
+### Current Release 1.0
 
  - Add an Actors/Task that starts a application and exchanges data using stdout
    and stdin.
@@ -33,7 +33,7 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
  - Add an Actors/Task that callout to a remote application and exchange data
    using JSON over stdin and stdout.
 
-### Current Release 0.8
+### Release 0.8
 
  - A somewhat non trivial example. GemChart collects statistics on my gems and
    stores those statistics. It also provides a web interface to view the

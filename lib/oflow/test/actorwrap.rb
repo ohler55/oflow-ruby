@@ -52,10 +52,15 @@ module OFlow
           begin
             @actor.perform(op, box)
           rescue Exception => e
-            ship(:error, Box.new([e, full_name()]))
+            handle_error(e)
           end
         end
         nil
+      end
+
+      def handle_error(e)
+        #puts "*** #{e.class}: #{e.message}"
+        @history << Action.new(:error, Box.new([e, full_name()]))
       end
 
       def join(timeout)

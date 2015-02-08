@@ -1,5 +1,6 @@
 
 require 'open3'
+require 'thread'
 
 module OFlow
   module Actors
@@ -28,31 +29,32 @@ module OFlow
         @outThread = nil
         @ctxs = {}
         @ctxCnt = 0
-      end
-
-      def clearCtx(ctx)
-        @ctxs.delete(ctx)
+        @killLock = Mutex.new
       end
 
       def perform(op, box)
-        # TBD if op is :kill then kill pid and ship exit status
+        if :kill == op
+          status = kill()
+          task.ship(:killed, Box.new(status, box.tracker))
+          return
+        end
         if @pid.nil?
           @in, @out, @err, wt = Open3.popen3(@cmd, chdir: @dir)
           @pid = wt[:pid]
           @outThread = Thread.start(self) do |me|
-            #Thread.current[:name] = me.full_name() + ":out"
+            Thread.current[:name] = me.task.full_name() + "-out"
             Oj.load(me.out, mode: :compat) do |o|
               begin
-                puts "*** output: #{o}"
-                # TBD make sure ctx is present in the output and also in the ctxs, decide what the right actions is if not
-                me.clearCtx(o["ctx"])
-                # TBD get ctx from output
-                me.task.ship(nil, Box.new(o))
-                #task.ship(nil, Box.new(o, box.tracker)) # TBD get tracker from some saved unique id
+                k = o["ctx"]
+                raise Exception.new("missing context in #{cmd} reply") if k.nil?
+                raise Exception.new("context not found in #{cmd} reply for #{k}") unless me.hasCtx?(k)
+                ctx = me.clearCtx(k)
+                me.task.ship(nil, Box.new(o["out"], ctx))
               rescue Exception => e
-                puts "*** #{e.class}: #{e.message}"
+                me.task.handle_error(e)
               end
             end
+            @outThread = nil
             kill()
           end
         end
@@ -72,14 +74,35 @@ module OFlow
         !@ctxs.empty?
       end
 
+      def getCtx(ctx)
+        @ctxs[ctx]
+      end
+
+      def hasCtx?(ctx)
+        @ctxs.has_key?(ctx)
+      end
+
+      def clearCtx(ctx)
+        @ctxs.delete(ctx)
+      end
+
       def kill()
-        # mutex protect?
-        # TBD kill pid if not dead
-        @in = nil
-        @out = nil
-        @err = nil
-        @pid = nil
-        @outThread = nil
+        status = nil
+        @killLock.synchronize do
+          # kill but don't wait for an exit. Leave it orphaned so a new app can be
+          # started.
+          status = Process.kill("HUP", @pid) unless @pid.nil?
+          @in.close() unless @in.nil?
+          @out.close() unless @out.nil?
+          @err.close() unless @err.nil?
+          Thread.kill(@outThread) unless @outThread.nil?
+          @in = nil
+          @out = nil
+          @err = nil
+          @pid = nil
+          @outThread = nil
+        end
+        status
       end
 
     end # ShellRepeat

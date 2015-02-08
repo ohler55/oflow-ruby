@@ -29,10 +29,13 @@ class ShellRepeatTest < ::MiniTest::Test
     t.join(1.0)
     assert_equal(1, t.history.size, 'one entry should be in the history')
 
-    assert_equal({"ctx" => 1, "out" => [3,6,9]}, t.history[0].box.contents, 'should  have correct contents in shipment')
+    assert_equal([3,6,9], t.history[0].box.contents, 'should  have correct contents in shipment')
     t.receive(nil, ::OFlow::Box.new([3,2,1]))
     t.join(1.0)
     assert_equal(2, t.history.size, 'two entries should be in the history')
+    # optional
+    t.receive(:kill, ::OFlow::Box.new([1,2,3]))
+    t.join(1.0)
   end
 
 end
