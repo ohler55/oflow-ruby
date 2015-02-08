@@ -147,8 +147,6 @@ Hello World!
 
 ## Future Features
 
- - CallOut Actor that uses pipes and fork to use a non-Ruby actor. 
-
  - High performance C version. Proof of concept puts the performance range at
    around 10M operations per second where an operation is one task execution per
    thread.
