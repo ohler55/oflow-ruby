@@ -10,6 +10,7 @@ module OFlow
       attr_reader :dir
       attr_reader :cmd
       attr_reader :timeout
+      attr_reader :out
 
       def initialize(task, options)
         super
@@ -24,62 +25,61 @@ module OFlow
         @out = nil
         @err = nil
         @pid = nil
+        @outThread = nil
+        @ctxs = {}
+        @ctxCnt = 0
+      end
+
+      def clearCtx(ctx)
+        @ctxs.delete(ctx)
       end
 
       def perform(op, box)
-        input = Oj.dump(box.contents, mode: :compat, indent: 0)
+        # TBD if op is :kill then kill pid and ship exit status
         if @pid.nil?
-          # TBD start app
-          #  separate thread for gathering output
-        end
-        i, o, e, _ = Open3.popen3(@cmd, chdir: @dir)
-        i.write(input)
-        i.close
-        giveup = Time.now + @timeout
-        ra = [e, o]
-
-        out = ''
-        err = ''
-        ec = false # stderr closed flag
-        oc = false # stdout closed flag
-        while true
-          rem = giveup - Time.now
-          raise Exception.new("Timed out waiting for output.") if 0.0 > rem
-          rs, _, es = select(ra, nil, ra, rem)
-          unless es.nil?
-            es.each do |io|
-              ec |= io == e
-              oc |= io == o
-            end
-          end
-          break if ec && oc
-          unless rs.nil?
-            rs.each do |io|
-              if io == e && !ec
-                if io.closed? || io.eof?
-                  ec = true
-                  next
-                end
-                err += io.read_nonblock(1000)
-              elsif io == o && !oc
-                if io.closed? || io.eof?
-                  oc = true
-                  next
-                end
-                out += io.read_nonblock(1000)
+          @in, @out, @err, wt = Open3.popen3(@cmd, chdir: @dir)
+          @pid = wt[:pid]
+          @outThread = Thread.start(self) do |me|
+            #Thread.current[:name] = me.full_name() + ":out"
+            Oj.load(me.out, mode: :compat) do |o|
+              begin
+                puts "*** output: #{o}"
+                # TBD make sure ctx is present in the output and also in the ctxs, decide what the right actions is if not
+                me.clearCtx(o["ctx"])
+                # TBD get ctx from output
+                me.task.ship(nil, Box.new(o))
+                #task.ship(nil, Box.new(o, box.tracker)) # TBD get tracker from some saved unique id
+              rescue Exception => e
+                puts "*** #{e.class}: #{e.message}"
               end
             end
+            kill()
           end
-          break if ec && oc
         end
-        if 0 < err.length
-          raise Exception.new(err)
+        if @in.closed?
+          kill()
+          return
         end
-        output = Oj.load(out, mode: :compat)
-        o.close
-        e.close
+        @ctxCnt += 1
+        @ctxs[@ctxCnt] = box.tracker
+        wrap = { "ctx" => @ctxCnt, "in" => box.contents }
+        input = Oj.dump(wrap, mode: :compat, indent: 0)
+        @in.write(input + "\n")
+        @in.flush
+      end
 
-        task.ship(nil, Box.new(output, box.tracker))
+      def busy?()
+        !@ctxs.empty?
+      end
+
+      def kill()
+        # mutex protect?
+        # TBD kill pid if not dead
+        @in = nil
+        @out = nil
+        @err = nil
+        @pid = nil
+        @outThread = nil
       end
 
     end # ShellRepeat

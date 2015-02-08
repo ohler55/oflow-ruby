@@ -51,6 +51,10 @@ module OFlow
       {}
     end
 
+    def busy?()
+      false
+    end
+
     class Spec
       attr_reader :op
       attr_reader :type

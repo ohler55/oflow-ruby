@@ -58,6 +58,14 @@ module OFlow
         nil
       end
 
+      def join(timeout)
+        giveup = Time.now + timeout
+        while @actor.busy?
+          raise Exception.new("Timed out") if giveup < Time.now
+          sleep(0.1)
+        end
+      end
+
       # Task API that adds entry to history.
       def ship(dest, box)
         @history << Action.new(dest, box)

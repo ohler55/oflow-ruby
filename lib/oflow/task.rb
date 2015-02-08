@@ -241,7 +241,7 @@ module OFlow
     # Returns the true if any requests are queued or a request is being processed.
     # @return [true|false] true if busy, false otherwise
     def busy?()
-      !@current_req.nil? || !@queue.empty?
+      !@current_req.nil? || !@queue.empty? || @actor.busy?
     end
 
     # Returns the default timeout for the time to wait for the Task to be

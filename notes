@@ -17,7 +17,11 @@
    - when to restart?
     - when any of the IO sockets are closed
     - attempt a kill based on pid
-    
+
+  - test
+   - double.rb
+    - Oj.load on stdin
+    - double each member in an array and set as out
 
  - features
   - 1.0.0

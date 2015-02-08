@@ -25,13 +25,21 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 ## Release Notes
 
-### Next Release 0.8
+### Next Release 1.0
+
+ - Add an Actors/Task that starts a application and exchanges data using stdout
+   and stdin.
+
+ - Add an Actors/Task that callout to a remote application and exchange data
+   using JSON over stdin and stdout.
+
+### Current Release 0.8
 
  - A somewhat non trivial example. GemChart collects statistics on my gems and
    stores those statistics. It also provides a web interface to view the
    statistics as a graph.
 
-### Current Release 0.7
+### Release 0.7
 
  - Simplified the APIs and structure.
 
@@ -139,21 +147,17 @@ Hello World!
 
 ## Future Features
 
- - .svg file input for configuration.
-
- - Visio file input for configuration.
-
- - CallOut Actor that uses pipes and fork to use a non-Ruby actor.
-
- - Cross linking Tasks and Flows.
-
- - Dynamic links to Tasks and Flows.
+ - CallOut Actor that uses pipes and fork to use a non-Ruby actor. 
 
  - High performance C version. Proof of concept puts the performance range at
    around 10M operations per second where an operation is one task execution per
    thread.
 
  - HTTP/Websockets based inpector.
+
+ - .svg file input for configuration.
+
+ - Visio file input for configuration.
 
 # Links
 
