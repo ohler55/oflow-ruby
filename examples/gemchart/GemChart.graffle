@@ -7,7 +7,7 @@
 	<key>ApplicationVersion</key>
 	<array>
 		<string>com.omnigroup.OmniGraffle6</string>
-		<string>163.7.0.243167</string>
+		<string>167.2.0.244490</string>
 	</array>
 	<key>AutoAdjust</key>
 	<true/>
@@ -50,7 +50,7 @@
 	<array>
 		<dict>
 			<key>Bounds</key>
-			<string>{{486.46007317295357, 82.949903445165319}, {37, 23}}</string>
+			<string>{{486.40701982438668, 82.955851266429804}, {37, 23}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -966,7 +966,7 @@ dir: examples/gemchart/pages}</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{120.24501382231833, 273.39366937528473}, {103, 23}}</string>
+			<string>{{120.24504308869797, 273.39430994490152}, {103, 23}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -1217,7 +1217,7 @@ start: 23:11:00}</string>
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \f1\fs18 \cf2 class: ::GemStatus\
-gems: oj, ox, oflow, opee, oterm, odisk,piper-push\
+gems: oj, ox, oflow, opee, oterm, odisk,piper-ruby\
 }</string>
 			</dict>
 		</dict>
@@ -1350,7 +1350,7 @@ port: 6060}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2015-10-09 20:25:17 +0000</string>
+	<string>2015-10-10 14:33:10 +0000</string>
 	<key>Modifier</key>
 	<string>Peter Ohler</string>
 	<key>NotesVisible</key>
