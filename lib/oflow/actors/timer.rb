@@ -133,8 +133,12 @@ module OFlow
 
       def set_start(v)
         if v.is_a?(String)
-          v = DateTime.parse(v).to_time
-          v = v - v.gmtoff
+          begin
+            v = DateTime.parse(v).to_time
+            v = v - v.gmtoff
+          rescue Exception
+            v = Time.now() + v.to_i
+          end
         elsif v.is_a?(Numeric)
           v = Time.now() + v
         elsif v.nil?
@@ -143,6 +147,7 @@ module OFlow
           raise ConfigError.new("Expected start to be a Time or Numeric, not a #{v.class}.")
         end
         @start = v
+        @pending = @start
       end
 
       def set_stop(v)

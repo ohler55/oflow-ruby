@@ -25,7 +25,13 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 ## Release Notes
 
-### Current Release 1.0
+### Current Release 1.0.1
+
+ - Fixed the set option command line feature.
+
+ - Changed the URL on the GemChart example since RubyGems starting using https.
+
+### Release 1.0
 
  - Add an Actors/Task that starts a application and exchanges data using stdout
    and stdin.

@@ -43,6 +43,7 @@ module OFlow
     end
 
     def set_option(key, value)
+      set_options({ key.to_sym => value })
     end
 
     # Return any options that should be displayed as part of a Task.describe().

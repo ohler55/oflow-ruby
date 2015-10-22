@@ -16,8 +16,17 @@ class GemStatus < ::OFlow::Actor
     preload() if @preload
     now = DateTime.now
     @gems.each { |g|
-      uri = URI("http://rubygems.org/api/v1/gems/#{g}.json")
+      uri = URI("https://rubygems.org/api/v1/gems/#{g}.json")
       json = Oj.load(Net::HTTP.get(uri), mode: :compat)
+      if json.nil?
+        begin
+          # raise to build the backtrace
+          raise Exception.new("#{uri} failed to load JSON.")
+        rescue Exception => e
+          task.handle_error(e)
+          next
+        end
+      end
       key = "%s-%04d.%02d.%02d" % [g, now.year, now.month, now.day]
       rec = {
         date: "%04d.%02d.%02d" % [now.year, now.month, now.day],
@@ -54,7 +63,7 @@ class GemStatus < ::OFlow::Actor
   end
 
   def preload_gem(g)
-    uri = URI("http://rubygems.org/api/v1/versions/#{g}.json")
+    uri = URI("https://rubygems.org/api/v1/versions/#{g}.json")
     json = Oj.load(Net::HTTP.get(uri), mode: :compat)
     recs = []
     json.each { |r|
