@@ -25,7 +25,11 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 ## Release Notes
 
-### Current Release 1.0.1
+### Release 1.0.2
+
+ - Updated GemChart sample to handle poor connections better.
+
+### Release 1.0.1
 
  - Fixed the set option command line feature.
 

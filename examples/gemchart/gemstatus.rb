@@ -17,29 +17,43 @@ class GemStatus < ::OFlow::Actor
     now = DateTime.now
     @gems.each { |g|
       uri = URI("https://rubygems.org/api/v1/gems/#{g}.json")
-      json = Oj.load(Net::HTTP.get(uri), mode: :compat)
-      if json.nil?
-        begin
+      begin
+        info = get_gem_info(uri)
+        if info.nil?
           # raise to build the backtrace
           raise Exception.new("#{uri} failed to load JSON.")
-        rescue Exception => e
-          task.handle_error(e)
-          next
         end
+      rescue Exception => e
+        task.handle_error(e)
+        next
       end
       key = "%s-%04d.%02d.%02d" % [g, now.year, now.month, now.day]
       rec = {
         date: "%04d.%02d.%02d" % [now.year, now.month, now.day],
         julian: now.mjd,
-        name: json['name'],
-        version: json['version'],
-        downloads: json['downloads'],
-        version_downloads: json['version_downloads']
+        name: info['name'],
+        version: info['version'],
+        downloads: info['downloads'],
+        version_downloads: info['version_downloads']
       }
       task.ship(:save, ::OFlow::Box.new({ key: key, rec: rec }))
     }
   end
 
+  def get_gem_info(uri)
+    err = nil
+    [1, 4, 16, 256].each do |duration|
+      begin
+        response = Net::HTTP.get(uri)
+        return Oj.load(response, mode: :compat)
+      rescue Exception => e
+        err = e
+        sleep(duration)
+      end
+    end
+    raise err
+  end
+  
   def set_options(options)
     ga = options[:gems]
     raise "No gems specified" if ga.nil?
