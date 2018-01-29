@@ -1217,7 +1217,7 @@ start: 23:11:00}</string>
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \f1\fs18 \cf2 class: ::GemStatus\
-gems: oj, ox, oflow, opee, oterm, odisk, piper-ruby, wabur\
+gems: oj, ox, oflow, opee, oterm, odisk, piper-ruby, wabur, agoo\
 }</string>
 			</dict>
 		</dict>
