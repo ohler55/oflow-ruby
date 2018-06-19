@@ -20,8 +20,12 @@ module OFlow
       @name = File.basename(filename, '.graffle')
 
       nodes = doc.locate('plist/dict')[0].nodes
-      nodes = Graffle.get_key_value(nodes, 'GraphicsList')
-
+      sheets = Graffle.get_key_value(nodes, 'Sheets')
+      if sheets.nil?
+	nodes = Graffle.get_key_value(nodes, 'GraphicsList')
+      else
+	nodes = Graffle.get_key_value(sheets[0].nodes, 'GraphicsList')
+      end
       raise ConfigError.new("Empty flow.") if nodes.nil?
       
       nodes.each do |node|

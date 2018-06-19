@@ -17,12 +17,8 @@ class Switch < ::OFlow::Actor
     if path.end_with?('.json')
       box = box.set('dest', :result)
       gem = path[1...-5]
-      if 'all' == gem
-        box = box.set('expr', nil)
-      else
-        # TBD narrow down search further with time range
-        box = box.set('expr', Proc.new { |rec, key, seq| gem == rec[:name] })
-      end
+      box = box.set('expr', nil)
+      box = box.set('table', gem)
       task.ship(:query, box)
     else
       task.ship(:static, box)

@@ -25,6 +25,10 @@ Follow [@peterohler on Twitter](http://twitter.com/#!/peterohler) for announceme
 
 ## Release Notes
 
+### Release 1.1.0
+
+ - Changed the gemchart example to use a new Recorder actor.
+
 ### Release 1.0.2
 
  - Updated GemChart sample to handle poor connections better.

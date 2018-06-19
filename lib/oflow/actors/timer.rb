@@ -92,9 +92,9 @@ module OFlow
               task.links.each_key do |key|
                 begin
                   task.ship(key, box)
-                rescue BlockedError => e
+                rescue BlockedError
                   task.warn("Failed to ship timer #{box.contents} to #{key}. Task blocked.")
-                rescue BusyError => e
+                rescue BusyError
                   task.warn("Failed to ship timer #{box.contents} to #{key}. Task busy.")
                 end
               end

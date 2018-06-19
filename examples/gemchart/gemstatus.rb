@@ -27,7 +27,6 @@ class GemStatus < ::OFlow::Actor
         task.handle_error(e)
         next
       end
-      key = "%s-%04d.%02d.%02d" % [g, now.year, now.month, now.day]
       rec = {
         date: "%04d.%02d.%02d" % [now.year, now.month, now.day],
         julian: now.mjd,
@@ -36,7 +35,7 @@ class GemStatus < ::OFlow::Actor
         downloads: info['downloads'],
         version_downloads: info['version_downloads']
       }
-      task.ship(:save, ::OFlow::Box.new({ key: key, rec: rec }))
+      task.ship(:save, ::OFlow::Box.new({ table: rec[:name], key: rec[:date], rec: rec }))
     }
   end
 
@@ -97,8 +96,7 @@ class GemStatus < ::OFlow::Actor
     recs.each { |r|
       r[:downloads] = dcnt
       dcnt += r[:version_downloads]
-      key = "%s-%s" % [r[:name], r[:date]]
-      task.ship(:save, ::OFlow::Box.new({ key: key, rec: r }))
+      task.ship(:save, ::OFlow::Box.new({ table: r[:name], key: r[:date], rec: r }))
     }
   end
 
