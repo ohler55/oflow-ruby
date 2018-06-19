@@ -102,7 +102,9 @@ module OFlow
             if @period.nil? || @period == 0
               @pending = now
             else
-              @pending += period
+	      diff = now - @pending
+              @pending += @period * diff.to_i/@period.to_i
+	      @pending += @period if @pending <= now
             end
           end
           # If there is a request waiting then return so it can be handled. It
