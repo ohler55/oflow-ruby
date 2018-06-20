@@ -12,10 +12,11 @@ module OFlow
 
       # When to trigger the first event. nil means start now.
       attr_reader :start
-      # The stop time. If nil then there is not stopping unless the repeat limit
-      # kicks in.
+      # The stop time. If nil then there is no stopping unless the repeat
+      # limit kicks in.
       attr_reader :stop
-      # How long to wait between each trigger. nil indicates as fast as possible,
+      # How long to wait between each trigger. nil indicates as fast as
+      # possible,
       attr_reader :period
       # How many time to repeat before stopping. nil mean go forever.
       attr_reader :repeat
@@ -23,11 +24,13 @@ module OFlow
       attr_reader :label
       # The number of time the timer has fired or shipped.
       attr_reader :count
-      # Boolean flag indicating a tracker should be added to the trigger content
-      # if true.
+      # Boolean flag indicating a tracker should be added to the trigger
+      # content if true.
       attr_reader :with_tracker
       # Time of next or pending trigger.
       attr_reader :pending
+      # Flag indicating a trigger should be fired on start as well.
+      attr_reader :on_start
 
       def initialize(task, options={})
         @count = 0
@@ -35,6 +38,7 @@ module OFlow
         @stop = nil
         @period = nil
         @repeat = nil
+	@on_start = false
         set_options(options)
         @pending = @start
         super
@@ -70,6 +74,9 @@ module OFlow
         when :with_tracker
           set_with_tracker(box.nil? ? nil : box.contents)
         end
+	if @on_start
+	  trigger(Time.now())
+	end
         while true
           now = Time.now()
           # If past stop time then it is done. A future change in options can
@@ -87,17 +94,7 @@ module OFlow
             unless Task::STOPPED == task.state
               @count += 1
               now = Time.now()
-              tracker = @with_tracker ? Tracker.create(@label) : nil
-              box = Box.new([@label, @count, now.utc()], tracker)
-              task.links.each_key do |key|
-                begin
-                  task.ship(key, box)
-                rescue BlockedError
-                  task.warn("Failed to ship timer #{box.contents} to #{key}. Task blocked.")
-                rescue BusyError
-                  task.warn("Failed to ship timer #{box.contents} to #{key}. Task busy.")
-                end
-              end
+	      trigger(now)
             end
             if @period.nil? || @period == 0
               @pending = now
@@ -124,12 +121,27 @@ module OFlow
         end
       end
 
+      def trigger(now)
+        tracker = @with_tracker ? Tracker.create(@label) : nil
+        box = Box.new([@label, @count, now.utc()], tracker)
+        task.links.each_key do |key|
+          begin
+            task.ship(key, box)
+          rescue BlockedError
+            task.warn("Failed to ship timer #{box.contents} to #{key}. Task blocked.")
+          rescue BusyError
+            task.warn("Failed to ship timer #{box.contents} to #{key}. Task busy.")
+          end
+        end
+      end
+
       def set_options(options)
         set_start(options[:start]) # if nil let start get set to now
         set_stop(options[:stop]) if options.has_key?(:stop)
         set_period(options[:period]) if options.has_key?(:period)
         set_repeat(options[:repeat]) if options.has_key?(:repeat)
         set_with_tracker(options[:with_tracker])
+        set_on_start(options[:on_start])
         @label = options[:label].to_s
       end
 
@@ -137,7 +149,7 @@ module OFlow
         if v.is_a?(String)
           begin
             v = DateTime.parse(v).to_time
-            v = v - v.gmtoff
+            v = v - v.localtime.gmtoff
           rescue Exception
             v = Time.now() + v.to_i
           end
@@ -195,6 +207,18 @@ module OFlow
         @label = v
       end
 
+      def set_on_start(v)
+	if v.is_a?(TrueClass)
+          @on_start = true
+	elsif v.is_a?(FalseClass)
+	  @on_start = false
+	elsif v.nil?
+	  # no change
+	else
+          @on_start = ('true' == v.to_s.strip.downcase)
+	end
+      end
+
       def set_with_tracker(v)
         v = false if v.nil?
         unless true == v || false == v
@@ -202,7 +226,7 @@ module OFlow
         end
         @with_tracker = v
       end
-
+      
     end # Timer
   end # Actors
 end # OFlow
