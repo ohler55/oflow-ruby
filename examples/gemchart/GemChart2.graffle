@@ -7305,7 +7305,7 @@ dir: examples/gemchart/pages}</string>
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
 \f1\fs18 \cf2 class: Timer\
-period: 30\
+period: 86400\
 on_start: true\
 start: 23:20:00}</string>
 					</dict>
