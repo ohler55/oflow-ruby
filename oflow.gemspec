@@ -17,7 +17,6 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib']
 
-  s.has_rdoc = true
   s.extra_rdoc_files = ['README.md']
   s.rdoc_options = ['--main', 'README.md']
   
