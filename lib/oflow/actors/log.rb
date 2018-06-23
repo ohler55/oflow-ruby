@@ -1,4 +1,5 @@
 
+require 'date'
 require 'logger'
 
 module OFlow
@@ -87,7 +88,7 @@ module OFlow
           @logger = Logger.new(stream)
         else
           @logger = Logger.new(STDOUT)
-          @formatter = proc { |s,t,p,m| "#{s[0]} #{p}> #{m}\n" } if @formatter.nil?
+          @formatter = proc { |s,t,p,m| "#{t.strftime('%Y-%m-%d %H:%M:%S.%6N')} #{p}> #{m}\n" } if @formatter.nil?
         end
         @logger.level = options.fetch(:severity, Env.log_level)
         @logger.formatter = proc { |s,t,p,m| m }
